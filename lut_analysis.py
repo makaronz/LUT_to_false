@@ -262,4 +262,4 @@ if __name__ == "__main__":
             # Optionally save the table to a CSV file
             tabela.to_csv('comparison_table.csv', index=False)
     else:
-        print("No file selected.")\
+        print("No file selected.")
