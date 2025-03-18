@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelPasta - Analiza plików LUT</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>PixelPasta</h1>
+            <p>Narzędzie do analizy plików LUT w formacie .CUBE</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="upload-section">
+            <h2>Prześlij plik LUT</h2>
+            <form id="upload-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="cube-file">Wybierz plik .CUBE:</label>
+                    <input type="file" id="cube-file" name="cube-file" accept=".cube" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="color-space">Wybierz przestrzeń barwną kamery:</label>
+                    <select id="color-space" name="color-space" required>
+                        <option value="">-- Wybierz przestrzeń --</option>
+                        <option value="S-Gamut3">S-Gamut3/S-Log3</option>
+                        <option value="S-Gamut3.Cine">S-Gamut3.Cine/S-Log3</option>
+                        <option value="LogC">ARRI LogC</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Analizuj</button>
+            </form>
+        </section>
+
+        <section class="results-section" id="results" style="display: none;">
+            <h2>Wyniki analizy</h2>
+            
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="curve-tab">Krzywa tonalna</button>
+                <button class="tab-btn" data-tab="table-tab">Tabela porównawcza</button>
+                <button class="tab-btn" data-tab="info-tab">Informacje o LUT</button>
+            </div>
+            
+            <div class="tab-content">
+                <div id="curve-tab" class="tab-pane active">
+                    <div class="chart-container">
+                        <canvas id="curve-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div id="table-tab" class="tab-pane">
+                    <div class="table-container">
+                        <table id="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Ekspozycja (%)</th>
+                                    <th>S-Log3 (%)</th>
+                                    <th>Rec.709 (%)</th>
+                                    <th>Twój LUT (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Dane będą wstawiane dynamicznie -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div id="info-tab" class="tab-pane">
+                    <div class="info-container">
+                        <h3>Informacje o pliku LUT</h3>
+                        <div id="lut-info">
+                            <!-- Informacje będą wstawiane dynamicznie -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="actions">
+                <button id="download-csv" class="btn">Pobierz CSV</button>
+                <button id="download-pdf" class="btn">Pobierz raport PDF</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 PixelPasta. Wszelkie prawa zastrzeżone.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
