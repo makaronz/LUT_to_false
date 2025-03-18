@@ -1,17 +1,19 @@
 import numpy as np
 import pandas as pd
 from scipy.interpolate import RegularGridInterpolator
+from .cube_parser import load_cube_file
 
 def slog3_curve(L):
     """
     Konwertuje wartości liniowe na S-Log3.
-    
+
     Args:
         L (numpy.ndarray): Wartości liniowe (0-1)
-        
+
     Returns:
         numpy.ndarray: Wartości S-Log3 (0-1)
     """
+    L = np.clip(L, 0, 1)  # Upewnienie się, że wartości są w zakresie [0, 1]
     a = 0.432699
     b = 0.009468
     c = 0.655
@@ -29,13 +31,14 @@ def slog3_curve(L):
 def inverse_slog3_curve(V):
     """
     Konwertuje wartości S-Log3 na liniowe.
-    
+
     Args:
         V (numpy.ndarray): Wartości S-Log3 (0-1)
-        
+
     Returns:
         numpy.ndarray: Wartości liniowe (0-1)
     """
+    V = np.clip(V, 0, 1)  # Upewnienie się, że wartości są w zakresie [0, 1]
     a = 0.432699
     b = 0.009468
     c = 0.655
@@ -53,13 +56,14 @@ def inverse_slog3_curve(V):
 def rec709_oetf(L):
     """
     Konwertuje wartości liniowe na Rec.709 (z korekcją gamma).
-    
+
     Args:
         L (numpy.ndarray): Wartości liniowe (0-1)
-        
+
     Returns:
         numpy.ndarray: Wartości Rec.709 (0-1)
     """
+    L = np.clip(L, 0, 1)  # Upewnienie się, że wartości są w zakresie [0, 1]
     V = np.where(
         L < 0.018,
         4.5 * L,
@@ -67,99 +71,93 @@ def rec709_oetf(L):
     )
     return V
 
-def interpolate_1d_lut(lut_1d, input_values):
+def interpolate_1d_lut(lut_1d, input_values_r, input_values_g, input_values_b):
     """
     Interpoluje wartości z 1D LUT.
-    
+
     Args:
         lut_1d (numpy.ndarray): Dane 1D LUT
-        input_values (numpy.ndarray): Wartości wejściowe do interpolacji
-        
+        input_values_r (numpy.ndarray): Wartości wejściowe dla kanału R
+        input_values_g (numpy.ndarray): Wartości wejściowe dla kanału G
+        input_values_b (numpy.ndarray): Wartości wejściowe dla kanału B
+
     Returns:
-        numpy.ndarray: Interpolowane wartości wyjściowe
+        numpy.ndarray: Interpolowane wartości wyjściowe (R, G, B)
     """
     lut_size = len(lut_1d)
     lut_input = np.linspace(0.0, 1.0, lut_size)
-    lut_output = lut_1d[:, 0]  # Zakładając R=G=B
-    output_values = np.interp(input_values, lut_input, lut_output)
-    return output_values
+    lut_output_r = lut_1d[:, 0]
+    lut_output_g = lut_1d[:, 1]
+    lut_output_b = lut_1d[:, 2]
 
-def interpolate_3d_lut(lut_3d, lut_size, input_values):
+    output_values_r = np.interp(input_values_r, lut_input, lut_output_r)
+    output_values_g = np.interp(input_values_g, lut_input, lut_output_g)
+    output_values_b = np.interp(input_values_b, lut_input, lut_output_b)
+
+    return np.stack([output_values_r, output_values_g, output_values_b], axis=-1)
+
+def interpolate_3d_lut(lut_3d, lut_size, input_values_r, input_values_g, input_values_b):
     """
     Interpoluje wartości z 3D LUT.
-    
+
     Args:
         lut_3d (numpy.ndarray): Dane 3D LUT
         lut_size (int): Rozmiar LUT
-        input_values (numpy.ndarray): Wartości wejściowe do interpolacji
-        
+        input_values_r (numpy.ndarray): Wartości wejściowe dla kanału R
+        input_values_g (numpy.ndarray): Wartości wejściowe dla kanału G
+        input_values_b (numpy.ndarray): Wartości wejściowe dla kanału B
     Returns:
-        numpy.ndarray: Interpolowane wartości wyjściowe
+        numpy.ndarray: Interpolowane wartości wyjściowe (R, G, B)
     """
-    # Utworzenie siatki wejściowej dla R, G, B
     grid = np.linspace(0, 1, lut_size)
-    # Przekształcenie lut_3d
     lut_3d = lut_3d.reshape((lut_size, lut_size, lut_size, 3))
-    interpolator = RegularGridInterpolator((grid, grid, grid), lut_3d, bounds_error=False, fill_value=None)
+    interpolator = RegularGridInterpolator((grid, grid, grid), lut_3d, bounds_error=False, fill_value=0)
 
-    # Przygotowanie punktów wejściowych, gdzie R=G=B
-    input_points = np.array([[v, v, v] for v in input_values])
-
-    # Interpolacja wartości
+    input_points = np.stack([input_values_r, input_values_g, input_values_b], axis=-1)
     output_values = interpolator(input_points)
 
-    # Zakładając R=G=B, bierzemy pierwszy kanał
-    return output_values[:, 0]
+    return output_values
 
-def s_gamut3_to_rec709(rgb_values):
+def srgb_to_rec709(rgb_values, color_space='S-Gamut3'):
     """
-    Konwertuje wartości RGB z przestrzeni S-Gamut3 do Rec.709.
-    
+    Konwertuje wartości RGB z przestrzeni S-Gamut3 lub S-Gamut3.Cine do Rec.709.
+
     Args:
-        rgb_values (numpy.ndarray): Wartości RGB w przestrzeni S-Gamut3
-        
+        rgb_values (numpy.ndarray): Wartości RGB
+        color_space (str): Przestrzeń barwna ('S-Gamut3' lub 'S-Gamut3.Cine')
+
     Returns:
         numpy.ndarray: Wartości RGB w przestrzeni Rec.709
     """
-    # Macierz transformacji z S-Gamut3 do Rec.709
-    matrix = np.array([
-        [1.6410, -0.3245, -0.3165],
-        [-0.6636, 1.6157, 0.0479],
-        [0.0117, -0.0085, 0.9968]
-    ])
-    return np.dot(rgb_values, matrix.T)
+    if color_space == 'S-Gamut3':
+        matrix = np.array([
+            [1.6410, -0.3245, -0.3165],
+            [-0.6636, 1.6157, 0.0479],
+            [0.0117, -0.0085, 0.9968]
+        ])
+    elif color_space == 'S-Gamut3.Cine':
+        matrix = np.array([
+            [1.5529, -0.2555, -0.2974],
+            [-0.5428, 1.5027, 0.0401],
+            [-0.0026, -0.0186, 1.0212]
+        ])
+    else:
+        raise ValueError("Nieobsługiwana przestrzeń barwna. Wybierz 'S-Gamut3' lub 'S-Gamut3.Cine'")
 
-def s_gamut3_cine_to_rec709(rgb_values):
-    """
-    Konwertuje wartości RGB z przestrzeni S-Gamut3.Cine do Rec.709.
-    
-    Args:
-        rgb_values (numpy.ndarray): Wartości RGB w przestrzeni S-Gamut3.Cine
-        
-    Returns:
-        numpy.ndarray: Wartości RGB w przestrzeni Rec.709
-    """
-    # Macierz transformacji z S-Gamut3.Cine do Rec.709
-    matrix = np.array([
-        [1.5529, -0.2555, -0.2974],
-        [-0.5428, 1.5027, 0.0401],
-        [-0.0026, -0.0186, 1.0212]
-    ])
     return np.dot(rgb_values, matrix.T)
 
 def generate_table(lut_filename, color_space):
     """
     Generuje tabelę porównawczą dla pliku LUT.
-    
+
     Args:
         lut_filename (str): Ścieżka do pliku .CUBE
         color_space (str): Przestrzeń barwna ('S-Gamut3' lub 'S-Gamut3.Cine')
-        
+
     Returns:
         pandas.DataFrame: Tabela porównawcza
     """
-    from .cube_parser import load_cube_file
-    
+
     # Wczytanie LUT
     lut_data = load_cube_file(lut_filename)
 
@@ -173,50 +171,40 @@ def generate_table(lut_filename, color_space):
     # Konwersja S-Log3 na światło liniowe
     L_linear = inverse_slog3_curve(V_slog3)
 
-    # Interpolacja wartości LUT
+    # Interpolacja wartości LUT - teraz dla R, G, B
     if lut_data['lut_type'] == '1D' or lut_data['lut_type'] == 'both':
         lut_1d = lut_data['lut_1d']
-        # Wejście do LUT to wartości S-Log3
-        V_lut = interpolate_1d_lut(lut_1d, V_slog3)
+        V_lut_rgb = interpolate_1d_lut(lut_1d, V_slog3, V_slog3, V_slog3) # Wejście to wartości S-Log3
     elif lut_data['lut_type'] == '3D':
         lut_3d = lut_data['lut_3d']
         lut_size = lut_data['lut_3d_size']
-        V_lut = interpolate_3d_lut(lut_3d, lut_size, V_slog3)
+        V_lut_rgb = interpolate_3d_lut(lut_3d, lut_size, V_slog3, V_slog3, V_slog3)
     else:
         raise ValueError("Nie można określić typu LUT.")
 
-    # Konwersja wyjścia LUT (w S-Log3) z powrotem na światło liniowe
-    V_lut_linear = inverse_slog3_curve(V_lut)
+    # Konwersja wyjścia LUT z powrotem na światło liniowe
+    V_lut_linear_r = inverse_slog3_curve(V_lut_rgb[:, 0])
+    V_lut_linear_g = inverse_slog3_curve(V_lut_rgb[:, 1])
+    V_lut_linear_b = inverse_slog3_curve(V_lut_rgb[:, 2])
 
-    # Ponieważ pracujemy z wartościami w skali szarości, musimy utworzyć trójki RGB
-    rgb_values = np.stack([V_lut_linear, V_lut_linear, V_lut_linear], axis=-1)
+    rgb_values = np.stack([V_lut_linear_r, V_lut_linear_g, V_lut_linear_b], axis=-1)
 
-    if color_space == 'S-Gamut3':
-        transformed_rgb = s_gamut3_to_rec709(rgb_values)
-    elif color_space == 'S-Gamut3.Cine':
-        transformed_rgb = s_gamut3_cine_to_rec709(rgb_values)
-    else:
-        # Brak transformacji
-        transformed_rgb = rgb_values
+    transformed_rgb = srgb_to_rec709(rgb_values, color_space)
 
     # Zastosowanie kodowania gamma (Rec.709 OETF)
     transformed_rgb_gamma = rec709_oetf(transformed_rgb)
 
     # Obliczenie luminancji z przekształconych wartości RGB
-    # Użycie współczynników luminancji Rec.709: Y = 0.2126 R + 0.7152 G + 0.0722 B
     luminance = (0.2126 * transformed_rgb_gamma[:, 0] +
                  0.7152 * transformed_rgb_gamma[:, 1] +
                  0.0722 * transformed_rgb_gamma[:, 2])
 
-    # Upewnienie się, że wartości luminancji są w zakresie [0,1]
     luminance = np.clip(luminance, 0, 1)
 
-    # Konwersja wartości na procenty
     V_slog3_percent = V_slog3 * 100
     V_rec709_percent = rec709_oetf(L_linear) * 100
     V_lut_percent = luminance * 100
 
-    # Utworzenie tabeli
     data = {
         'Exposure (%)': exposure_percentages,
         'S-Log3 (%)': V_slog3_percent,

@@ -3,23 +3,22 @@
 import os
 import io
 import tempfile
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, session
 import pandas as pd
 import matplotlib
-matplotlib.use('Agg')  # Ustawienie backendu bez GUI
+matplotlib.use('Agg')  # Ustawienie backendu bez GUI, dodany komentarz
 import matplotlib.pyplot as plt
 from werkzeug.utils import secure_filename
 import numpy as np
 from pixelpasta.lut_processor.cube_parser import load_cube_file
 from pixelpasta.lut_processor.color_analysis import generate_table
+import traceback
+import sys
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = tempfile.gettempdir()
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Limit 16MB
-
-# Globalne zmienne do przechowywania ostatnich wyników
-last_analysis_results = None
-last_comparison_table = None
+app.secret_key = os.urandom(24) # Generowanie losowego klucza sesji
 
 @app.route('/')
 def index():
@@ -27,51 +26,46 @@ def index():
 
 @app.route('/api/analyze', methods=['POST', 'GET'])
 def analyze_lut():
-    # Jeśli to żądanie GET, zwróć ostatnie wyniki analizy
+    # Użycie sesji do przechowywania danych
     if request.method == 'GET':
-        if last_analysis_results is not None:
-            return jsonify(last_analysis_results)
+        if 'last_analysis_results' in session:
+            return jsonify(session['last_analysis_results'])
         else:
             return jsonify({'error': 'Brak danych analizy'}), 404
-    # Sprawdzenie czy plik został przesłany
+
     if 'cube-file' not in request.files:
         return jsonify({'error': 'Nie przesłano pliku'}), 400
     
     file = request.files['cube-file']
     
-    # Sprawdzenie czy plik ma nazwę
     if file.filename == '':
         return jsonify({'error': 'Nie wybrano pliku'}), 400
     
-    # Sprawdzenie rozszerzenia pliku
     if not file.filename.lower().endswith('.cube'):
         return jsonify({'error': 'Nieprawidłowy format pliku. Wymagany plik .CUBE'}), 400
-    
-    # Sprawdzenie czy wybrano przestrzeń barwną
+
+    # Dodatkowa walidacja zawartości pliku .cube
+    content = file.read().decode('utf-8', errors='ignore')  # Dekodowanie z ignorowaniem błędów
+    if not any(keyword in content for keyword in ['TITLE', 'LUT_1D_SIZE', 'LUT_3D_SIZE']):
+        return jsonify({'error': 'Nieprawidłowy plik .CUBE - brak wymaganych słów kluczowych'}), 400
+    file.seek(0)  # Powrót na początek pliku
+
     color_space = request.form.get('color-space')
     if not color_space:
         return jsonify({'error': 'Nie wybrano przestrzeni barwnej'}), 400
     
-    # Zapisanie pliku tymczasowo
     filename = secure_filename(file.filename)
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(filepath)
     
     try:
-        # Generowanie tabeli porównawczej
         comparison_table = generate_table(filepath, color_space)
         
-        # Zapisanie wyników do zmiennych globalnych
-        global last_analysis_results, last_comparison_table
-        last_comparison_table = comparison_table
-        
-        # Przygotowanie danych do zwrócenia
         exposure_percentages = comparison_table['Exposure (%)'].tolist()
         slog3_percentages = comparison_table['S-Log3 (%)'].tolist()
         rec709_percentages = comparison_table['Rec.709 (%)'].tolist()
         lut_percentages = comparison_table['Your LUT (%)'].tolist()
         
-        # Informacje o LUT
         lut_data = load_cube_file(filepath)
         lut_info = {
             'filename': filename,
@@ -81,38 +75,38 @@ def analyze_lut():
             'color_space': color_space
         }
         
-        # Przygotowanie odpowiedzi
-        last_analysis_results = {
+        session['last_analysis_results'] = {
             'exposure_percentages': exposure_percentages,
             'slog3_percentages': slog3_percentages,
             'rec709_percentages': rec709_percentages,
             'lut_percentages': lut_percentages,
             'lut_info': lut_info
         }
+        session['last_comparison_table'] = comparison_table.to_dict(orient='records') # Zapis do sesji jako lista słowników
         
-        return jsonify(last_analysis_results)
+        return jsonify(session['last_analysis_results'])
     
+    except ValueError as ve:
+        return jsonify({'error': f'Błąd wartości: {str(ve)}'}), 400
+    except KeyError as ke:
+        return jsonify({'error': f'Brak klucza: {str(ke)}'}), 400
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': f'Nieoczekiwany błąd: {str(e)}'}), 500
     
     finally:
-        # Usunięcie pliku tymczasowego
         if os.path.exists(filepath):
             os.remove(filepath)
 
 @app.route('/api/download/csv', methods=['GET'])
 def download_csv():
-    global last_comparison_table
-    
-    if last_comparison_table is None:
+    if 'last_comparison_table' not in session:
         return jsonify({'error': 'Brak danych do pobrania'}), 400
     
     try:
-        # Utworzenie pliku CSV w pamięci
+        comparison_table = pd.DataFrame(session['last_comparison_table']) # Odczyt z sesji
         csv_data = io.StringIO()
-        last_comparison_table.to_csv(csv_data, index=False)
+        comparison_table.to_csv(csv_data, index=False)
         
-        # Przygotowanie odpowiedzi
         mem = io.BytesIO()
         mem.write(csv_data.getvalue().encode('utf-8'))
         mem.seek(0)
@@ -129,35 +123,16 @@ def download_csv():
 
 @app.route('/api/download/pdf', methods=['GET'])
 def download_pdf():
-    global last_analysis_results
-    
-    if last_analysis_results is None:
+    if 'last_analysis_results' not in session:
         return jsonify({'error': 'Brak danych do pobrania'}), 400
     
     try:
-        # Zapisz logi błędów do pliku
-        import traceback
-        import sys
-        
-        with open('pdf_error.log', 'w') as f:
-            f.write('Rozpoczęcie generowania PDF\n')
-        
-        # Utworzenie wykresu
-        with open('pdf_error.log', 'a') as f:
-            f.write('Tworzenie wykresu...\n')
-            
         plt.figure(figsize=(10, 6))
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Pobieranie danych...\n')
             
-        exposure = last_analysis_results['exposure_percentages']
-        slog3 = last_analysis_results['slog3_percentages']
-        rec709 = last_analysis_results['rec709_percentages']
-        lut = last_analysis_results['lut_percentages']
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Rysowanie wykresu...\n')
+        exposure = session['last_analysis_results']['exposure_percentages']
+        slog3 = session['last_analysis_results']['slog3_percentages']
+        rec709 = session['last_analysis_results']['rec709_percentages']
+        lut = session['last_analysis_results']['lut_percentages']
             
         plt.plot(exposure, slog3, label='S-Log3', color='blue')
         plt.plot(exposure, rec709, label='Rec.709', color='red')
@@ -169,19 +144,11 @@ def download_pdf():
         plt.grid(True, linestyle='--', alpha=0.7)
         plt.legend()
         
-        with open('pdf_error.log', 'a') as f:
-            f.write('Zapisywanie wykresu do pamięci...\n')
-            
-        # Zapisanie wykresu do pamięci
         img_data = io.BytesIO()
         plt.savefig(img_data, format='png', dpi=100, bbox_inches='tight')
         img_data.seek(0)
         plt.close()
         
-        with open('pdf_error.log', 'a') as f:
-            f.write('Importowanie modułów do generowania PDF...\n')
-            
-        # Utworzenie PDF z wykresem i tabelą
         from reportlab.lib.pagesizes import letter
         from reportlab.pdfgen import canvas
         from reportlab.lib import colors
@@ -189,10 +156,6 @@ def download_pdf():
         from reportlab.lib.units import inch
         from PIL import Image
         
-        with open('pdf_error.log', 'a') as f:
-            f.write('Przygotowanie danych do tabeli...\n')
-            
-        # Przygotowanie danych do tabeli
         table_data = [['Ekspozycja (%)', 'S-Log3 (%)', 'Rec.709 (%)', 'Twój LUT (%)']]
         for i in range(len(exposure)):
             table_data.append([
@@ -202,28 +165,16 @@ def download_pdf():
                 f"{lut[i]:.2f}"
             ])
         
-        with open('pdf_error.log', 'a') as f:
-            f.write('Tworzenie PDF w pamięci...\n')
-            
-        # Utworzenie PDF w pamięci
         pdf_data = io.BytesIO()
         c = canvas.Canvas(pdf_data, pagesize=letter)
         width, height = letter
         
-        with open('pdf_error.log', 'a') as f:
-            f.write('Dodawanie tytułu...\n')
-            
-        # Dodanie tytułu
         c.setFont("Helvetica-Bold", 16)
         c.drawString(inch, height - inch, "Analiza LUT - Raport")
         
-        with open('pdf_error.log', 'a') as f:
-            f.write('Dodawanie informacji o LUT...\n')
-            
-        # Dodanie informacji o LUT
         c.setFont("Helvetica", 12)
         y_position = height - 1.5 * inch
-        lut_info = last_analysis_results['lut_info']
+        lut_info = session['last_analysis_results']['lut_info']
         
         c.drawString(inch, y_position, f"Nazwa pliku: {lut_info['filename']}")
         y_position -= 20
@@ -232,10 +183,6 @@ def download_pdf():
         c.drawString(inch, y_position, f"Przestrzeń barwna: {lut_info['color_space']}")
         y_position -= 40
         
-        with open('pdf_error.log', 'a') as f:
-            f.write('Dodawanie wykresu...\n')
-            
-        # Dodanie wykresu
         img = Image.open(img_data)
         img_width, img_height = img.size
         aspect = img_height / float(img_width)
@@ -245,15 +192,10 @@ def download_pdf():
         c.drawImage(img_data, inch, y_position - display_height, width=display_width, height=display_height)
         y_position -= display_height + 40
         
-        with open('pdf_error.log', 'a') as f:
-            f.write('Dodawanie tabeli...\n')
-            
-        # Dodanie tabeli
         c.setFont("Helvetica-Bold", 12)
         c.drawString(inch, y_position, "Tabela porównawcza:")
         y_position -= 30
         
-        # Utworzenie tabeli
         table = Table(table_data)
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
@@ -264,31 +206,17 @@ def download_pdf():
             ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
             ('GRID', (0, 0), (-1, -1), 1, colors.black)
         ]))
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Rysowanie tabeli...\n')
-            
-        # Rysowanie tabeli
+
         table.wrapOn(c, width, height)
         table.drawOn(c, inch, y_position - table._height)
         
-        with open('pdf_error.log', 'a') as f:
-            f.write('Dodawanie stopki...\n')
-            
-        # Dodanie stopki
         c.setFont("Helvetica", 10)
         c.drawString(inch, inch, "Wygenerowano przez PixelPasta")
         c.drawRightString(width - inch, inch, "Strona 1 z 1")
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Zapisywanie PDF...\n')
-            
+
         c.save()
         pdf_data.seek(0)
         
-        with open('pdf_error.log', 'a') as f:
-            f.write('Zwracanie pliku PDF...\n')
-            
         return send_file(
             pdf_data,
             mimetype='application/pdf',
@@ -297,60 +225,7 @@ def download_pdf():
         )
     
     except Exception as e:
-        with open('pdf_error.log', 'a') as f:
-            f.write(f'Błąd: {str(e)}\n')
-            traceback.print_exc(file=f)
-        return jsonify({'error': str(e)}), 500
-
-# Trasa testowa do demonstracji
-@app.route('/test')
-def test():
-    global last_analysis_results, last_comparison_table
-    
-    # Użyj przykładowego pliku LUT
-    filepath = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'example.cube')
-    
-    if not os.path.exists(filepath):
-        return jsonify({'error': 'Przykładowy plik LUT nie istnieje'}), 404
-    
-    try:
-        # Generowanie tabeli porównawczej
-        color_space = 'S-Gamut3'
-        comparison_table = generate_table(filepath, color_space)
-        
-        # Zapisanie wyników do zmiennych globalnych
-        last_comparison_table = comparison_table
-        
-        # Przygotowanie danych do zwrócenia
-        exposure_percentages = comparison_table['Exposure (%)'].tolist()
-        slog3_percentages = comparison_table['S-Log3 (%)'].tolist()
-        rec709_percentages = comparison_table['Rec.709 (%)'].tolist()
-        lut_percentages = comparison_table['Your LUT (%)'].tolist()
-        
-        # Informacje o LUT
-        lut_data = load_cube_file(filepath)
-        lut_info = {
-            'filename': 'example.cube',
-            'lut_type': lut_data['lut_type'],
-            'lut_1d_size': lut_data['lut_1d_size'],
-            'lut_3d_size': lut_data['lut_3d_size'],
-            'color_space': color_space
-        }
-        
-        # Przygotowanie odpowiedzi
-        last_analysis_results = {
-            'exposure_percentages': exposure_percentages,
-            'slog3_percentages': slog3_percentages,
-            'rec709_percentages': rec709_percentages,
-            'lut_percentages': lut_percentages,
-            'lut_info': lut_info
-        }
-        
-        # Przekierowanie do strony głównej
-        return render_template('upload.html')
-    
-    except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False) # Wyłączenie trybu debugowania

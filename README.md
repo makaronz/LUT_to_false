@@ -111,6 +111,31 @@ This script is useful for filmmakers and colorists who want to analyze and compa
 
 This project is licensed under the MIT License. See the `LICENSE` file for details.
 
+## Web Application (PixelPasta)
+
+A web application called **PixelPasta** has been developed to provide a user-friendly interface for the LUT analysis tool.
+
+### Features
+
+-   **Upload LUT File:** Easily upload your `.cube` LUT file through the web interface.
+-   **Visualize Results:** View the generated comparative table directly in your browser.
+-   **Download CSV:** Download the table as a CSV file.
+-   **Responsive Design:** Works seamlessly on various devices (desktops, tablets, and smartphones).
+
+### Running the Application
+
+1.  **Navigate to the `pixelpasta` directory:**
+
+    ```bash
+    cd pixelpasta
+    ```
+
+2.  **Run the Flask application:**
+    ```
+    python app.py
+    ```
+3.  Open your web browser and go to `http://localhost:5000` to access the application.
+
 ## Author
 
 makaronz
@@ -228,6 +253,32 @@ Skrypt jest przydatny dla filmowców i kolorystów, którzy chcą analizować i 
 ## Licencja
 
 Ten projekt jest udostępniany na licencji MIT. Szczegóły licencji znajdują się w pliku `LICENSE`.
+
+## Aplikacja Webowa (PixelPasta)
+
+Stworzono aplikację webową o nazwie **PixelPasta**, która udostępnia przyjazny interfejs dla narzędzia do analizy LUT.
+
+### Funkcje
+
+-   **Przesyłanie pliku LUT:** Łatwe przesyłanie pliku LUT `.cube` za pomocą interfejsu webowego.
+-   **Wizualizacja wyników:** Wyświetlanie wygenerowanej tabeli porównawczej bezpośrednio w przeglądarce.
+-   **Pobieranie CSV:** Pobieranie tabeli w formacie CSV.
+-   **Responsywny design:** Działa bezproblemowo na różnych urządzeniach (komputery stacjonarne, tablety i smartfony).
+
+### Uruchamianie aplikacji
+
+1.  **Przejdź do katalogu `pixelpasta`:**
+
+    ```bash
+    cd pixelpasta
+    ```
+
+2.  **Uruchom aplikację Flask:**
+    ```
+    python app.py
+    ```
+
+3.  Otwórz przeglądarkę internetową i przejdź do adresu `http://localhost:5000`, aby uzyskać dostęp do aplikacji.
 
 ## Autor
 
