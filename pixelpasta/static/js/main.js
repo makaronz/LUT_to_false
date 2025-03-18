@@ -13,6 +13,30 @@ document.addEventListener('DOMContentLoaded', function() {
     let analysisData = null;
     let curveChart = null;
     
+    // Sprawdź, czy mamy już dane analizy (np. z trasy testowej)
+    fetch('/api/analyze', {
+        method: 'GET'
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        }
+        // Jeśli nie ma danych, po prostu ignorujemy
+        return null;
+    })
+    .then(data => {
+        if (data) {
+            // Zapisanie danych do zmiennej globalnej
+            analysisData = data;
+            
+            // Wyświetlenie wyników
+            showResults();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+    
     // Obsługa przesyłania formularza
     uploadForm.addEventListener('submit', function(e) {
         e.preventDefault();
