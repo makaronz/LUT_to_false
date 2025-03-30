@@ -67,6 +67,71 @@ The application provides a web interface for uploading LUT files, selecting refe
 - Batch processing of multiple LUTs
 - API endpoints for integration with other applications
 
+## Deployment Options
+
+### Heroku
+
+The application is already configured for deployment on Heroku:
+
+1. Create a Heroku account and install the Heroku CLI
+2. Login to Heroku CLI:
+   ```bash
+   heroku login
+   ```
+3. Create a new Heroku app:
+   ```bash
+   heroku create your-lutcomparetool-app
+   ```
+4. Push your code to Heroku:
+   ```bash
+   git push heroku merge:main
+   ```
+
+### Docker
+
+You can also deploy using Docker:
+
+1. Create a Dockerfile in the project root:
+   ```
+   FROM python:3.11-slim
+
+   WORKDIR /app
+
+   COPY . .
+   RUN pip install --no-cache-dir -r requirements.txt
+
+   EXPOSE 8080
+
+   CMD ["gunicorn", "--bind", "0.0.0.0:8080", "lutcomparetool_app:app"]
+   ```
+
+2. Build and run the Docker image:
+   ```bash
+   docker build -t lutcomparetool .
+   docker run -p 8080:8080 lutcomparetool
+   ```
+
+### Self-Hosted/VPS
+
+To deploy on your own server:
+
+1. Set up a Python environment on your server
+2. Clone the repository and install dependencies
+3. Set up a production WSGI server:
+   ```bash
+   gunicorn --bind 0.0.0.0:8080 lutcomparetool_app:app
+   ```
+4. Configure Nginx/Apache as a reverse proxy (recommended for production)
+
+### Cloud Platforms
+
+The application can also be deployed on platforms like:
+- AWS Elastic Beanstalk
+- Google Cloud Run
+- Azure App Service
+
+Each platform has its own deployment process, but they all support Python Flask applications.
+
 ## License
 
 This project is licensed under the MIT License.

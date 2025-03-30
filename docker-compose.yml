@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  lutcomparetool:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./reports:/app/reports
+    environment:
+      - FLASK_ENV=production
+      - PORT=8080
+    restart: unless-stopped

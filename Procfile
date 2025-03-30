@@ -1,1 +1,1 @@
-web: gunicorn pixelpasta_app:app
+web: gunicorn lutcomparetool_app:app
