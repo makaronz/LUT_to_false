@@ -1,8 +1,8 @@
-# PixelPasta - LUT Analyzer
+# LUTcompareTool - LUT Analyzer
 
 ## Project Overview
 
-PixelPasta is a comprehensive toolkit for filmmakers, colorists, and developers working with Look-Up Tables (LUTs). This application allows you to analyze `.cube` LUT files, compare them against various color spaces (like S-Log3, LogC, RED Log), and visualize the results through detailed reports.
+LUTcompareTool is a comprehensive toolkit for filmmakers, colorists, and developers working with Look-Up Tables (LUTs). This application allows you to analyze `.cube` LUT files, compare them against various color spaces (like S-Log3, LogC, RED Log), and visualize the results through detailed reports.
 
 The application provides a web interface for uploading LUT files, selecting reference curves, and generating analysis reports in both PNG and PDF formats.
 
@@ -16,7 +16,7 @@ The application provides a web interface for uploading LUT files, selecting refe
 
 ## Core Components
 
-1. **Web Application (`pixelpasta_app.py`)**: Flask-based web server providing the user interface and handling LUT analysis
+1. **Web Application (`lutcomparetool_app.py`)**: Flask-based web server providing the user interface and handling LUT analysis
 2. **LUT Analysis Package (`lut_analyzer_package`)**: Core modules for LUT parsing, analysis, and report generation
    - `lut_parsing.py`: Handles loading and parsing .cube files
    - `reporting.py`: Generates comparison data, plots, and PDF reports
@@ -43,7 +43,7 @@ The application provides a web interface for uploading LUT files, selecting refe
 
 3. **Run the Application**:
    ```bash
-   python pixelpasta_app.py
+   python lutcomparetool_app.py
    ```
    The web interface will be available at `http://localhost:8080`
 

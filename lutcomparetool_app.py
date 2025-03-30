@@ -58,7 +58,7 @@ CURVE_MAP = {k: v for k, v in CURVE_MAP.items() if callable(v)}
 def index():
     """Displays the main page with the form."""
     # For now returns a simple text, later will render a template
-    # return "Welcome to Pixel Pasta LUT Analyzer!"
+    # return "Welcome to LUTcompareTool!"
     # Pass the list of available curves to the template
     available_curves = sorted(CURVE_MAP.keys())
     return render_template('index.html', curves=available_curves)
