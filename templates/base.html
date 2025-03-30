@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{% block title %}Pixel Pasta LUT Analyzer{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Można dodać linki do frameworków CSS jak Bootstrap czy Tailwind, jeśli potrzebne -->
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon"> <!-- Placeholder for favicon -->
+</head>
+<body>
+    <header>
+        <div class="container">
+            <!-- Zakładam, że logo jest w static/images/pixel_pasta_logo.png -->
+            <img src="{{ url_for('static', filename='images/pixel_pasta_logo.png') }}" alt="Pixel Pasta Logo" class="logo">
+            <h1>Pixel Pasta LUT Analyzer</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Wyświetlanie wiadomości flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Główna zawartość strony -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; Pixel Pasta Industries. Wszelkie prawa zastrzeżone (albo i nie!).</p> <!-- Upewniono się, że tag {% now 'Y' %} jest usunięty -->
+        </div>
+    </footer>
+
+    <!-- Opcjonalne skrypty JS -->
+    <!-- <script src="{{ url_for('static', filename='js/main.js') }}"></script> -->
+</body>
+</html>

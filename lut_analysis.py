@@ -1,35 +1,12 @@
 import numpy as np
-import pandas as pd
-import tkinter as tk
-from tkinter import filedialog
-
-
-def select_cube_file():
-    root = tk.Tk()
-    root.withdraw()  # Hide the main Tkinter window
-    filetypes = [("Cube files", "*.cube"), ("All files", "*.*")]
-    filename = filedialog.askopenfilename(title="Select .cube file", filetypes=filetypes)
-    root.destroy()
-    return filename
-
-
-def select_color_space():
-    print("Select the color space you are using:")
-    print("1: S-Gamut3/S-Log3")
-    print("2: S-Gamut3.Cine/S-Log3")
-    choice = input("Enter 1 or 2: ")
-    if choice == '1':
-        return 'S-Gamut3'
-    elif choice == '2':
-        return 'S-Gamut3.Cine'
-    else:
-        print("Invalid selection. Defaulting to S-Gamut3.")
-        return 'S-Gamut3'
-
+from scipy.interpolate import RegularGridInterpolator
 
 def load_cube_file(filename):
-    with open(filename, 'r') as file:
-        lines = file.readlines()
+    try:
+        with open(filename, 'r') as file:
+            lines = file.readlines()
+    except FileNotFoundError:
+        raise FileNotFoundError(f"File not found: {filename}")
 
     # Remove comments and empty lines
     lines = [line.strip() for line in lines if line.strip() != '' and not line.strip().startswith('#')]
@@ -39,44 +16,75 @@ def load_cube_file(filename):
     lut_1d = []
     lut_3d = []
     lut_type = None  # '1D', '3D', or 'both'
+    title = None
 
     keywords = ['TITLE', 'DOMAIN_MIN', 'DOMAIN_MAX', 'LUT_1D_SIZE', 'LUT_3D_SIZE']
 
-    for line in lines:
+    data_started = False  # Flag to indicate when LUT data starts
+    for line_number, line in enumerate(lines, 1):
         stripped_line = line.strip()
+
         if any(stripped_line.startswith(keyword) for keyword in keywords):
-            if 'LUT_1D_SIZE' in stripped_line:
-                lut_1d_size = int(stripped_line.split()[-1])
+            parts = stripped_line.split()
+            if len(parts) < 2:
+                raise ValueError(f"Invalid keyword format in line {line_number}: {line}")
+
+            if 'TITLE' in stripped_line:
+                title = stripped_line.split(' ', 1)[1].strip('"')
+            elif 'LUT_1D_SIZE' in stripped_line:
+                try:
+                    lut_1d_size = int(parts[-1])
+                except ValueError:
+                    raise ValueError(f"Invalid LUT_1D_SIZE value in line {line_number}: {line}")
                 if lut_type == '3D':
                     lut_type = 'both'
                 else:
                     lut_type = '1D'
             elif 'LUT_3D_SIZE' in stripped_line:
-                lut_3d_size = int(stripped_line.split()[-1])
+                try:
+                    lut_3d_size = int(parts[-1])
+                except ValueError:
+                    raise ValueError(f"Invalid LUT_3D_SIZE value in line {line_number}: {line}")
                 if lut_type == '1D':
                     lut_type = 'both'
                 else:
                     lut_type = '3D'
-            continue  # Skip header lines
-        else:
+        elif not data_started:
+            data_started = True # Assume data starts after header
+
+        if data_started:
             # LUT data
             try:
                 values = [float(v) for v in stripped_line.split()]
-                if len(values) == 3:
-                    if lut_type == '1D' and len(lut_1d) < lut_1d_size:
-                        lut_1d.append(values)
-                    elif lut_type == 'both' and len(lut_1d) < lut_1d_size:
-                        lut_1d.append(values)
-                    else:
-                        lut_3d.append(values)
-            except ValueError:
-                continue  # Skip lines that cannot be converted to float
+                if len(values) != 3:
+                    raise ValueError(f"Invalid data format in line {line_number}: {line}. Expected 3 values.")
+
+                if lut_type == '1D' and len(lut_1d) < lut_1d_size:
+                    lut_1d.append(values)
+                elif lut_type == 'both' and len(lut_1d) < lut_1d_size:
+                    lut_1d.append(values)
+                elif lut_type in ('3D', 'both'):
+                    lut_3d.append(values)
+                else:
+                    raise ValueError(f"Unexpected data in line {line_number}: {line}")
+
+            except ValueError as e:
+                raise ValueError(f"Error parsing data in line {line_number}: {e}")
+
+    if lut_type == '1D' and len(lut_1d) != lut_1d_size:
+        raise ValueError(f"Incorrect number of data entries for 1D LUT. Expected {lut_1d_size}, got {len(lut_1d)}")
+    if lut_type == '3D' and len(lut_3d) != lut_3d_size**3:
+        raise ValueError(f"Incorrect number of data entries for 3D LUT. Expected {lut_3d_size**3}, got {len(lut_3d)}")
+    if lut_type == 'both' and (len(lut_1d) != lut_1d_size or len(lut_3d) != lut_3d_size**3):
+        raise ValueError("Incorrect number of data entries for combined 1D and 3D LUT.")
+
     return {
+        'title': title,
         'lut_type': lut_type,
         'lut_1d_size': lut_1d_size,
         'lut_3d_size': lut_3d_size,
-        'lut_1d': np.array(lut_1d),
-        'lut_3d': np.array(lut_3d)
+        'lut_1d': np.array(lut_1d, dtype=np.float32),
+        'lut_3d': np.array(lut_3d, dtype=np.float32)
     }
 
 
@@ -130,17 +138,35 @@ def rec709_curve(L):
     )
     return V
 
-
 def interpolate_1d_lut(lut_1d, input_values):
+    """Interpolates values using a 1D LUT.
+
+    Args:
+        lut_1d (np.ndarray): The 1D LUT data. Assumed to be Nx3 (RGB).
+        input_values (np.ndarray): The input values to interpolate (grayscale).
+
+    Returns:
+        np.ndarray: The interpolated RGB values (Nx3).
+    """
     lut_size = len(lut_1d)
     lut_input = np.linspace(0.0, 1.0, lut_size)
-    lut_output = lut_1d[:, 0]  # Assuming R=G=B
-    output_values = np.interp(input_values, lut_input, lut_output)
+    output_values = np.empty((len(input_values), 3), dtype=np.float32)
+    for i in range(3):  # Interpolate each color channel separately
+      output_values[:,i] = np.interp(input_values, lut_input, lut_1d[:,i])
     return output_values
 
-
 def interpolate_3d_lut(lut_3d, lut_size, input_values):
-    from scipy.interpolate import RegularGridInterpolator
+    """
+    Interpolates values using a 3D LUT.
+
+    Args:
+        lut_3d (np.ndarray):  3D LUT data.
+        lut_size (int): Size of the 3D LUT.
+        input_values (np.ndarray): Input RGB values (Nx3 array).
+
+    Returns:
+        np.ndarray: Interpolated RGB values (Nx3 array).
+    """
 
     # Create input grid for R, G, B
     grid = np.linspace(0, 1, lut_size)
@@ -148,15 +174,176 @@ def interpolate_3d_lut(lut_3d, lut_size, input_values):
     lut_3d = lut_3d.reshape((lut_size, lut_size, lut_size, 3))
     interpolator = RegularGridInterpolator((grid, grid, grid), lut_3d, bounds_error=False, fill_value=None)
 
-    # Prepare input points where R=G=B
-    input_points = np.array([[v, v, v] for v in input_values])
-
     # Interpolate values
-    output_values = interpolator(input_points)
+    output_values = interpolator(input_values)
+    return output_values
 
-    # Assuming R=G=B, take the first channel
-    return output_values[:, 0]
+# --- ARRI LogC4 Functions (from logc4.pdf) ---
+# https://www.arri.com/resource/blob/35922/b87524555309a95e58555b49fe22b848/2022-08-arri-log-c4-data.pdf
 
+# 4.1.1 Encoding Function
+def arri_logc4_encode(e_scene):
+    a = (2**18 - 16) / 117.45
+    b = (1023 - 95) / 1023
+    c = 95 / 1023
+    s = (7 * np.log(2) * 2**(7 - 14 * c/b)) / (a * b)
+    t = (2**(14 * (-c/b) + 6) - 64) / a
+
+    return np.where(e_scene >= t,
+                    (np.log2(a * e_scene + 64) - 6) / 14 * b + c,
+                    (e_scene - t) / s)
+
+# 4.1.2 Decoding Function
+def arri_logc4_decode(e_prime):
+    a = (2**18 - 16) / 117.45
+    b = (1023 - 95) / 1023
+    c = 95 / 1023
+    s = (7 * np.log(2) * 2**(7 - 14 * c/b)) / (a * b)
+    t = (2**(14 * (-c/b) + 6) - 64) / a
+
+    return np.where(e_prime >= 0,
+                    (2**(14 * (e_prime - c) / b + 6) - 64) / a,
+                    e_prime * s + t)
+
+# --- ARRI LogC3 Functions  ---
+# https://www.arri.com/en/learn-help/learn-help-camera-system/tools/lut-generator
+def arri_logc3_encode(e_scene):
+    a = 5.555556
+    b = 0.052272
+    c = 0.247190
+    d = 0.385537
+    t = 0.00928
+
+    return np.where(e_scene >= t,
+                    c * np.log10(a * e_scene + b) + d,
+                    (e_scene/t) * (c * np.log10(a * t + b) + d))
+
+def arri_logc3_decode(e_prime):
+    a = 5.555556
+    b = 0.052272
+    c = 0.247190
+    d = 0.385537
+    t = 0.00928
+    
+    return np.where(e_prime >= (c * np.log10(a * t + b) + d),
+                    (np.power(10, ((e_prime - d) / c)) - b) / a,
+                    (e_prime / (c * np.log10(a * t + b) + d)) * t)
+                    
+
+# 4.3.1 ARRI LogC4 to CIE XYZ Conversion
+def arri_logc4_to_xyz(rgb_logc4):
+    m_xyz = np.array([
+        [0.704858320407232064, 0.129760295170463003, 0.115837311473976537],
+        [0.254524176404027025, 0.781477732712002049, -0.036001909116029039],
+        [0.000000000000000000, 0.000000000000000000, 1.089057750759878429]
+    ])
+    rgb_linear = np.array([arri_logc4_decode(val) for val in rgb_logc4])
+    return np.dot(m_xyz, rgb_linear)
+
+# 4.3.2 ARRI LogC4 to ACES Conversion
+def arri_logc4_to_aces(rgb_logc4):
+    m_aces = np.array([
+        [0.750957362824734131, 0.144422786709757084, 0.104619850465508965],
+        [0.000821837079380207, 1.007397584885003194, -0.008219421964383583],
+        [-0.000499952143533471, -0.000854177231436971, 1.001354129374970370]
+    ])
+    rgb_linear = np.array([arri_logc4_decode(val) for val in rgb_logc4])
+    return np.dot(m_aces, rgb_linear)
+
+
+# --- Placeholder functions for S-Log3 (Approximation) ---
+
+def slog3_encode(linear):
+    """
+    Approximates S-Log3 encoding.  This is NOT the official formula.
+    """
+    a = 0.432699
+    b = 7.3
+    c = 0.037584
+    d = 0.616596
+    t = 0.01
+    m = 17.9177
+    n = 0.092864
+    
+    if linear >= t:
+        return np.clip(a * np.log(b * linear + c) + d, 0, 1)
+    else:
+        return np.clip(m * linear + n, 0, 1)
+
+def slog3_decode(log_value):
+    """
+    Approximates S-Log3 decoding. This is NOT the official formula.
+    """
+    a = 0.432699
+    b = 7.3
+    c = 0.037584
+    d = 0.616596
+    t = 0.01
+    m = 17.9177
+    n = 0.092864
+
+    if log_value >= (m*t + n) :
+        return (np.exp((log_value - d) / a) - c) / b
+    else:
+        return (log_value - n) / m
+
+def slog2_encode(linear):
+    #a = 0.1596;
+    #b = 10.1572;
+    #c = 0.0393;
+    #d = 0.6306;
+    a = 0.432699
+    b = 7.3
+    c = 0.037584
+    d = 0.616596
+    t = 0.014
+    m = 15.1927
+    n = 0.096636
+    
+    if linear >= t:
+        return np.clip(a * np.log(b * linear + c) + d, 0, 1)
+    else:
+        return np.clip(m * linear + n, 0, 1)
+
+def slog2_decode(log_value):
+    #a = 0.1596;
+    #b = 10.1572;
+    #c = 0.0393;
+    #d = 0.6306;
+    a = 0.432699
+    b = 7.3
+    c = 0.037584
+    d = 0.616596
+    t = 0.014
+    m = 15.1927
+    n = 0.096636
+    if log_value >= (m*t + n) :
+        return (np.exp((log_value - d) / a) - c) / b
+    else:
+        return (log_value - n) / m
+        
+# --- Placeholder functions for RED Log3G10 (Approximation) ---
+def log3g10_encode(linear):
+    """
+    Approximates RED Log3G10 encoding. This is NOT the official formula.
+    """
+    a = 0.555556
+    b = 10.0
+    c = 0.001
+    d = 0.0722
+    
+    return np.clip(a * np.log10(b * linear + c) + d, 0, 1)
+
+def log3g10_decode(log_value):
+    """
+    Approximates RED Log3G10 decoding. This is NOT the official formula
+    """
+    a = 0.555556
+    b = 10.0
+    c = 0.001
+    d = 0.0722
+    
+    return (10**((log_value - d) / a) - c) / b
 
 def s_gamut3_to_rec709(rgb_values):
     # Transformation matrix from S-Gamut3 to Rec.709
@@ -178,88 +365,67 @@ def s_gamut3_cine_to_rec709(rgb_values):
     return np.dot(rgb_values, matrix.T)
 
 
-def generate_table(lut_filename, color_space):
-    # Load LUT
+def generate_table(lut_filename, color_space, input_encoding='slog3'):
+    """Generates a table comparing different color encodings and LUT conversions.
+
+    Args:
+        lut_filename (str): Path to the .cube LUT file.
+        color_space (str): Target color space ('s-gamut3' or 's-gamut3.cine').
+        input_encoding (str): Input color encoding ('slog3', 'arri_logc4', 'log3g10').
+    Returns:
+        np.ndarray: Table with comparison data.
+    """
+
     lut_data = load_cube_file(lut_filename)
 
-    # Define exposure values
-    exposure_percentages = list(range(1, 100, 5))  # From 1% to 99% in steps of 5%
-    L_values = np.array([p / 100.0 for p in exposure_percentages])
+    exposure_percentages = np.arange(1, 100, 5)
+    L_values = exposure_percentages / 100.0
 
-    # Calculate S-Log3 values
-    V_slog3 = slog3_curve(L_values)  # Values between 0 and 1
+    if input_encoding == 'slog3':
+        input_values = slog3_curve(L_values)
+        input_linear = inverse_slog3_curve(input_values)
+    elif input_encoding == 'arri_logc4':
+        input_values = arri_logc4_encode(L_values)
+        input_linear = arri_logc4_decode(input_values)
+    elif input_encoding == 'log3g10':
+        input_values = log3g10_encode(L_values)
+        input_linear = log3g10_decode(input_values)
+    else:
+        raise ValueError("Invalid input_encoding. Choose 'slog3', 'arri_logc4', or 'log3g10'.")
 
-    # Convert S-Log3 to linear light
-    L_linear = inverse_slog3_curve(V_slog3)
+    # Create RGB triplets for input
+    input_rgb = np.stack([input_values, input_values, input_values], axis=-1)
 
-    # Interpolate LUT values
-    if lut_data['lut_type'] == '1D' or lut_data['lut_type'] == 'both':
-        lut_1d = lut_data['lut_1d']
-        # Input to LUT is S-Log3 values
-        V_lut = interpolate_1d_lut(lut_1d, V_slog3)
+    if lut_data['lut_type'] == '1D':
+        lut_output = interpolate_1d_lut(lut_data['lut_1d'], input_values)
     elif lut_data['lut_type'] == '3D':
-        lut_3d = lut_data['lut_3d']
-        lut_size = lut_data['lut_3d_size']
-        V_lut = interpolate_3d_lut(lut_3d, lut_size, V_slog3)
+        lut_output = interpolate_3d_lut(lut_data['lut_3d'], lut_data['lut_3d_size'], input_rgb)
+    elif lut_data['lut_type'] == 'both':  # Use 3D LUT if both are available
+        lut_output = interpolate_3d_lut(lut_data['lut_3d'], lut_data['lut_3d_size'], input_rgb)
     else:
-        print("Cannot determine LUT type.")
-        return
+        raise ValueError("Cannot determine LUT type.")
 
-    # Convert LUT output (in S-Log3) back to linear light
-    V_lut_linear = inverse_slog3_curve(V_lut)
-
-    # Since we're working with grayscale values, we need to create RGB triplets
-    rgb_values = np.stack([V_lut_linear, V_lut_linear, V_lut_linear], axis=-1)
-
-    if color_space == 'S-Gamut3':
-        transformed_rgb = s_gamut3_to_rec709(rgb_values)
-    elif color_space == 'S-Gamut3.Cine':
-        transformed_rgb = s_gamut3_cine_to_rec709(rgb_values)
+    if color_space.lower() == 's-gamut3':
+        transformed_rgb = s_gamut3_to_rec709(lut_output)
+    elif color_space.lower() == 's-gamut3.cine':
+        transformed_rgb = s_gamut3_cine_to_rec709(lut_output)
     else:
-        print("Unknown color space. No transformation applied.")
-        transformed_rgb = rgb_values  # No transformation
+        raise ValueError("Invalid color_space. Choose 's-gamut3' or 's-gamut3.cine'.")
 
-    # Apply gamma encoding (Rec.709 OETF)
+    # Apply Rec.709 OETF
     transformed_rgb_gamma = rec709_oetf(transformed_rgb)
 
-    # Calculate luminance from transformed RGB values
-    # Use Rec.709 luminance coefficients: Y = 0.2126 R + 0.7152 G + 0.0722 B
+    # Calculate luminance
     luminance = (0.2126 * transformed_rgb_gamma[:, 0] +
                  0.7152 * transformed_rgb_gamma[:, 1] +
                  0.0722 * transformed_rgb_gamma[:, 2])
 
-    # Ensure luminance values are within [0,1]
     luminance = np.clip(luminance, 0, 1)
 
-    # Convert values to percentages
-    V_slog3_percent = V_slog3 * 100
-    V_rec709_percent = rec709_oetf(L_linear) * 100
-    V_lut_percent = luminance * 100
+    # Convert to percentages
+    input_percent = input_values * 100
+    rec709_percent = rec709_oetf(input_linear) * 100  # Using input_linear for Rec709
+    lut_percent = luminance * 100
 
-    # Create the table
-    data = {
-        'Exposure (%)': exposure_percentages,
-        'S-Log3 (%)': V_slog3_percent,
-        'Rec.709 (%)': V_rec709_percent,
-        'Your LUT (%)': V_lut_percent,
-        'Color Space': [color_space] * len(exposure_percentages)
-    }
-    df = pd.DataFrame(data)
-    return df
-
-
-if __name__ == "__main__":
-    # Select color space
-    color_space = select_color_space()
-
-    # Select LUT file
-    lut_filename = select_cube_file()
-
-    if lut_filename:
-        tabela = generate_table(lut_filename, color_space)
-        if tabela is not None:
-            print(tabela)
-            # Optionally save the table to a CSV file
-            tabela.to_csv('comparison_table.csv', index=False)
-    else:
-        print("No file selected.")
+    table = np.column_stack([exposure_percentages, input_percent, rec709_percent, lut_percent])
+    return table

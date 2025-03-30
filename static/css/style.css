@@ -1,0 +1,204 @@
+/* Podstawowe style i resetowanie */
+body {
+    font-family: 'Courier New', Courier, monospace; /* Czcionka w stylu retro/tech */
+    background-color: #1a1a2e; /* Ciemne tło, np. granatowe/fioletowe */
+    color: #e0e0e0; /* Jasny kolor tekstu */
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    width: 90%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 15px;
+}
+
+/* Nagłówek */
+header {
+    background-color: #16213e; /* Nieco jaśniejszy niż tło body */
+    padding: 15px 0;
+    border-bottom: 3px solid #e94560; /* Czerwony/magenta akcent */
+    text-align: center;
+}
+
+header .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.logo {
+    max-height: 60px; /* Dostosuj rozmiar logo */
+    width: auto;
+}
+
+header h1 {
+    color: #f0c674; /* Żółty/beżowy kolor dla nagłówka */
+    margin: 0;
+    font-size: 2em;
+    text-shadow: 2px 2px #0f3460; /* Cień w stylu pixel art */
+}
+
+/* Główna zawartość */
+main {
+    flex-grow: 1; /* Zajmuje dostępną przestrzeń */
+    padding-top: 20px;
+    padding-bottom: 40px;
+}
+
+main h2, main h3 {
+    color: #5f9ea0; /* Turkusowy/cyjanowy akcent dla podtytułów */
+    border-bottom: 1px dashed #5f9ea0;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+/* Formularz */
+.upload-form {
+    background-color: #1f4068; /* Ciemnoniebieskie tło formularza */
+    padding: 20px;
+    border-radius: 5px;
+    border: 1px solid #5f9ea0;
+    margin-top: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #f0c674;
+    font-weight: bold;
+}
+
+.form-group input[type="file"],
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #5f9ea0;
+    background-color: #16213e;
+    color: #e0e0e0;
+    border-radius: 3px;
+    box-sizing: border-box; /* Zapobiega przekraczaniu szerokości przez padding */
+}
+
+/* Przyciski */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: inherit;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #e94560; /* Czerwony/magenta */
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: #c7304a;
+}
+
+.btn-secondary {
+    background-color: #5f9ea0; /* Turkusowy */
+    color: #ffffff;
+}
+
+.btn-secondary:hover {
+    background-color: #4a7c7e;
+}
+
+.btn-link {
+    background: none;
+    color: #f0c674;
+    text-decoration: underline;
+    padding: 0;
+}
+.btn-link:hover {
+    color: #ffffff;
+}
+
+
+/* Wiadomości Flash */
+.flash-messages {
+    margin-bottom: 20px;
+}
+
+.alert {
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border-radius: 3px;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.alert-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.alert-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+
+/* Strona wyników */
+.result-section {
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: #1f4068;
+    border: 1px solid #5f9ea0;
+    border-radius: 5px;
+}
+
+.result-plot {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 10px auto;
+    border: 1px solid #5f9ea0;
+}
+
+/* Stopka */
+footer {
+    background-color: #16213e;
+    color: #a0a0a0;
+    text-align: center;
+    padding: 15px 0;
+    margin-top: auto; /* Przykleja stopkę do dołu */
+    border-top: 1px solid #5f9ea0;
+    font-size: 0.9em;
+}
+
+/* Responsywność (prosty przykład) */
+@media (max-width: 600px) {
+    header .container {
+        flex-direction: column;
+    }
+    header h1 {
+        font-size: 1.5em;
+    }
+    .logo {
+        max-height: 40px;
+    }
+}

@@ -3,9 +3,10 @@
 import os
 import io
 import tempfile
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify
 import pandas as pd
 import matplotlib
+
 matplotlib.use('Agg')  # Ustawienie backendu bez GUI
 import matplotlib.pyplot as plt
 from werkzeug.utils import secure_filename
@@ -27,6 +28,7 @@ def index():
 
 @app.route('/api/analyze', methods=['POST', 'GET'])
 def analyze_lut():
+    global last_analysis_results, last_comparison_table
     # Jeśli to żądanie GET, zwróć ostatnie wyniki analizy
     if request.method == 'GET':
         if last_analysis_results is not None:
@@ -36,41 +38,62 @@ def analyze_lut():
     # Sprawdzenie czy plik został przesłany
     if 'cube-file' not in request.files:
         return jsonify({'error': 'Nie przesłano pliku'}), 400
-    
+
     file = request.files['cube-file']
-    
+
     # Sprawdzenie czy plik ma nazwę
     if file.filename == '':
         return jsonify({'error': 'Nie wybrano pliku'}), 400
-    
+
     # Sprawdzenie rozszerzenia pliku
     if not file.filename.lower().endswith('.cube'):
         return jsonify({'error': 'Nieprawidłowy format pliku. Wymagany plik .CUBE'}), 400
-    
+
     # Sprawdzenie czy wybrano przestrzeń barwną
     color_space = request.form.get('color-space')
     if not color_space:
         return jsonify({'error': 'Nie wybrano przestrzeni barwnej'}), 400
-    
+
     # Zapisanie pliku tymczasowo
     filename = secure_filename(file.filename)
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(filepath)
-    
+
     try:
         # Generowanie tabeli porównawczej
         comparison_table = generate_table(filepath, color_space)
-        
+
         # Zapisanie wyników do zmiennych globalnych
-        global last_analysis_results, last_comparison_table
+
         last_comparison_table = comparison_table
-        
-        # Przygotowanie danych do zwrócenia
+
+       # Przygotowanie danych do zwrócenia
         exposure_percentages = comparison_table['Exposure (%)'].tolist()
-        slog3_percentages = comparison_table['S-Log3 (%)'].tolist()
+
+        #Zmienne do przechowywania danych w zaleznosci od wybranej opcji
+        log_percentages = None
+        log_label = None
+
+       # Przygotowanie danych do zwrócenia
+        exposure_percentages = comparison_table['Exposure (%)'].tolist()
+
+        #Zmienne do przechowywania danych w zaleznosci od wybranej opcji
+        log_percentages = None
+        log_label = None
+
+        if color_space == "LogC4":
+            log_percentages = comparison_table['LogC4 (%)'].tolist()
+            log_label = 'LogC4 (%)'
+        elif color_space == "LogC":
+            log_percentages = comparison_table['LogC (%)'].tolist()
+            log_label = 'LogC (%)'
+        else:
+            log_percentages = comparison_table['S-Log3 (%)'].tolist()
+            log_label = 'S-Log3 (%)'
+
         rec709_percentages = comparison_table['Rec.709 (%)'].tolist()
         lut_percentages = comparison_table['Your LUT (%)'].tolist()
-        
+
         # Informacje o LUT
         lut_data = load_cube_file(filepath)
         lut_info = {
@@ -80,253 +103,68 @@ def analyze_lut():
             'lut_3d_size': lut_data['lut_3d_size'],
             'color_space': color_space
         }
-        
+
         # Przygotowanie odpowiedzi
         last_analysis_results = {
             'exposure_percentages': exposure_percentages,
-            'slog3_percentages': slog3_percentages,
+            'log_percentages': log_percentages,
+            'log_label': log_label,
             'rec709_percentages': rec709_percentages,
             'lut_percentages': lut_percentages,
             'lut_info': lut_info
         }
-        
         return jsonify(last_analysis_results)
-    
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
+
     finally:
         # Usunięcie pliku tymczasowego
         if os.path.exists(filepath):
             os.remove(filepath)
 
-@app.route('/api/download/csv', methods=['GET'])
-def download_csv():
-    global last_comparison_table
-    
-    if last_comparison_table is None:
-        return jsonify({'error': 'Brak danych do pobrania'}), 400
-    
-    try:
-        # Utworzenie pliku CSV w pamięci
-        csv_data = io.StringIO()
-        last_comparison_table.to_csv(csv_data, index=False)
-        
-        # Przygotowanie odpowiedzi
-        mem = io.BytesIO()
-        mem.write(csv_data.getvalue().encode('utf-8'))
-        mem.seek(0)
-        
-        return send_file(
-            mem,
-            mimetype='text/csv',
-            as_attachment=True,
-            download_name='lut_analysis.csv'
-        )
-    
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@app.route('/api/download/pdf', methods=['GET'])
-def download_pdf():
-    global last_analysis_results
-    
-    if last_analysis_results is None:
-        return jsonify({'error': 'Brak danych do pobrania'}), 400
-    
-    try:
-        # Zapisz logi błędów do pliku
-        import traceback
-        import sys
-        
-        with open('pdf_error.log', 'w') as f:
-            f.write('Rozpoczęcie generowania PDF\n')
-        
-        # Utworzenie wykresu
-        with open('pdf_error.log', 'a') as f:
-            f.write('Tworzenie wykresu...\n')
-            
-        plt.figure(figsize=(10, 6))
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Pobieranie danych...\n')
-            
-        exposure = last_analysis_results['exposure_percentages']
-        slog3 = last_analysis_results['slog3_percentages']
-        rec709 = last_analysis_results['rec709_percentages']
-        lut = last_analysis_results['lut_percentages']
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Rysowanie wykresu...\n')
-            
-        plt.plot(exposure, slog3, label='S-Log3', color='blue')
-        plt.plot(exposure, rec709, label='Rec.709', color='red')
-        plt.plot(exposure, lut, label='Twój LUT', color='green')
-        
-        plt.title('Porównanie krzywych tonalnych')
-        plt.xlabel('Ekspozycja (%)')
-        plt.ylabel('Wartość wyjściowa (%)')
-        plt.grid(True, linestyle='--', alpha=0.7)
-        plt.legend()
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Zapisywanie wykresu do pamięci...\n')
-            
-        # Zapisanie wykresu do pamięci
-        img_data = io.BytesIO()
-        plt.savefig(img_data, format='png', dpi=100, bbox_inches='tight')
-        img_data.seek(0)
-        plt.close()
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Importowanie modułów do generowania PDF...\n')
-            
-        # Utworzenie PDF z wykresem i tabelą
-        from reportlab.lib.pagesizes import letter
-        from reportlab.pdfgen import canvas
-        from reportlab.lib import colors
-        from reportlab.platypus import Table, TableStyle
-        from reportlab.lib.units import inch
-        from PIL import Image
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Przygotowanie danych do tabeli...\n')
-            
-        # Przygotowanie danych do tabeli
-        table_data = [['Ekspozycja (%)', 'S-Log3 (%)', 'Rec.709 (%)', 'Twój LUT (%)']]
-        for i in range(len(exposure)):
-            table_data.append([
-                str(exposure[i]),
-                f"{slog3[i]:.2f}",
-                f"{rec709[i]:.2f}",
-                f"{lut[i]:.2f}"
-            ])
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Tworzenie PDF w pamięci...\n')
-            
-        # Utworzenie PDF w pamięci
-        pdf_data = io.BytesIO()
-        c = canvas.Canvas(pdf_data, pagesize=letter)
-        width, height = letter
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Dodawanie tytułu...\n')
-            
-        # Dodanie tytułu
-        c.setFont("Helvetica-Bold", 16)
-        c.drawString(inch, height - inch, "Analiza LUT - Raport")
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Dodawanie informacji o LUT...\n')
-            
-        # Dodanie informacji o LUT
-        c.setFont("Helvetica", 12)
-        y_position = height - 1.5 * inch
-        lut_info = last_analysis_results['lut_info']
-        
-        c.drawString(inch, y_position, f"Nazwa pliku: {lut_info['filename']}")
-        y_position -= 20
-        c.drawString(inch, y_position, f"Typ LUT: {lut_info['lut_type']}")
-        y_position -= 20
-        c.drawString(inch, y_position, f"Przestrzeń barwna: {lut_info['color_space']}")
-        y_position -= 40
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Dodawanie wykresu...\n')
-            
-        # Dodanie wykresu
-        img = Image.open(img_data)
-        img_width, img_height = img.size
-        aspect = img_height / float(img_width)
-        display_width = width - 2 * inch
-        display_height = display_width * aspect
-        
-        c.drawImage(img_data, inch, y_position - display_height, width=display_width, height=display_height)
-        y_position -= display_height + 40
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Dodawanie tabeli...\n')
-            
-        # Dodanie tabeli
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(inch, y_position, "Tabela porównawcza:")
-        y_position -= 30
-        
-        # Utworzenie tabeli
-        table = Table(table_data)
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
-        ]))
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Rysowanie tabeli...\n')
-            
-        # Rysowanie tabeli
-        table.wrapOn(c, width, height)
-        table.drawOn(c, inch, y_position - table._height)
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Dodawanie stopki...\n')
-            
-        # Dodanie stopki
-        c.setFont("Helvetica", 10)
-        c.drawString(inch, inch, "Wygenerowano przez PixelPasta")
-        c.drawRightString(width - inch, inch, "Strona 1 z 1")
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Zapisywanie PDF...\n')
-            
-        c.save()
-        pdf_data.seek(0)
-        
-        with open('pdf_error.log', 'a') as f:
-            f.write('Zwracanie pliku PDF...\n')
-            
-        return send_file(
-            pdf_data,
-            mimetype='application/pdf',
-            as_attachment=True,
-            download_name='lut_analysis.pdf'
-        )
-    
-    except Exception as e:
-        with open('pdf_error.log', 'a') as f:
-            f.write(f'Błąd: {str(e)}\n')
-            traceback.print_exc(file=f)
-        return jsonify({'error': str(e)}), 500
 
 # Trasa testowa do demonstracji
 @app.route('/test')
 def test():
     global last_analysis_results, last_comparison_table
-    
     # Użyj przykładowego pliku LUT
     filepath = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'example.cube')
-    
+
     if not os.path.exists(filepath):
         return jsonify({'error': 'Przykładowy plik LUT nie istnieje'}), 404
-    
+
     try:
         # Generowanie tabeli porównawczej
         color_space = 'S-Gamut3'
         comparison_table = generate_table(filepath, color_space)
-        
+
         # Zapisanie wyników do zmiennych globalnych
         last_comparison_table = comparison_table
-        
-        # Przygotowanie danych do zwrócenia
+
+       # Przygotowanie danych do zwrócenia
         exposure_percentages = comparison_table['Exposure (%)'].tolist()
-        slog3_percentages = comparison_table['S-Log3 (%)'].tolist()
+        log_percentages = None
+        log_label = None
+
+       # Przygotowanie danych do zwrócenia
+        exposure_percentages = comparison_table['Exposure (%)'].tolist()
+        log_percentages = None
+        log_label = None
+
+        if color_space == "LogC4":
+            log_percentages = comparison_table['LogC4 (%)'].tolist()
+            log_label = 'LogC4 (%)'
+        elif color_space == 'LogC':
+            log_percentages = comparison_table['LogC (%)'].tolist()
+            log_label = 'LogC (%)'
+        else:
+            log_percentages = comparison_table['S-Log3 (%)'].tolist()
+            log_label = 'S-Log3 (%)'
+
         rec709_percentages = comparison_table['Rec.709 (%)'].tolist()
         lut_percentages = comparison_table['Your LUT (%)'].tolist()
-        
+
         # Informacje o LUT
         lut_data = load_cube_file(filepath)
         lut_info = {
@@ -336,19 +174,20 @@ def test():
             'lut_3d_size': lut_data['lut_3d_size'],
             'color_space': color_space
         }
-        
+
         # Przygotowanie odpowiedzi
         last_analysis_results = {
             'exposure_percentages': exposure_percentages,
-            'slog3_percentages': slog3_percentages,
+            'log_percentages': log_percentages,
+            'log_label': log_label,
             'rec709_percentages': rec709_percentages,
             'lut_percentages': lut_percentages,
             'lut_info': lut_info
         }
-        
+
         # Przekierowanie do strony głównej
         return render_template('upload.html')
-    
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
