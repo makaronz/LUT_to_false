@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
-# Dodaję type hint dla Pylance aby pomóc w rozpoznaniu importu
+# Adding type hint for Pylance to help with import resolution
 from flask import (Flask, request, render_template, redirect, url_for,  # type: ignore
                    send_from_directory, flash, session)
 from werkzeug.utils import secure_filename  # type: ignore
 import traceback # For detailed error logging
 
-# Importuj funkcje z naszego pakietu
+# Import functions from our package
 try:
     from lut_analyzer_package.lut_parsing import load_cube_file
     from lut_analyzer_package.reporting import (compare_lut_to_curve,
@@ -19,7 +19,7 @@ except ImportError as e:
     print("Ensure the package is in the Python path or installed.", file=sys.stderr)
     sys.exit(1)
 
-# --- Konfiguracja Aplikacji ---
+# --- Application Configuration ---
 UPLOAD_FOLDER = 'uploads'
 REPORTS_FOLDER = 'reports' # Where generated reports (png, pdf) will be saved
 ALLOWED_EXTENSIONS = {'cube'}
@@ -27,83 +27,83 @@ ALLOWED_EXTENSIONS = {'cube'}
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['REPORTS_FOLDER'] = REPORTS_FOLDER
-# Potrzebny do flash messages (informacje dla użytkownika)
+# Required for flash messages (user notifications)
 app.config['SECRET_KEY'] = os.urandom(24)
 
-# Utwórz foldery, jeśli nie istnieją
+# Create folders if they don't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(REPORTS_FOLDER, exist_ok=True)
 
-# --- Funkcje Pomocnicze ---
+# --- Helper Functions ---
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Mapowanie nazw krzywych (jak w merged_lut_analyzer.py)
-# Upewnij się, że wszystkie funkcje są zaimportowane z transfer_functions
+# Mapping curve names (as in merged_lut_analyzer.py)
+# Make sure all functions are imported from transfer_functions
 CURVE_MAP = {name: func for name, func in locals().items() if name.startswith('linear_to_')}
-# Dodajmy aliasy, jeśli chcemy
+# Add aliases if needed
 CURVE_MAP.update({
     "gamma22": linear_to_redgamma4,
     "gamma24": linear_to_redgamma3,
     "clog2": linear_to_canonlog2,
     "redipp2odt": linear_to_red_ipp2_odt_approx,
 })
-# Usuńmy funkcje, które nie są krzywymi (jeśli jakieś się załapały)
+# Remove functions that are not curves (if any were included)
 CURVE_MAP = {k: v for k, v in CURVE_MAP.items() if callable(v)}
 
 
-# --- Trasy (Routes) ---
+# --- Routes ---
 @app.route('/')
 def index():
-    """Wyświetla główną stronę z formularzem."""
-    # Na razie zwraca prosty tekst, później będzie renderować szablon
-    # return "Witaj w Pixel Pasta LUT Analyzer!"
-    # Przekaż listę dostępnych krzywych do szablonu
+    """Displays the main page with the form."""
+    # For now returns a simple text, later will render a template
+    # return "Welcome to Pixel Pasta LUT Analyzer!"
+    # Pass the list of available curves to the template
     available_curves = sorted(CURVE_MAP.keys())
     return render_template('index.html', curves=available_curves)
 
 @app.route('/analyze', methods=['POST'])
 def analyze_lut_route():
-    """Obsługuje przesyłanie pliku LUT i uruchamia analizę."""
+    """Handles LUT file upload and initiates the analysis."""
     if 'lut_file' not in request.files:
-        flash('Nie znaleziono części pliku w zapytaniu.', 'error')
+        flash('No file part found in the request.', 'error')
         return redirect(request.url)
     file = request.files['lut_file']
     if file.filename == '':
-        flash('Nie wybrano pliku.', 'error')
-        return redirect(url_for('index')) # Wróć do strony głównej
+        flash('No file selected.', 'error')
+        return redirect(url_for('index')) # Return to the main page
 
-    curve_name = request.form.get('curve_select', 'slog3') # Pobierz wybraną krzywą
+    curve_name = request.form.get('curve_select', 'slog3') # Get the selected curve
 
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         upload_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         try:
             file.save(upload_path)
-            flash(f'Plik {filename} został pomyślnie przesłany.', 'success')
+            flash(f'File {filename} was successfully uploaded.', 'success')
 
-            # --- Uruchomienie Analizy ---
+            # --- Running Analysis ---
             report_basename = os.path.splitext(filename)[0]
             report_pdf_path = os.path.join(app.config['REPORTS_FOLDER'], report_basename + ".pdf")
             report_png_path = os.path.join(app.config['REPORTS_FOLDER'], report_basename + ".png")
 
-            print(f"Rozpoczynanie analizy dla: {upload_path}, krzywa: {curve_name}")
+            print(f"Starting analysis for: {upload_path}, curve: {curve_name}")
 
             lut_data = load_cube_file(upload_path)
             curve_func = CURVE_MAP.get(curve_name)
             if not curve_func:
-                 raise ValueError(f"Nieprawidłowa nazwa krzywej: {curve_name}")
+                 raise ValueError(f"Invalid curve name: {curve_name}")
 
             comparison_data = compare_lut_to_curve(lut_data, curve_func)
             plot_title = f"LUT '{lut_data.get('title', filename)}' vs {curve_name.upper()}"
             plot_lut_vs_curve(comparison_data, plot_title, report_png_path)
             generate_pdf_report(lut_data, report_png_path, report_pdf_path)
 
-            print(f"Analiza zakończona. Raporty w: {app.config['REPORTS_FOLDER']}")
-            flash('Analiza zakończona pomyślnie!', 'success')
+            print(f"Analysis completed. Reports in: {app.config['REPORTS_FOLDER']}")
+            flash('Analysis completed successfully!', 'success')
 
-            # Zapisz ścieżki do raportów w sesji, aby wyświetlić je na stronie wyników
+            # Save report paths in session to display them on the results page
             session['report_pdf'] = os.path.basename(report_pdf_path)
             session['report_png'] = os.path.basename(report_png_path)
             session['lut_title'] = lut_data.get('title', filename)
@@ -111,32 +111,32 @@ def analyze_lut_route():
             return redirect(url_for('show_results'))
 
         except (FileNotFoundError, ValueError, IOError) as e:
-            flash(f'Błąd podczas analizy pliku {filename}: {e}', 'error')
-            print(f"Błąd analizy: {e}\n{traceback.format_exc()}")
+            flash(f'Error analyzing file {filename}: {e}', 'error')
+            print(f"Analysis error: {e}\n{traceback.format_exc()}")
             return redirect(url_for('index'))
         except Exception as e:
-            flash(f'Wystąpił nieoczekiwany błąd: {e}', 'error')
-            print(f"Nieoczekiwany błąd: {e}\n{traceback.format_exc()}")
+            flash(f'An unexpected error occurred: {e}', 'error')
+            print(f"Unexpected error: {e}\n{traceback.format_exc()}")
             return redirect(url_for('index'))
         finally:
-            # Opcjonalnie: usuń przesłany plik po analizie
+            # Optionally: delete the uploaded file after analysis
             # if os.path.exists(upload_path):
             #     os.remove(upload_path)
             pass
 
     else:
-        flash('Niedozwolony typ pliku. Akceptowane są tylko pliki .cube.', 'error')
+        flash('Invalid file type. Only .cube files are accepted.', 'error')
         return redirect(url_for('index'))
 
 @app.route('/results')
 def show_results():
-    """Wyświetla stronę z wynikami analizy."""
+    """Displays the analysis results page."""
     pdf_file = session.get('report_pdf')
     png_file = session.get('report_png')
-    lut_title = session.get('lut_title', 'Analiza LUT')
+    lut_title = session.get('lut_title', 'LUT Analysis')
 
     if not pdf_file or not png_file:
-        flash('Brak wyników analizy do wyświetlenia.', 'warning')
+        flash('No analysis results to display.', 'warning')
         return redirect(url_for('index'))
 
     return render_template('results.html',
@@ -146,17 +146,17 @@ def show_results():
 
 @app.route('/reports/<filename>')
 def serve_report(filename):
-    """Serwuje wygenerowane pliki raportów (PDF, PNG)."""
-    safe_filename = secure_filename(filename) # Dodatkowe zabezpieczenie
+    """Serves generated report files (PDF, PNG)."""
+    safe_filename = secure_filename(filename) # Additional security
     try:
         return send_from_directory(app.config['REPORTS_FOLDER'], safe_filename)
     except FileNotFoundError:
-        flash(f'Nie znaleziono pliku raportu: {safe_filename}', 'error')
+        flash(f'Report file not found: {safe_filename}', 'error')
         return redirect(url_for('index'))
 
 
-# --- Uruchomienie Aplikacji ---
+# --- Application Launch ---
 if __name__ == '__main__':
-    # Uruchomienie w trybie debugowania dla łatwiejszego rozwoju
-    # W środowisku produkcyjnym użyj serwera WSGI jak gunicorn lub waitress
+    # Run in debug mode for easier development
+    # In production environment, use a WSGI server like gunicorn or waitress
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
