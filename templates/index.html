@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Prześlij LUT - Pixel Pasta{% endblock %}
+{% block title %}Upload LUT - LUTcompareTool{% endblock %}
 
 {% block content %}
-    <h2>Analizator LUT</h2>
-    <p>Witaj w narzędziu Pixel Pasta do analizy plików LUT w formacie .cube.</p>
-    <p>Prześlij swój plik LUT i wybierz krzywą referencyjną, aby wygenerować raport porównawczy.</p>
+    <h2>LUT Analyzer</h2>
+    <p>Welcome to LUTcompareTool for analyzing .cube LUT files.</p>
+    <p>Upload your LUT file and select a reference curve to generate a comparison report.</p>
 
     <form method="post" action="{{ url_for('analyze_lut_route') }}" enctype="multipart/form-data" class="upload-form">
         <div class="form-group">
-            <label for="lut_file">Wybierz plik .cube:</label>
+            <label for="lut_file">Select a .cube file:</label>
             <input type="file" id="lut_file" name="lut_file" accept=".cube" required>
         </div>
 
         <div class="form-group">
-            <label for="curve_select">Wybierz krzywą referencyjną:</label>
+            <label for="curve_select">Select a reference curve:</label>
             <select name="curve_select" id="curve_select">
                 {% for curve in curves %}
                     <option value="{{ curve }}" {% if curve == 'slog3' %}selected{% endif %}>{{ curve.upper() }}</option>
@@ -22,6 +22,6 @@
             </select>
         </div>
 
-        <button type="submit" class="btn btn-primary">Analizuj</button>
+        <button type="submit" class="btn btn-primary">Analyze</button>
     </form>
 {% endblock %}

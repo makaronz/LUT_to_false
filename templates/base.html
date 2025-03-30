@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>{% block title %}Pixel Pasta LUT Analyzer{% endblock %}</title>
+    <title>{% block title %}LUTcompareTool{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <!-- Można dodać linki do frameworków CSS jak Bootstrap czy Tailwind, jeśli potrzebne -->
     <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon"> <!-- Placeholder for favicon -->
@@ -12,8 +12,8 @@
     <header>
         <div class="container">
             <!-- Zakładam, że logo jest w static/images/pixel_pasta_logo.png -->
-            <img src="{{ url_for('static', filename='images/pixel_pasta_logo.png') }}" alt="Pixel Pasta Logo" class="logo">
-            <h1>Pixel Pasta LUT Analyzer</h1>
+            <img src="{{ url_for('static', filename='images/pixel_pasta_logo.png') }}" alt="LUTcompareTool Logo" class="logo">
+            <h1>LUTcompareTool</h1>
         </div>
     </header>
 
@@ -35,7 +35,7 @@
 
     <footer>
         <div class="container">
-            <p>&copy; Pixel Pasta Industries. Wszelkie prawa zastrzeżone (albo i nie!).</p> <!-- Upewniono się, że tag {% now 'Y' %} jest usunięty -->
+            <p>&copy; LUTcompareTool. All rights reserved.</p> <!-- Upewniono się, że tag {% now 'Y' %} jest usunięty -->
         </div>
     </footer>
 

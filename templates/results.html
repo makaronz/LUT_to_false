@@ -1,30 +1,30 @@
 {% extends "base.html" %}
 
-{% block title %}Wyniki Analizy - {{ lut_title }}{% endblock %}
+{% block title %}Analysis Results - {{ lut_title }}{% endblock %}
 
 {% block content %}
-    <h2>Wyniki Analizy dla: {{ lut_title }}</h2>
+    <h2>Analysis Results for: {{ lut_title }}</h2>
 
     {% if png_file %}
         <div class="result-section">
-            <h3>Wykres Porównawczy</h3>
-            <img src="{{ url_for('serve_report', filename=png_file) }}" alt="Wykres porównawczy LUT vs Krzywa Referencyjna" class="result-plot">
-            <p><a href="{{ url_for('serve_report', filename=png_file) }}" target="_blank">Otwórz wykres w nowej karcie</a></p>
+            <h3>Comparison Chart</h3>
+            <img src="{{ url_for('serve_report', filename=png_file) }}" alt="LUT vs Reference Curve Comparison Chart" class="result-plot">
+            <p><a href="{{ url_for('serve_report', filename=png_file) }}" target="_blank">Open chart in new tab</a></p>
         </div>
     {% else %}
-        <p class="text-warning">Nie udało się wygenerować wykresu.</p>
+        <p class="text-warning">Failed to generate chart.</p>
     {% endif %}
 
     {% if pdf_file %}
         <div class="result-section">
-            <h3>Raport PDF</h3>
-            <p>Pobierz szczegółowy raport w formacie PDF:</p>
-            <a href="{{ url_for('serve_report', filename=pdf_file) }}" download="{{ pdf_file }}" class="btn btn-secondary">Pobierz Raport PDF</a>
+            <h3>PDF Report</h3>
+            <p>Download detailed report in PDF format:</p>
+            <a href="{{ url_for('serve_report', filename=pdf_file) }}" download="{{ pdf_file }}" class="btn btn-secondary">Download PDF Report</a>
         </div>
     {% else %}
-         <p class="text-warning">Nie udało się wygenerować raportu PDF.</p>
+         <p class="text-warning">Failed to generate PDF report.</p>
     {% endif %}
 
     <hr>
-    <a href="{{ url_for('index') }}" class="btn btn-link">Analizuj kolejny plik</a>
+    <a href="{{ url_for('index') }}" class="btn btn-link">Analyze another file</a>
 {% endblock %}
