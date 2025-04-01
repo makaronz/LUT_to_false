@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Error - LUTcompareTool{% endblock %}
+
+{% block content %}
+    <div class="error-container">
+        <h2>Error {{ error_code }}</h2>
+        <div class="error-icon">⚠️</div>
+        <p class="error-message">{{ error_message }}</p>
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}" class="btn btn-primary">Return to Homepage</a>
+        </div>
+    </div>
+{% endblock %} 

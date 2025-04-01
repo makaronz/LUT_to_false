@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Compare LUTs - LUTcompareTool{% endblock %}
+
+{% block content %}
+    <h2>LUT Comparison</h2>
+    <p>Compare two different .cube LUT files to see their differences.</p>
+
+    <form method="post" action="{{ url_for('compare_luts_route') }}" enctype="multipart/form-data" class="upload-form">
+        <div class="form-group">
+            <label for="lut_file1">First LUT file:</label>
+            <input type="file" id="lut_file1" name="lut_file1" accept=".cube" required>
+        </div>
+
+        <div class="form-group">
+            <label for="lut_file2">Second LUT file:</label>
+            <input type="file" id="lut_file2" name="lut_file2" accept=".cube" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Compare LUTs</button>
+    </form>
+    
+    <div class="nav-links">
+        <a href="{{ url_for('index') }}" class="btn btn-link">Back to Single Analysis</a>
+        <a href="{{ url_for('batch_page') }}" class="btn btn-link">Batch Analysis</a>
+    </div>
+{% endblock %} 

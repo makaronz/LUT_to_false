@@ -5,7 +5,7 @@ Moduł odpowiedzialny za generowanie raportów, wykresów i analiz porównawczyc
 
 import numpy as np
 import matplotlib.pyplot as plt
-from fpdf import FPDF
+from fpdf2 import FPDF
 import os
 from typing import Callable, Dict, Optional
 

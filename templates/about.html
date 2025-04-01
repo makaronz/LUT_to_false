@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}About LUTcompareTool{% endblock %}
+
+{% block content %}
+    <h2>About LUTcompareTool</h2>
+    
+    <div class="about-section">
+        <h3>What is LUTcompareTool?</h3>
+        <p>LUTcompareTool is a comprehensive toolkit for filmmakers, colorists, and developers working with Look-Up Tables (LUTs). This application allows you to analyze .cube LUT files, compare them against various color spaces (like S-Log3, LogC, RED Log), and visualize the results through detailed reports.</p>
+    </div>
+    
+    <div class="about-section">
+        <h3>Features</h3>
+        <ul>
+            <li><strong>LUT File Analysis</strong>: Upload and analyze .cube LUT files</li>
+            <li><strong>Multiple Curve Comparison</strong>: Compare LUTs against various transfer functions (S-Log3, LogC, RED Log, etc.)</li>
+            <li><strong>Visual Reports</strong>: Generate detailed PNG graphs showing the comparison between your LUT and selected curve</li>
+            <li><strong>PDF Reports</strong>: Create comprehensive PDF reports with LUT metadata and analysis results</li>
+            <li><strong>Batch Processing</strong>: Analyze multiple LUT files at once</li>
+            <li><strong>LUT-to-LUT Comparison</strong>: Compare two LUT files against each other</li>
+        </ul>
+    </div>
+    
+    <div class="about-section">
+        <h3>Supported Transfer Functions</h3>
+        <p>LUTcompareTool supports a wide range of camera log curves and transfer functions, including:</p>
+        <ul>
+            <li>Sony S-Log3</li>
+            <li>ARRI LogC3 and LogC4</li>
+            <li>RED Log3G10</li>
+            <li>Canon Log 2</li>
+            <li>Rec.709 Gamma</li>
+            <li>And many more...</li>
+        </ul>
+    </div>
+    
+    <div class="about-section">
+        <h3>How to Use</h3>
+        <ol>
+            <li>Select a function: single analysis, batch processing, or LUT comparison</li>
+            <li>Upload your .cube LUT file(s)</li>
+            <li>For single analysis and batch processing, select a reference curve</li>
+            <li>View the results and download reports as needed</li>
+        </ol>
+    </div>
+    
+    <div class="about-section">
+        <h3>Contact & Support</h3>
+        <p>For questions, feature requests, or bug reports, please contact us at support@lutcomparetool.com or visit our GitHub repository.</p>
+    </div>
+    
+    <div class="about-section">
+        <h3>Version</h3>
+        <p>LUTcompareTool v1.0.0</p>
+    </div>
+    
+    <div class="nav-links">
+        <a href="{{ url_for('index') }}" class="btn btn-link">Back to Application</a>
+    </div>
+{% endblock %} 

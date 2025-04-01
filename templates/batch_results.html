@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Batch Analysis Results - LUTcompareTool{% endblock %}
+
+{% block content %}
+    <h2>Batch Analysis Results</h2>
+    <p>Reference curve: <strong>{{ curve_name.upper() }}</strong></p>
+    
+    <div class="batch-summary">
+        <p>Successfully processed: <strong>{{ successful_files|length }}</strong> files</p>
+        <p>Failed: <strong>{{ failed_files|length }}</strong> files</p>
+        
+        {% if successful_files %}
+            <div class="download-all">
+                <a href="{{ url_for('download_batch_zip', batch_id=batch_id, zip_filename=zip_filename) }}" class="btn btn-primary">
+                    Download All Reports (ZIP)
+                </a>
+            </div>
+        {% endif %}
+    </div>
+    
+    {% if successful_files %}
+        <h3>Successful Results</h3>
+        <div class="batch-results">
+            {% for file in successful_files %}
+                <div class="result-card">
+                    <h4>{{ file.title }}</h4>
+                    <div class="thumbnail">
+                        <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.png) }}" target="_blank">
+                            <img src="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.png) }}" 
+                                 alt="Analysis of {{ file.filename }}" 
+                                 class="result-thumbnail">
+                        </a>
+                    </div>
+                    <div class="result-links">
+                        <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.pdf) }}" 
+                           download class="btn btn-link">Download PDF</a>
+                        <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.png) }}" 
+                           download class="btn btn-link">Download PNG</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    {% if failed_files %}
+        <h3>Failed Files</h3>
+        <table class="failed-files">
+            <thead>
+                <tr>
+                    <th>Filename</th>
+                    <th>Error</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for file in failed_files %}
+                    <tr>
+                        <td>{{ file.filename }}</td>
+                        <td>{{ file.error }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    
+    <div class="nav-links">
+        <a href="{{ url_for('batch_page') }}" class="btn btn-link">Process Another Batch</a>
+        <a href="{{ url_for('index') }}" class="btn btn-link">Back to Single Analysis</a>
+    </div>
+{% endblock %} 

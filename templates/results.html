@@ -3,13 +3,21 @@
 {% block title %}Analysis Results - {{ lut_title }}{% endblock %}
 
 {% block content %}
-    <h2>Analysis Results for: {{ lut_title }}</h2>
+    <h2>Analysis Results: {{ lut_title }}</h2>
+    
+    {% if is_comparison %}
+        <p>Comparison between <strong>{{ lut1_name }}</strong> and <strong>{{ lut2_name }}</strong></p>
+    {% else %}
+        <p>Reference curve: <strong>{{ curve_name.upper() }}</strong></p>
+    {% endif %}
 
     {% if png_file %}
         <div class="result-section">
             <h3>Comparison Chart</h3>
-            <img src="{{ url_for('serve_report', filename=png_file) }}" alt="LUT vs Reference Curve Comparison Chart" class="result-plot">
-            <p><a href="{{ url_for('serve_report', filename=png_file) }}" target="_blank">Open chart in new tab</a></p>
+            <div class="result-image">
+                <img src="{{ url_for('serve_report', filename=png_file) }}" alt="LUT Comparison Chart" class="result-plot">
+            </div>
+            <p><a href="{{ url_for('serve_report', filename=png_file) }}" download class="btn btn-secondary">Download Chart</a></p>
         </div>
     {% else %}
         <p class="text-warning">Failed to generate chart.</p>
@@ -18,13 +26,19 @@
     {% if pdf_file %}
         <div class="result-section">
             <h3>PDF Report</h3>
-            <p>Download detailed report in PDF format:</p>
-            <a href="{{ url_for('serve_report', filename=pdf_file) }}" download="{{ pdf_file }}" class="btn btn-secondary">Download PDF Report</a>
+            <p>Download detailed report with analysis data in PDF format:</p>
+            <a href="{{ url_for('serve_report', filename=pdf_file) }}" download class="btn btn-primary">Download PDF Report</a>
         </div>
     {% else %}
          <p class="text-warning">Failed to generate PDF report.</p>
     {% endif %}
 
-    <hr>
-    <a href="{{ url_for('index') }}" class="btn btn-link">Analyze another file</a>
+    <div class="nav-links">
+        {% if is_comparison %}
+            <a href="{{ url_for('compare_page') }}" class="btn btn-link">Compare More LUTs</a>
+        {% else %}
+            <a href="{{ url_for('index') }}" class="btn btn-link">Analyze Another File</a>
+        {% endif %}
+        <a href="{{ url_for('batch_page') }}" class="btn btn-link">Try Batch Analysis</a>
+    </div>
 {% endblock %}
