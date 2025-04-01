@@ -52,7 +52,28 @@ def allowed_file(filename):
 
 # Mapping curve names (as in merged_lut_analyzer.py)
 # Make sure all functions are imported from transfer_functions
-CURVE_MAP = {name: func for name, func in locals().items() if name.startswith('linear_to_')}
+CURVE_MAP = {
+    # Sony Curves
+    "slog3": linear_to_slog3,
+    "slog3_cine": linear_to_slog3_cine,
+    "slog2": linear_to_slog2,
+    
+    # ARRI Curves
+    "logc4": linear_to_logc4,
+    "logc3": linear_to_logc3,
+    
+    # RED Curves
+    "log3g10": linear_to_log3g10,
+    "redgamma3": linear_to_redgamma3,
+    "redgamma4": linear_to_redgamma4,
+    "redlogfilm": linear_to_redlogfilm,
+    
+    # Other Curves
+    "vlog": linear_to_vlog,
+    "canonlog2": linear_to_canonlog2,
+    "rec709": linear_to_rec709,
+}
+
 # Add aliases if needed
 CURVE_MAP.update({
     "gamma22": linear_to_redgamma4,
@@ -60,9 +81,9 @@ CURVE_MAP.update({
     "clog2": linear_to_canonlog2,
     "redipp2odt": linear_to_red_ipp2_odt_approx,
 })
+
 # Remove functions that are not curves (if any were included)
 CURVE_MAP = {k: v for k, v in CURVE_MAP.items() if callable(v)}
-
 
 # --- Routes ---
 @app.route('/')

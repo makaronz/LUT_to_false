@@ -26,11 +26,32 @@
 
         <div class="form-group">
             <label for="curve_select">Select a reference curve:</label>
-            <select name="curve_select" id="curve_select">
-                {% for curve in curves %}
-                    <option value="{{ curve }}" {% if curve == 'slog3' %}selected{% endif %}>{{ curve.upper() }}</option>
-                {% endfor %}
+            <select name="curve_select" id="curve_select" class="form-control">
+                <optgroup label="Sony Curves">
+                    <option value="slog3">S-Log3 (S-Gamut3)</option>
+                    <option value="slog3_cine">S-Log3 (S-Gamut3.cine)</option>
+                    <option value="slog2">S-Log2</option>
+                </optgroup>
+                <optgroup label="ARRI Curves">
+                    <option value="logc4">LogC4 (Newer ARRI Standard)</option>
+                    <option value="logc3">LogC3 (Legacy ARRI Standard)</option>
+                </optgroup>
+                <optgroup label="RED Curves">
+                    <option value="log3g10">RED Log3G10</option>
+                    <option value="redgamma3">REDgamma3</option>
+                    <option value="redgamma4">REDgamma4</option>
+                    <option value="redlogfilm">REDlogFilm (Legacy)</option>
+                </optgroup>
+                <optgroup label="Other Curves">
+                    <option value="vlog">V-Log</option>
+                    <option value="canonlog2">Canon Log2</option>
+                    <option value="rec709">Rec.709</option>
+                </optgroup>
             </select>
+            <small class="form-text text-muted">
+                Note: S-Log3 has different implementations for S-Gamut3 and S-Gamut3.cine color spaces.
+                LogC3 and LogC4 are different standards with different mathematical values.
+            </small>
         </div>
 
         <button type="submit" class="btn btn-primary">Analyze</button>
