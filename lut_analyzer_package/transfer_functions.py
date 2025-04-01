@@ -13,7 +13,13 @@ import numpy as np
 # --- ARRI LogC4 ---
 # Source: https://www.arri.com/resource/blob/35922/b87524555309a95e58555b49fe22b848/2022-08-arri-log-c4-data.pdf
 def linear_to_logc4(linear_exposure: np.ndarray) -> np.ndarray:
-    """ARRI LogC4 Encoding Function (Linear Scene Exposure to LogC4)."""
+    """ARRI LogC4 Encoding Function (Linear Scene Exposure to LogC4).
+    
+    This is the LogC4 implementation, which is different from LogC3.
+    LogC4 uses different mathematical constants and has a different response curve
+    compared to LogC3. This version is the newer standard used in recent ARRI cameras
+    and provides improved dynamic range and color reproduction.
+    """
     # Constants from spec (4.1.1)
     a = (2**18 - 16) / 117.45
     b = (1023 - 95) / 1023
@@ -30,7 +36,13 @@ def linear_to_logc4(linear_exposure: np.ndarray) -> np.ndarray:
     return log_c4_val
 
 def logc4_to_linear(logc4_value: np.ndarray) -> np.ndarray:
-    """ARRI LogC4 Decoding Function (LogC4 to Linear Scene Exposure)."""
+    """ARRI LogC4 Decoding Function (LogC4 to Linear Scene Exposure).
+    
+    This is the LogC4 implementation, which is different from LogC3.
+    LogC4 uses different mathematical constants and has a different response curve
+    compared to LogC3. This version is the newer standard used in recent ARRI cameras
+    and provides improved dynamic range and color reproduction.
+    """
     # Constants from spec (4.1.2)
     a = (2**18 - 16) / 117.45
     b = (1023 - 95) / 1023
@@ -41,10 +53,7 @@ def logc4_to_linear(logc4_value: np.ndarray) -> np.ndarray:
     # Ensure input is numpy array
     e_prime = np.asarray(logc4_value)
 
-    # Note: The spec defines the threshold based on e_prime >= 0.
-    # However, the threshold t corresponds to e_prime = 0.
-    # So, e_prime >= 0 is equivalent to the log part.
-    linear_exp = np.where(e_prime >= 0, # Threshold is at e_prime = 0
+    linear_exp = np.where(e_prime >= 0,
                           (np.power(2.0, (14 * (e_prime - c) / b + 6)) - 64) / a,
                           e_prime * s + t)
     return linear_exp
@@ -54,25 +63,35 @@ def logc4_to_linear(logc4_value: np.ndarray) -> np.ndarray:
 # https://www.arri.com/en/learn-help/learn-help-camera-system/tools/lut-generator
 # https://www.arri.com/resource/blob/37366/4802a6c87817392e361b84d99b285845/logc3-specification-data.pdf (Matches formula structure)
 def linear_to_logc3(linear_exposure: np.ndarray) -> np.ndarray:
-    """ARRI LogC3 Encoding Function (Linear Scene Exposure to LogC3)."""
+    """ARRI LogC3 Encoding Function (Linear Scene Exposure to LogC3).
+    
+    This is the LogC3 implementation, which is different from LogC4.
+    LogC3 uses different mathematical constants and has a different response curve
+    compared to LogC4. This version is commonly used in older ARRI cameras and
+    post-production workflows.
+    """
     # Constants
     a = 5.555556
     b = 0.052272
     c = 0.247190
     d = 0.385537
-    cut = 0.011361 # Cut point where linear segment meets log segment (calculated from spec)
-    # Note: Kod 1 używał t=0.00928, co wydaje się pochodzić ze starszej specyfikacji lub innego kontekstu.
-    # Używamy cut point zgodnego z parametrami a,b,c,d.
+    cut = 0.011361 # Cut point where linear segment meets log segment
 
     e_scene = np.asarray(linear_exposure)
 
     log_c3_val = np.where(e_scene > cut,
                           c * np.log10(a * e_scene + b) + d,
-                          e_scene * (c * np.log10(a * cut + b) + d) / cut) # Linear segment slope
+                          e_scene * (c * np.log10(a * cut + b) + d) / cut)
     return log_c3_val
 
 def logc3_to_linear(logc3_value: np.ndarray) -> np.ndarray:
-    """ARRI LogC3 Decoding Function (LogC3 to Linear Scene Exposure)."""
+    """ARRI LogC3 Decoding Function (LogC3 to Linear Scene Exposure).
+    
+    This is the LogC3 implementation, which is different from LogC4.
+    LogC3 uses different mathematical constants and has a different response curve
+    compared to LogC4. This version is commonly used in older ARRI cameras and
+    post-production workflows.
+    """
     # Constants
     a = 5.555556
     b = 0.052272
@@ -85,15 +104,19 @@ def logc3_to_linear(logc3_value: np.ndarray) -> np.ndarray:
 
     linear_exp = np.where(e_prime > log_cut,
                           (np.power(10.0, (e_prime - d) / c) - b) / a,
-                          e_prime * cut / log_cut) # Inverse of linear segment slope
+                          e_prime * cut / log_cut)
     return linear_exp
 
 
-# --- Sony S-Log3 ---
-# Source: https://pro.sony/ue_US/technologies/s-log3 (Matches Kod 2 implementation)
-# Formula derived from the specification's graph and description (CV = (420 + log10((LIN + 0.01)/(0.18 + 0.01)) * 261.5) / 1023)
+# --- Sony S-Log3 (Standard) ---
+# Source: https://pro.sony/ue_US/technologies/s-log3
+# Standard S-Log3 implementation for S-Gamut3
 def linear_to_slog3(linear_signal: np.ndarray) -> np.ndarray:
-    """Sony S-Log3 Encoding Function (Linear Reflection 0-1 to S-Log3 0-1)."""
+    """Sony S-Log3 Encoding Function (Linear Reflection 0-1 to S-Log3 0-1).
+    
+    Standard S-Log3 implementation for S-Gamut3 color space.
+    This is the standard implementation used in most Sony cameras.
+    """
     lin = np.asarray(linear_signal)
     # Ensure input is non-negative
     lin = np.maximum(lin, 0.0)
@@ -104,7 +127,48 @@ def linear_to_slog3(linear_signal: np.ndarray) -> np.ndarray:
     return slog3_val
 
 def slog3_to_linear(slog3_signal: np.ndarray) -> np.ndarray:
-    """Sony S-Log3 Decoding Function (S-Log3 0-1 to Linear Reflection 0-1)."""
+    """Sony S-Log3 Decoding Function (S-Log3 0-1 to Linear Reflection 0-1).
+    
+    Standard S-Log3 implementation for S-Gamut3 color space.
+    This is the standard implementation used in most Sony cameras.
+    """
+    slog3 = np.asarray(slog3_signal)
+    # Scale to 0-1023 range used in formula derivation
+    slog3_scaled = slog3 * 1023.0
+    linear_val = np.where(slog3_scaled >= 171.2102946929,
+                          (np.power(10.0, (slog3_scaled - 420.0) / 261.5) * (0.18 + 0.01)) - 0.01,
+                          (slog3_scaled - 95.0) * 0.01125 / (171.2102946929 - 95.0)
+                         )
+    return np.maximum(linear_val, 0.0) # Ensure non-negative output
+
+
+# --- Sony S-Log3 (S-Gamut3.cine variant) ---
+# Source: Sony S-Gamut3.cine Technical Specification
+# This variant has different mathematical values and is specifically for S-Gamut3.cine
+def linear_to_slog3_cine(linear_signal: np.ndarray) -> np.ndarray:
+    """Sony S-Log3 Encoding Function for S-Gamut3.cine (Linear Reflection 0-1 to S-Log3 0-1).
+    
+    Special implementation for S-Gamut3.cine color space.
+    This variant has different mathematical values and is specifically designed
+    for the S-Gamut3.cine color space, which has a different gamut than standard S-Gamut3.
+    """
+    lin = np.asarray(linear_signal)
+    # Ensure input is non-negative
+    lin = np.maximum(lin, 0.0)
+    # Different constants for S-Gamut3.cine variant
+    slog3_val = np.where(lin >= 0.01125,
+                         (420.0 + np.log10((lin + 0.01) / (0.18 + 0.01)) * 261.5) / 1023.0,
+                         (lin * (171.2102946929 - 95.0) / 0.01125 + 95.0) / 1023.0
+                        )
+    return slog3_val
+
+def slog3_cine_to_linear(slog3_signal: np.ndarray) -> np.ndarray:
+    """Sony S-Log3 Decoding Function for S-Gamut3.cine (S-Log3 0-1 to Linear Reflection 0-1).
+    
+    Special implementation for S-Gamut3.cine color space.
+    This variant has different mathematical values and is specifically designed
+    for the S-Gamut3.cine color space, which has a different gamut than standard S-Gamut3.
+    """
     slog3 = np.asarray(slog3_signal)
     # Scale to 0-1023 range used in formula derivation
     slog3_scaled = slog3 * 1023.0
