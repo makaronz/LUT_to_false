@@ -5,7 +5,9 @@ Moduł odpowiedzialny za generowanie raportów, wykresów i analiz porównawczyc
 
 import numpy as np
 import matplotlib.pyplot as plt
-from fpdf2 import FPDF
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
 import os
 from typing import Callable, Dict, Optional
 
@@ -147,7 +149,7 @@ def plot_lut_vs_curve(comparison_data: Dict[str, np.ndarray], title: str, output
 
 def generate_pdf_report(lut_data: dict, plot_path: str, output_pdf_path: str):
     """
-    Generates a simple PDF report using FPDF.
+    Generates a simple PDF report using ReportLab.
 
     Args:
         lut_data (dict): Loaded LUT data.
@@ -156,64 +158,77 @@ def generate_pdf_report(lut_data: dict, plot_path: str, output_pdf_path: str):
     """
     print(f"Generating PDF report: {output_pdf_path}")
     try:
-        pdf = FPDF()
-        pdf.add_page()
-        # Use core fonts to avoid substitution warnings
-        pdf.set_font("Helvetica", size=12)
-
+        # Ensure directory exists
+        abs_path = os.path.abspath(output_pdf_path)
+        dir_name = os.path.dirname(abs_path)
+        if dir_name:  # Only create if path includes a directory
+            os.makedirs(dir_name, exist_ok=True)
+            
+        # Create the PDF with ReportLab
+        c = canvas.Canvas(abs_path, pagesize=A4)
+        width, height = A4  # A4 is defined as (595.27, 841.89) points
+        
         # Title
-        pdf.set_font("Helvetica", 'B', 16)
-        pdf.cell(0, 10, text="LUT Analysis Report", new_x="LMARGIN", new_y="NEXT", align="C") # Use text, new_x/y
-        pdf.ln(10)
-
+        c.setFont("Helvetica-Bold", 16)
+        c.drawCentredString(width/2, height - 30, "LUT Analysis Report")
+        
         # LUT Info
-        pdf.set_font("Helvetica", 'B', 12)
-        pdf.cell(0, 10, text="LUT Information", new_x="LMARGIN", new_y="NEXT")
-        pdf.set_font("Helvetica", size=10)
-        pdf.cell(0, 5, text=f"Title: {lut_data.get('title', 'N/A')}", new_x="LMARGIN", new_y="NEXT")
-        pdf.cell(0, 5, text=f"Type: {lut_data.get('lut_type', 'N/A')}", new_x="LMARGIN", new_y="NEXT")
+        c.setFont("Helvetica-Bold", 12)
+        c.drawString(30, height - 60, "LUT Information")
+        
+        c.setFont("Helvetica", 10)
+        y_position = height - 80
+        line_height = 15
+        
+        c.drawString(30, y_position, f"Title: {lut_data.get('title', 'N/A')}")
+        y_position -= line_height
+        
+        c.drawString(30, y_position, f"Type: {lut_data.get('lut_type', 'N/A')}")
+        y_position -= line_height
+        
         if lut_data.get('lut_1d_size'):
-            pdf.cell(0, 5, text=f"1D Size: {lut_data['lut_1d_size']}", new_x="LMARGIN", new_y="NEXT")
+            c.drawString(30, y_position, f"1D Size: {lut_data['lut_1d_size']}")
+            y_position -= line_height
+            
         if lut_data.get('lut_3d_size'):
-            pdf.cell(0, 5, text=f"3D Size: {lut_data['lut_3d_size']}", new_x="LMARGIN", new_y="NEXT")
-        pdf.cell(0, 5, text=f"Domain Min: {lut_data.get('domain_min', 'N/A')}", new_x="LMARGIN", new_y="NEXT")
-        pdf.cell(0, 5, text=f"Domain Max: {lut_data.get('domain_max', 'N/A')}", new_x="LMARGIN", new_y="NEXT")
-        pdf.ln(5)
-
+            c.drawString(30, y_position, f"3D Size: {lut_data['lut_3d_size']}")
+            y_position -= line_height
+            
+        c.drawString(30, y_position, f"Domain Min: {lut_data.get('domain_min', 'N/A')}")
+        y_position -= line_height
+        
+        c.drawString(30, y_position, f"Domain Max: {lut_data.get('domain_max', 'N/A')}")
+        y_position -= line_height * 2
+        
         # Plot
         if os.path.exists(plot_path):
-            pdf.set_font("Helvetica", 'B', 12)
-            pdf.cell(0, 10, text="LUT vs Reference Curve Plot", new_x="LMARGIN", new_y="NEXT")
+            c.setFont("Helvetica-Bold", 12)
+            c.drawString(30, y_position, "LUT vs Reference Curve Plot")
+            y_position -= line_height * 1.5
+            
             try:
-                # Add image, respecting page margins (A4 width approx 210mm, margins 10mm each side -> 190mm width)
-                pdf.image(plot_path, x=10, y=None, w=190)
-                pdf.ln(5) # Add some space after image
+                # Add image, respecting page margins
+                # ReportLab uses points (1/72 inch), so convert mm to points
+                image_width = 190 * mm
+                c.drawImage(plot_path, 30, y_position - 300, width=image_width, preserveAspectRatio=True)
+                y_position -= 320  # Adjust based on image height
             except Exception as e:
-                pdf.set_font("Helvetica", size=10)
-                pdf.set_text_color(255, 0, 0) # Red color for error
-                pdf.cell(0, 5, text=f"Error embedding plot: {e}", new_x="LMARGIN", new_y="NEXT")
-                pdf.set_text_color(0, 0, 0) # Reset color
+                c.setFillColorRGB(1, 0, 0)  # Red color for error
+                c.drawString(30, y_position, f"Error embedding plot: {e}")
+                c.setFillColorRGB(0, 0, 0)  # Reset color
+                y_position -= line_height
         else:
-            pdf.set_font("Helvetica", size=10)
-            pdf.cell(0, 5, text=f"Plot image not found at: {plot_path}", new_x="LMARGIN", new_y="NEXT")
-
+            c.drawString(30, y_position, f"Plot image not found at: {plot_path}")
+            y_position -= line_height
+        
         # TODO: Add False Color Table / Analysis here
-        pdf.ln(10)
-        pdf.set_font("Helvetica", 'I', 8)
-        pdf.cell(0, 5, text="(False Color analysis not yet implemented)", new_x="LMARGIN", new_y="NEXT")
-
-
+        y_position -= line_height
+        c.setFont("Helvetica-Oblique", 8)
+        c.drawString(30, y_position, "(False Color analysis not yet implemented)")
+        
         # Save PDF
-        try:
-            abs_path = os.path.abspath(output_pdf_path)
-            dir_name = os.path.dirname(abs_path)
-            # Ensure directory exists
-            if dir_name: # Only create if path includes a directory
-                os.makedirs(dir_name, exist_ok=True)
-            pdf.output(abs_path) # Use default 'F' mode by not specifying
-            print(f"PDF report saved to {abs_path}")
-        except Exception as e:
-            print(f"Error saving PDF report to {abs_path}: {e}")
-
+        c.save()
+        print(f"PDF report saved to {abs_path}")
+        
     except Exception as pdf_err:
         print(f"Error generating PDF report: {pdf_err}")
