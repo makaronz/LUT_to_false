@@ -19,21 +19,35 @@ def linear_to_logc4(linear_exposure: np.ndarray) -> np.ndarray:
     LogC4 uses different mathematical constants and has a different response curve
     compared to LogC3. This version is the newer standard used in recent ARRI cameras
     and provides improved dynamic range and color reproduction.
+    
+    Uses double precision internally for calculations to maximize accuracy.
+    
+    Args:
+        linear_exposure: Linear scene exposure values, typically in range [0, ∞)
+        
+    Returns:
+        LogC4 encoded values in range [0, 1]
     """
-    # Constants from spec (4.1.1)
-    a = (2**18 - 16) / 117.45
-    b = (1023 - 95) / 1023
-    c = 95 / 1023
-    s = (7 * np.log(2) * 2**(7 - 14 * c/b)) / (a * b)
-    t = (2**(14 * (-c/b) + 6) - 64) / a
-
-    # Ensure input is numpy array
-    e_scene = np.asarray(linear_exposure)
-
-    log_c4_val = np.where(e_scene >= t,
-                          (np.log2(a * e_scene + 64) - 6) / 14 * b + c,
-                          (e_scene - t) / s)
-    return log_c4_val
+    # Użycie float64 dla wszystkich obliczeń wewnętrznych
+    e_scene = np.asarray(linear_exposure, dtype=np.float64)
+    
+    # Constants from the official ARRI LogC4 Technical Paper (section 4.1.1)
+    # Precise values with full precision
+    a = (2.0**18 - 16.0) / 117.45
+    b = (1023.0 - 95.0) / 1023.0
+    c = 95.0 / 1023.0
+    s = (7.0 * np.log(2.0) * 2.0**(7.0 - 14.0 * c/b)) / (a * b)
+    t = (2.0**(14.0 * (-c/b) + 6.0) - 64.0) / a
+    
+    # Wysokoprecyzyjne obliczenia
+    log_segment = (np.log2(a * e_scene + 64.0) - 6.0) / 14.0 * b + c
+    lin_segment = (e_scene - t) / s
+    
+    # Zastosowanie wektoryzacji numpy dla lepszej wydajności
+    log_c4_val = np.where(e_scene >= t, log_segment, lin_segment)
+    
+    # Konwersja z powrotem do float32 po zakończeniu precyzyjnych obliczeń
+    return np.clip(log_c4_val, 0.0, 1.0).astype(np.float32)
 
 def logc4_to_linear(logc4_value: np.ndarray) -> np.ndarray:
     """ARRI LogC4 Decoding Function (LogC4 to Linear Scene Exposure).
@@ -42,26 +56,42 @@ def logc4_to_linear(logc4_value: np.ndarray) -> np.ndarray:
     LogC4 uses different mathematical constants and has a different response curve
     compared to LogC3. This version is the newer standard used in recent ARRI cameras
     and provides improved dynamic range and color reproduction.
+    
+    Uses double precision internally for calculations to maximize accuracy.
+    
+    Args:
+        logc4_value: LogC4 encoded values in range [0, 1]
+        
+    Returns:
+        Linear scene exposure values, typically in range [0, ∞)
     """
-    # Constants from spec (4.1.2)
-    a = (2**18 - 16) / 117.45
-    b = (1023 - 95) / 1023
-    c = 95 / 1023
-    s = (7 * np.log(2) * 2**(7 - 14 * c/b)) / (a * b)
-    t = (2**(14 * (-c/b) + 6) - 64) / a
-
-    # Ensure input is numpy array
-    e_prime = np.asarray(logc4_value)
-
-    linear_exp = np.where(e_prime >= 0,
-                          (np.power(2.0, (14 * (e_prime - c) / b + 6)) - 64) / a,
-                          e_prime * s + t)
-    return linear_exp
+    # Użycie float64 dla wszystkich obliczeń wewnętrznych
+    e_prime = np.asarray(logc4_value, dtype=np.float64)
+    
+    # Constants from the official ARRI LogC4 Technical Paper (section 4.1.2)
+    a = (2.0**18 - 16.0) / 117.45
+    b = (1023.0 - 95.0) / 1023.0
+    c = 95.0 / 1023.0
+    s = (7.0 * np.log(2.0) * 2.0**(7.0 - 14.0 * c/b)) / (a * b)
+    t = (2.0**(14.0 * (-c/b) + 6.0) - 64.0) / a
+    
+    # Threshold is at e_prime = 0 based on the specification
+    threshold = 0.0
+    
+    # Wysokoprecyzyjne obliczenia
+    log_segment = (np.power(2.0, (14.0 * (e_prime - c) / b + 6.0)) - 64.0) / a
+    lin_segment = e_prime * s + t
+    
+    # Zastosowanie wektoryzacji numpy dla lepszej wydajności
+    linear_exp = np.where(e_prime >= threshold, log_segment, lin_segment)
+    
+    # Konwersja z powrotem do float32 po zakończeniu precyzyjnych obliczeń
+    return np.maximum(linear_exp, 0.0).astype(np.float32)
 
 # --- ARRI LogC3 ---
-# Source: ARRI LUT Generator / Whitepapers (consistent across sources)
+# Source: ARRI LUT Generator / Whitepapers
 # https://www.arri.com/en/learn-help/learn-help-camera-system/tools/lut-generator
-# https://www.arri.com/resource/blob/37366/4802a6c87817392e361b84d99b285845/logc3-specification-data.pdf (Matches formula structure)
+# https://www.arri.com/resource/blob/37366/4802a6c87817392e361b84d99b285845/logc3-specification-data.pdf
 def linear_to_logc3(linear_exposure: np.ndarray) -> np.ndarray:
     """ARRI LogC3 Encoding Function (Linear Scene Exposure to LogC3).
     
@@ -69,20 +99,35 @@ def linear_to_logc3(linear_exposure: np.ndarray) -> np.ndarray:
     LogC3 uses different mathematical constants and has a different response curve
     compared to LogC4. This version is commonly used in older ARRI cameras and
     post-production workflows.
+    
+    Uses double precision internally for calculations to maximize accuracy.
+    
+    Args:
+        linear_exposure: Linear scene exposure values, typically in range [0, ∞)
+        
+    Returns:
+        LogC3 encoded values in range [0, 1]
     """
-    # Constants
-    a = 5.555556
-    b = 0.052272
-    c = 0.247190
-    d = 0.385537
-    cut = 0.011361 # Cut point where linear segment meets log segment
+    # Użycie float64 dla wszystkich obliczeń wewnętrznych
+    e_scene = np.asarray(linear_exposure, dtype=np.float64)
+    
+    # Dokładne wartości z oficjalnej specyfikacji ARRI dla LogC v3
+    # Wartości dla "EI800 (native)" z dokumentacji ARRI
+    a = 5.555556  # Dokładna wartość z dokumentacji
+    b = 0.052272  # Dokładna wartość z dokumentacji
+    c = 0.247190  # Dokładna wartość z dokumentacji
+    d = 0.385537  # Dokładna wartość z dokumentacji
+    cut = 0.011361  # Precyzyjny punkt odcięcia
 
-    e_scene = np.asarray(linear_exposure)
-
-    log_c3_val = np.where(e_scene > cut,
-                          c * np.log10(a * e_scene + b) + d,
-                          e_scene * (c * np.log10(a * cut + b) + d) / cut)
-    return log_c3_val
+    # Wysokoprecyzyjne obliczenia
+    log_segment = c * np.log10(a * e_scene + b) + d
+    lin_segment = e_scene * (c * np.log10(a * cut + b) + d) / cut
+    
+    # Zastosowanie wektoryzacji numpy dla lepszej wydajności
+    log_c3_val = np.where(e_scene > cut, log_segment, lin_segment)
+    
+    # Konwersja z powrotem do float32 po zakończeniu precyzyjnych obliczeń
+    return np.clip(log_c3_val, 0.0, 1.0).astype(np.float32)
 
 def logc3_to_linear(logc3_value: np.ndarray) -> np.ndarray:
     """ARRI LogC3 Decoding Function (LogC3 to Linear Scene Exposure).
@@ -91,21 +136,36 @@ def logc3_to_linear(logc3_value: np.ndarray) -> np.ndarray:
     LogC3 uses different mathematical constants and has a different response curve
     compared to LogC4. This version is commonly used in older ARRI cameras and
     post-production workflows.
+    
+    Uses double precision internally for calculations to maximize accuracy.
+    
+    Args:
+        logc3_value: LogC3 encoded values in range [0, 1]
+        
+    Returns:
+        Linear scene exposure values, typically in range [0, ∞)
     """
-    # Constants
+    # Użycie float64 dla wszystkich obliczeń wewnętrznych
+    e_prime = np.asarray(logc3_value, dtype=np.float64)
+    
+    # Dokładne wartości z oficjalnej specyfikacji ARRI dla LogC v3
+    # Wartości dla "EI800 (native)" z dokumentacji ARRI
     a = 5.555556
     b = 0.052272
     c = 0.247190
     d = 0.385537
-    cut = 0.011361 # Cut point
-    log_cut = c * np.log10(a * cut + b) + d # Value at cut point
+    cut = 0.011361
+    log_cut = c * np.log10(a * cut + b) + d  # Wartość LogC w punkcie odcięcia
 
-    e_prime = np.asarray(logc3_value)
-
-    linear_exp = np.where(e_prime > log_cut,
-                          (np.power(10.0, (e_prime - d) / c) - b) / a,
-                          e_prime * cut / log_cut)
-    return linear_exp
+    # Wysokoprecyzyjne obliczenia
+    log_segment = (np.power(10.0, (e_prime - d) / c) - b) / a
+    lin_segment = e_prime * cut / log_cut
+    
+    # Zastosowanie wektoryzacji numpy dla lepszej wydajności
+    linear_exp = np.where(e_prime > log_cut, log_segment, lin_segment)
+    
+    # Konwersja z powrotem do float32 po zakończeniu precyzyjnych obliczeń
+    return np.maximum(linear_exp, 0.0).astype(np.float32)
 
 
 # --- Sony S-Log3 (Standard) ---
@@ -116,67 +176,135 @@ def linear_to_slog3(linear_signal: np.ndarray) -> np.ndarray:
     
     Standard S-Log3 implementation for S-Gamut3 color space.
     This is the standard implementation used in most Sony cameras.
+    
+    Uses double precision internally for calculations to maximize accuracy.
     """
-    lin = np.asarray(linear_signal)
+    # Użycie float64 dla wszystkich obliczeń wewnętrznych
+    lin = np.asarray(linear_signal, dtype=np.float64)
     # Ensure input is non-negative
     lin = np.maximum(lin, 0.0)
-    slog3_val = np.where(lin >= 0.01125,
-                         (420.0 + np.log10((lin + 0.01) / (0.18 + 0.01)) * 261.5) / 1023.0,
-                         (lin * (171.2102946929 - 95.0) / 0.01125 + 95.0) / 1023.0
-                        )
-    return slog3_val
+    
+    # Oficjalne parametry Sony z dokumentacji technicznej
+    a = 0.01
+    b = 0.18
+    c = 261.5  # Dokładna wartość z Sony
+    d = 420.0  # Dokładna wartość z Sony
+    
+    # Progi odcięcia z oficjalnej dokumentacji
+    cut1 = 0.01125  # (7bit_equivalent) cutoff for linear segment
+    
+    # Obliczenia S-Log3 z maksymalną precyzją
+    log_segment = (d + np.log10((lin + a) / (b + a)) * c) / 1023.0
+    lin_segment = (lin * (171.2102946929 - 95.0) / cut1 + 95.0) / 1023.0
+    
+    # Zastosowanie wektoryzacji numpy dla lepszej wydajności
+    slog3_val = np.where(lin >= cut1, log_segment, lin_segment)
+    
+    # Konwersja z powrotem do float32 po zakończeniu precyzyjnych obliczeń
+    return np.clip(slog3_val, 0.0, 1.0).astype(np.float32)
 
 def slog3_to_linear(slog3_signal: np.ndarray) -> np.ndarray:
     """Sony S-Log3 Decoding Function (S-Log3 0-1 to Linear Reflection 0-1).
     
     Standard S-Log3 implementation for S-Gamut3 color space.
     This is the standard implementation used in most Sony cameras.
+    
+    Uses double precision internally for calculations to maximize accuracy.
     """
-    slog3 = np.asarray(slog3_signal)
+    # Użycie float64 dla wszystkich obliczeń wewnętrznych
+    slog3 = np.asarray(slog3_signal, dtype=np.float64)
+    
+    # Oficjalne parametry Sony
+    a = 0.01
+    b = 0.18
+    c = 261.5
+    d = 420.0
+    
+    # Progi odcięcia
+    cut2 = 171.2102946929 / 1023.0  # Wartość w zakresie 0-1
+    
     # Scale to 0-1023 range used in formula derivation
     slog3_scaled = slog3 * 1023.0
-    linear_val = np.where(slog3_scaled >= 171.2102946929,
-                          (np.power(10.0, (slog3_scaled - 420.0) / 261.5) * (0.18 + 0.01)) - 0.01,
-                          (slog3_scaled - 95.0) * 0.01125 / (171.2102946929 - 95.0)
-                         )
-    return np.maximum(linear_val, 0.0) # Ensure non-negative output
+    
+    # Wysokoprecyzyjne obliczenia
+    log_segment = (np.power(10.0, (slog3_scaled - d) / c) * (b + a)) - a
+    lin_segment = (slog3_scaled - 95.0) * 0.01125 / (171.2102946929 - 95.0)
+    
+    linear_val = np.where(slog3_scaled >= cut2, log_segment, lin_segment)
+    
+    # Ensure non-negative output i konwersja do float32
+    return np.maximum(linear_val, 0.0).astype(np.float32)
 
 
 # --- Sony S-Log3 (S-Gamut3.cine variant) ---
 # Source: Sony S-Gamut3.cine Technical Specification
-# This variant has different mathematical values and is specifically for S-Gamut3.cine
 def linear_to_slog3_cine(linear_signal: np.ndarray) -> np.ndarray:
     """Sony S-Log3 Encoding Function for S-Gamut3.cine (Linear Reflection 0-1 to S-Log3 0-1).
     
     Special implementation for S-Gamut3.cine color space.
-    This variant has different mathematical values and is specifically designed
-    for the S-Gamut3.cine color space, which has a different gamut than standard S-Gamut3.
+    This variant uses the same S-Log3 curve but is associated with S-Gamut3.cine color space,
+    which has a different gamut than standard S-Gamut3. This distinction is critical for
+    correct color reproduction.
+    
+    Uses double precision internally for calculations to maximize accuracy.
     """
-    lin = np.asarray(linear_signal)
-    # Ensure input is non-negative
+    # Użycie float64 dla wszystkich obliczeń wewnętrznych - krzywa jest ta sama co dla S-Gamut3
+    # Różnice dotyczą głównie przestrzeni kolorów, nie krzywej transferu
+    lin = np.asarray(linear_signal, dtype=np.float64)
     lin = np.maximum(lin, 0.0)
-    # Different constants for S-Gamut3.cine variant
-    slog3_val = np.where(lin >= 0.01125,
-                         (420.0 + np.log10((lin + 0.01) / (0.18 + 0.01)) * 261.5) / 1023.0,
-                         (lin * (171.2102946929 - 95.0) / 0.01125 + 95.0) / 1023.0
-                        )
-    return slog3_val
+    
+    # Oficjalne parametry Sony z dokumentacji technicznej
+    a = 0.01
+    b = 0.18
+    c = 261.5
+    d = 420.0
+    
+    # Progi odcięcia z oficjalnej dokumentacji
+    cut1 = 0.01125
+    
+    # Obliczenia S-Log3 z maksymalną precyzją
+    log_segment = (d + np.log10((lin + a) / (b + a)) * c) / 1023.0
+    lin_segment = (lin * (171.2102946929 - 95.0) / cut1 + 95.0) / 1023.0
+    
+    # Zastosowanie wektoryzacji numpy dla lepszej wydajności
+    slog3_val = np.where(lin >= cut1, log_segment, lin_segment)
+    
+    # Konwersja z powrotem do float32 po zakończeniu precyzyjnych obliczeń
+    return np.clip(slog3_val, 0.0, 1.0).astype(np.float32)
 
 def slog3_cine_to_linear(slog3_signal: np.ndarray) -> np.ndarray:
     """Sony S-Log3 Decoding Function for S-Gamut3.cine (S-Log3 0-1 to Linear Reflection 0-1).
     
     Special implementation for S-Gamut3.cine color space.
-    This variant has different mathematical values and is specifically designed
-    for the S-Gamut3.cine color space, which has a different gamut than standard S-Gamut3.
+    This variant uses the same S-Log3 curve but is associated with S-Gamut3.cine color space,
+    which has a different gamut than standard S-Gamut3. This distinction is critical for
+    correct color reproduction.
+    
+    Uses double precision internally for calculations to maximize accuracy.
     """
-    slog3 = np.asarray(slog3_signal)
+    # Użycie float64 dla wszystkich obliczeń wewnętrznych
+    slog3 = np.asarray(slog3_signal, dtype=np.float64)
+    
+    # Oficjalne parametry Sony
+    a = 0.01
+    b = 0.18
+    c = 261.5
+    d = 420.0
+    
+    # Progi odcięcia
+    cut2 = 171.2102946929 / 1023.0
+    
     # Scale to 0-1023 range used in formula derivation
     slog3_scaled = slog3 * 1023.0
-    linear_val = np.where(slog3_scaled >= 171.2102946929,
-                          (np.power(10.0, (slog3_scaled - 420.0) / 261.5) * (0.18 + 0.01)) - 0.01,
-                          (slog3_scaled - 95.0) * 0.01125 / (171.2102946929 - 95.0)
-                         )
-    return np.maximum(linear_val, 0.0) # Ensure non-negative output
+    
+    # Wysokoprecyzyjne obliczenia
+    log_segment = (np.power(10.0, (slog3_scaled - d) / c) * (b + a)) - a
+    lin_segment = (slog3_scaled - 95.0) * 0.01125 / (171.2102946929 - 95.0)
+    
+    linear_val = np.where(slog3_scaled >= cut2, log_segment, lin_segment)
+    
+    # Ensure non-negative output i konwersja do float32
+    return np.maximum(linear_val, 0.0).astype(np.float32)
 
 
 # --- Rec.709 OETF/EOTF (Gamma ~2.4) ---

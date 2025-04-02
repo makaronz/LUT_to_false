@@ -10,6 +10,7 @@ from flask import (Flask, request, render_template, redirect, url_for,  # type: 
                    send_from_directory, flash, session, send_file)
 from werkzeug.utils import secure_filename  # type: ignore
 import traceback # For detailed error logging
+import numpy as np
 
 # Import functions from our package
 try:
@@ -18,8 +19,14 @@ try:
                                                 plot_lut_vs_curve,
                                                 generate_pdf_report,
                                                 compare_two_luts,
-                                                plot_lut_vs_lut)
+                                                plot_lut_vs_lut,
+                                                generate_comparison_report)
     from lut_analyzer_package.transfer_functions import * # Import all transfer functions
+    from lut_analyzer_package.color_space import (s_gamut3_to_rec709,
+                                                 s_gamut3_cine_to_rec709,
+                                                 arri_wide_gamut4_to_rec709,
+                                                 arri_wide_gamut3_to_rec709,
+                                                 red_wide_gamut_rgb_to_rec709)
 except ImportError as e:
     print(f"Error importing lut_analyzer_package: {e}", file=sys.stderr)
     print("Ensure the package is in the Python path or installed.", file=sys.stderr)
@@ -40,6 +47,9 @@ app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max upload size
 # Required for flash messages (user notifications)
 app.config['SECRET_KEY'] = os.urandom(24)
 
+# Ustawienie wysokiej precyzji dla obliczeń numerycznych
+np.set_printoptions(precision=15)
+
 # Create folders if they don't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(REPORTS_FOLDER, exist_ok=True)
@@ -50,53 +60,118 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Mapping curve names (as in merged_lut_analyzer.py)
-# Make sure all functions are imported from transfer_functions
-CURVE_MAP = {
+# Mapping of curve names to appropriate functions and color spaces
+CURVE_INFO = {
     # Sony Curves
-    "slog3": linear_to_slog3,
-    "slog3_cine": linear_to_slog3_cine,
-    "slog2": linear_to_slog2,
+    "slog3": {
+        "curve_func": linear_to_slog3,
+        "inverse_func": slog3_to_linear,
+        "color_space": "sgamut3",
+        "color_transform": s_gamut3_to_rec709,
+        "description": "Sony S-Log3 (S-Gamut3)"
+    },
+    "slog3_cine": {
+        "curve_func": linear_to_slog3_cine,
+        "inverse_func": slog3_cine_to_linear,
+        "color_space": "sgamut3_cine",
+        "color_transform": s_gamut3_cine_to_rec709,
+        "description": "Sony S-Log3 (S-Gamut3.cine)"
+    },
+    "slog2": {
+        "curve_func": linear_to_slog2,
+        "inverse_func": slog2_to_linear,
+        "color_space": "sgamut3",  # Simplified - often used with S-Gamut3
+        "color_transform": s_gamut3_to_rec709,
+        "description": "Sony S-Log2"
+    },
     
     # ARRI Curves
-    "logc4": linear_to_logc4,
-    "logc3": linear_to_logc3,
+    "logc4": {
+        "curve_func": linear_to_logc4,
+        "inverse_func": logc4_to_linear,
+        "color_space": "arri_wide_gamut4",
+        "color_transform": arri_wide_gamut4_to_rec709,
+        "description": "ARRI LogC4 (Wide Gamut 4)"
+    },
+    "logc3": {
+        "curve_func": linear_to_logc3,
+        "inverse_func": logc3_to_linear,
+        "color_space": "arri_wide_gamut3",
+        "color_transform": arri_wide_gamut3_to_rec709,
+        "description": "ARRI LogC3 (Wide Gamut 3)"
+    },
     
     # RED Curves
-    "log3g10": linear_to_log3g10,
-    "redgamma3": linear_to_redgamma3,
-    "redgamma4": linear_to_redgamma4,
-    "redlogfilm": linear_to_redlogfilm,
+    "log3g10": {
+        "curve_func": linear_to_log3g10,
+        "inverse_func": log3g10_to_linear,
+        "color_space": "red_wide_gamut_rgb",
+        "color_transform": red_wide_gamut_rgb_to_rec709,
+        "description": "RED Log3G10"
+    },
+    "redgamma3": {
+        "curve_func": linear_to_redgamma3,
+        "inverse_func": redgamma3_to_linear,
+        "color_space": "red_wide_gamut_rgb",
+        "color_transform": red_wide_gamut_rgb_to_rec709,
+        "description": "RED Gamma 3"
+    },
+    "redgamma4": {
+        "curve_func": linear_to_redgamma4,
+        "inverse_func": redgamma4_to_linear,
+        "color_space": "red_wide_gamut_rgb",
+        "color_transform": red_wide_gamut_rgb_to_rec709,
+        "description": "RED Gamma 4"
+    },
+    "redlogfilm": {
+        "curve_func": linear_to_redlogfilm,
+        "inverse_func": redlogfilm_to_linear,
+        "color_space": "red_wide_gamut_rgb",
+        "color_transform": red_wide_gamut_rgb_to_rec709,
+        "description": "RED Log Film"
+    },
     
     # Other Curves
-    "vlog": linear_to_vlog,
-    "canonlog2": linear_to_canonlog2,
-    "rec709": linear_to_rec709,
+    "vlog": {
+        "curve_func": linear_to_vlog,
+        "inverse_func": vlog_to_linear,
+        "color_space": "v_gamut",
+        "description": "Panasonic V-Log"
+    },
+    "canonlog2": {
+        "curve_func": linear_to_canonlog2,
+        "inverse_func": canonlog2_to_linear,
+        "color_space": "canon_cinema_gamut",
+        "description": "Canon Log 2"
+    },
+    "rec709": {
+        "curve_func": linear_to_rec709,
+        "inverse_func": rec709_to_linear,
+        "color_space": "rec709",
+        "description": "Rec.709"
+    }
 }
 
-# Add aliases if needed
-CURVE_MAP.update({
-    "gamma22": linear_to_redgamma4,
-    "gamma24": linear_to_redgamma3,
-    "clog2": linear_to_canonlog2,
-    "redipp2odt": linear_to_red_ipp2_odt_approx,
-})
-
-# Remove functions that are not curves (if any were included)
-CURVE_MAP = {k: v for k, v in CURVE_MAP.items() if callable(v)}
+# Aliasy dla zachowania kompatybilności
+CURVE_ALIASES = {
+    "gamma22": "redgamma4",
+    "gamma24": "redgamma3",
+    "clog2": "canonlog2",
+    "redipp2odt": "red_ipp2_odt_approx"
+}
 
 # --- Routes ---
 @app.route('/')
 def index():
     """Displays the main page with the form."""
     # Pass the list of available curves to the template
-    available_curves = sorted(CURVE_MAP.keys())
+    available_curves = sorted(list(CURVE_INFO.keys()) + list(CURVE_ALIASES.keys()))
     return render_template('index.html', curves=available_curves)
 
 @app.route('/batch')
 def batch_page():
     """Displays the batch analysis page."""
-    available_curves = sorted(CURVE_MAP.keys())
+    available_curves = sorted(CURVE_INFO.keys())
     return render_template('batch.html', curves=available_curves)
 
 @app.route('/compare')
@@ -116,6 +191,15 @@ def analyze_lut_route():
         return redirect(url_for('index')) # Return to the main page
 
     curve_name = request.form.get('curve_select', 'slog3') # Get the selected curve
+    
+    # Sprawdzenie aliasów dla zachowania kompatybilności
+    if curve_name in CURVE_ALIASES:
+        curve_name = CURVE_ALIASES[curve_name]
+    
+    # Sprawdzenie, czy krzywa istnieje
+    if curve_name not in CURVE_INFO:
+        flash(f'Invalid curve name: {curve_name}', 'error')
+        return redirect(url_for('index'))
 
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
@@ -132,14 +216,24 @@ def analyze_lut_route():
             print(f"Starting analysis for: {upload_path}, curve: {curve_name}")
 
             lut_data = load_cube_file(upload_path)
-            curve_func = CURVE_MAP.get(curve_name)
-            if not curve_func:
-                 raise ValueError(f"Invalid curve name: {curve_name}")
-
-            comparison_data = compare_lut_to_curve(lut_data, curve_func)
-            plot_title = f"LUT '{lut_data.get('title', filename)}' vs {curve_name.upper()}"
+            curve_info = CURVE_INFO.get(curve_name)
+            
+            if not curve_info:
+                raise ValueError(f"Invalid curve name: {curve_name}")
+            
+            # Użyj nowej, precyzyjnej funkcji porównującej
+            comparison_data = compare_lut_to_curve(
+                lut_data, 
+                curve_info["curve_func"],
+                use_tetrahedral=True  # Używaj dokładniejszej interpolacji tetrahedral
+            )
+            
+            plot_title = f"LUT '{lut_data.get('title', filename)}' vs {curve_info['description']}"
             plot_lut_vs_curve(comparison_data, plot_title, report_png_path)
-            generate_pdf_report(lut_data, report_png_path, report_pdf_path, curve_name=curve_name)
+            
+            # Użyj pełnej informacji o krzywej w raporcie
+            generate_pdf_report(lut_data, report_png_path, report_pdf_path, 
+                               curve_name=curve_info['description'])
 
             print(f"Analysis completed. Reports in: {app.config['REPORTS_FOLDER']}")
             flash('Analysis completed successfully!', 'success')
@@ -148,7 +242,7 @@ def analyze_lut_route():
             session['report_pdf'] = os.path.basename(report_pdf_path)
             session['report_png'] = os.path.basename(report_png_path)
             session['lut_title'] = lut_data.get('title', filename)
-            session['curve_name'] = curve_name
+            session['curve_name'] = curve_info['description']
 
             return redirect(url_for('show_results'))
 
@@ -183,6 +277,15 @@ def analyze_batch_route():
         return redirect(url_for('batch_page'))
         
     curve_name = request.form.get('curve_select', 'slog3')
+    
+    # Sprawdzenie aliasów dla zachowania kompatybilności
+    if curve_name in CURVE_ALIASES:
+        curve_name = CURVE_ALIASES[curve_name]
+    
+    # Sprawdzenie, czy krzywa istnieje
+    if curve_name not in CURVE_INFO:
+        flash(f'Invalid curve name: {curve_name}', 'error')
+        return redirect(url_for('batch_page'))
 
     # Create a unique batch ID based on timestamp
     batch_id = f"batch_{int(time.time())}"
@@ -209,14 +312,24 @@ def analyze_batch_route():
                 report_png_path = os.path.join(batch_dir, report_basename + ".png")
                 
                 lut_data = load_cube_file(upload_path)
-                curve_func = CURVE_MAP.get(curve_name)
-                if not curve_func:
+                curve_info = CURVE_INFO.get(curve_name)
+                
+                if not curve_info:
                     raise ValueError(f"Invalid curve name: {curve_name}")
-                    
-                comparison_data = compare_lut_to_curve(lut_data, curve_func)
-                plot_title = f"LUT '{lut_data.get('title', filename)}' vs {curve_name.upper()}"
+                
+                # Użyj nowej, precyzyjnej funkcji porównującej
+                comparison_data = compare_lut_to_curve(
+                    lut_data, 
+                    curve_info["curve_func"],
+                    use_tetrahedral=True  # Używaj dokładniejszej interpolacji tetrahedral
+                )
+                
+                plot_title = f"LUT '{lut_data.get('title', filename)}' vs {curve_info['description']}"
                 plot_lut_vs_curve(comparison_data, plot_title, report_png_path)
-                generate_pdf_report(lut_data, report_png_path, report_pdf_path, curve_name=curve_name)
+                
+                # Użyj pełnej informacji o krzywej w raporcie
+                generate_pdf_report(lut_data, report_png_path, report_pdf_path, 
+                                   curve_name=curve_info['description'])
                 
                 successful_files.append({
                     'filename': filename,
@@ -249,7 +362,7 @@ def analyze_batch_route():
         session['successful_files'] = successful_files
         session['failed_files'] = failed_files
         session['zip_filename'] = zip_filename
-        session['curve_name'] = curve_name
+        session['curve_name'] = curve_info['description']
         
         flash(f'Processed {len(successful_files)} files successfully. {len(failed_files)} files failed.', 'success')
         return redirect(url_for('show_batch_results'))
@@ -271,67 +384,62 @@ def compare_luts_route():
         flash('Both LUT files must be selected.', 'error')
         return redirect(url_for('compare_page'))
         
-    if allowed_file(file1.filename) and allowed_file(file2.filename):
-        filename1 = secure_filename(file1.filename)
-        filename2 = secure_filename(file2.filename)
-        
-        upload_path1 = os.path.join(app.config['UPLOAD_FOLDER'], filename1)
-        upload_path2 = os.path.join(app.config['UPLOAD_FOLDER'], filename2)
-        
-        try:
-            file1.save(upload_path1)
-            file2.save(upload_path2)
-            
-            # Generate report names
-            compare_id = f"compare_{int(time.time())}"
-            report_pdf_path = os.path.join(app.config['REPORTS_FOLDER'], f"{compare_id}.pdf")
-            report_png_path = os.path.join(app.config['REPORTS_FOLDER'], f"{compare_id}.png")
-            
-            # Load LUTs
-            lut_data1 = load_cube_file(upload_path1)
-            lut_data2 = load_cube_file(upload_path2)
-            
-            # Compare LUTs
-            comparison_data = compare_two_luts(lut_data1, lut_data2)
-            
-            # Generate title from filenames
-            title1 = lut_data1.get('title', filename1)
-            title2 = lut_data2.get('title', filename2)
-            plot_title = f"LUT Comparison: '{title1}' vs '{title2}'"
-            
-            # Generate visualization
-            plot_lut_vs_lut(comparison_data, plot_title, report_png_path)
-            
-            # Generate PDF report
-            generate_pdf_report({
-                'title': plot_title,
-                'lut_1': lut_data1,
-                'lut_2': lut_data2
-            }, report_png_path, report_pdf_path, comparison=True)
-            
-            # Save data for results page
-            session['report_pdf'] = os.path.basename(report_pdf_path)
-            session['report_png'] = os.path.basename(report_png_path)
-            session['lut_title'] = plot_title
-            session['is_comparison'] = True
-            session['lut1_name'] = title1
-            session['lut2_name'] = title2
-            
-            flash('Comparison completed successfully!', 'success')
-            return redirect(url_for('show_results'))
-            
-        except Exception as e:
-            flash(f'Error comparing LUT files: {e}', 'error')
-            print(f"Comparison error: {e}\n{traceback.format_exc()}")
-            return redirect(url_for('compare_page'))
-        finally:
-            # Clean up uploads
-            for path in [upload_path1, upload_path2]:
-                if os.path.exists(path):
-                    os.remove(path)
-    else:
+    if not (allowed_file(file1.filename) and allowed_file(file2.filename)):
         flash('Invalid file type. Only .cube files are accepted.', 'error')
         return redirect(url_for('compare_page'))
+        
+    # Save uploaded files
+    filename1 = secure_filename(file1.filename)
+    filename2 = secure_filename(file2.filename)
+    
+    upload_path1 = os.path.join(app.config['UPLOAD_FOLDER'], filename1)
+    upload_path2 = os.path.join(app.config['UPLOAD_FOLDER'], filename2)
+    
+    try:
+        file1.save(upload_path1)
+        file2.save(upload_path2)
+        
+        # Generate unique report names
+        timestamp = int(time.time())
+        report_basename = f"compare_{timestamp}"
+        report_pdf_path = os.path.join(app.config['REPORTS_FOLDER'], report_basename + ".pdf")
+        report_png_path = os.path.join(app.config['REPORTS_FOLDER'], report_basename + ".png")
+        
+        # Load LUT data
+        lut_data1 = load_cube_file(upload_path1)
+        lut_data2 = load_cube_file(upload_path2)
+        
+        # Compare LUTs using tetrahedral interpolation for maximum accuracy
+        comparison_data = compare_two_luts(lut_data1, lut_data2, use_tetrahedral=True)
+        
+        # Get LUT names from title or filename
+        lut1_name = lut_data1.get('title', filename1)
+        lut2_name = lut_data2.get('title', filename2)
+        
+        plot_title = f"Comparison: '{lut1_name}' vs '{lut2_name}'"
+        plot_lut_vs_lut(comparison_data, plot_title, report_png_path)
+        
+        # Generate report
+        generate_comparison_report(lut_data1, lut_data2, report_png_path, report_pdf_path)
+        
+        # Store results in session
+        session['report_pdf'] = os.path.basename(report_pdf_path)
+        session['report_png'] = os.path.basename(report_png_path)
+        session['lut1_name'] = lut1_name
+        session['lut2_name'] = lut2_name
+        session['is_comparison'] = True
+        
+        return redirect(url_for('show_results'))
+        
+    except Exception as e:
+        flash(f'An error occurred: {e}', 'error')
+        print(f"Error comparing LUTs: {e}\n{traceback.format_exc()}")
+        return redirect(url_for('compare_page'))
+    finally:
+        # Clean up uploaded files
+        for path in [upload_path1, upload_path2]:
+            if os.path.exists(path):
+                os.remove(path)
 
 @app.route('/results')
 def show_results():
