@@ -10,7 +10,12 @@ from flask import (Flask, request, render_template, redirect, url_for,  # type: 
                    send_from_directory, flash, session, send_file)
 from werkzeug.utils import secure_filename  # type: ignore
 import traceback # For detailed error logging
-import numpy as np
+try:
+    import numpy as np  # type: ignore
+except ImportError as e:
+    print(f"Error importing numpy: {e}", file=sys.stderr)
+    print("Please install numpy using: pip install numpy==1.26.0", file=sys.stderr)
+    sys.exit(1)
 
 # Import functions from our package
 try:

@@ -4,7 +4,7 @@ Moduł odpowiedzialny za interpolację wartości przy użyciu LUT 1D i 3D.
 """
 
 import numpy as np
-from scipy.interpolate import RegularGridInterpolator
+from scipy.interpolate import RegularGridInterpolator  # Make sure scipy is installed: pip install scipy==1.11.0
 from typing import List
 
 def interpolate_1d_lut(lut_1d: np.ndarray, input_values: np.ndarray, domain_min: float = 0.0, domain_max: float = 1.0) -> np.ndarray:
