@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Konfiguracja Gemini
+# UWAGA: Ustaw klucz API w zmiennej środowiskowej GOOGLE_API_KEY
+# Przykład: export GOOGLE_API_KEY='twój_klucz_api'
 GEMINI_API_KEY = os.getenv("GOOGLE_API_KEY")
 GEMINI_MODEL = "models/gemini-2.0-flash-001"
 
