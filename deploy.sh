@@ -27,5 +27,5 @@ mkdir -p uploads reports
 echo "Starting Gunicorn server..."
 nohup gunicorn --bind 0.0.0.0:8080 --workers 4 lutcomparetool_app:app > gunicorn.log 2>&1 &
 
-echo "Deployment completed. The application should be available at http://your-server-ip:8080"
+echo "Deployment completed. The application should be available at  http://your-server-ip:8080"
 echo "Check gunicorn.log for any errors."

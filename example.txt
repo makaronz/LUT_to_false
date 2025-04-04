@@ -1,0 +1,19 @@
+# Przykładowy plik do analizy
+
+## Sekcja 1: Wprowadzenie
+Ten plik zawiera przykładową zawartość do testowania analizatora Gemini 2.5 Pro.
+
+## Sekcja 2: Dane
+- Punkt 1: Analiza tekstu
+- Punkt 2: Przetwarzanie danych
+- Punkt 3: Generowanie raportów
+
+## Sekcja 3: Kod
+```python
+def example_function():
+    print("Hello, World!")
+    return True
+```
+
+## Sekcja 4: Podsumowanie
+Ten plik demonstruje różne typy zawartości, które mogą być analizowane przez Gemini 2.5 Pro. 

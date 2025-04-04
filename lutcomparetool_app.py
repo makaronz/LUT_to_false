@@ -5,6 +5,7 @@ import zipfile
 import io
 import time
 from pathlib import Path
+
 # Adding type hint for Pylance to help with import resolution
 from flask import (Flask, request, render_template, redirect, url_for,  # type: ignore
                    send_from_directory, flash, session, send_file)
@@ -16,6 +17,11 @@ except ImportError as e:
     print(f"Error importing numpy: {e}", file=sys.stderr)
     print("Please install numpy using: pip install numpy==1.26.0", file=sys.stderr)
     sys.exit(1)
+
+# Ustawienie backendu matplotlib na 'Agg' (non-interactive)
+# To pozwala na generowanie wykresów bez interfejsu graficznego
+import matplotlib
+matplotlib.use('Agg')
 
 # Import functions from our package
 try:

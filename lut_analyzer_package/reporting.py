@@ -5,6 +5,8 @@ Moduł odpowiedzialny za generowanie raportów, wykresów i analiz porównawczyc
 
 import numpy as np
 import matplotlib
+# Ustawienie backendu matplotlib na 'Agg' (non-interactive)
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import reportlab.pdfgen.canvas as canvas
 from reportlab.lib.pagesizes import A4
