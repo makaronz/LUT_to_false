@@ -552,6 +552,9 @@ def server_error(e):
 
 # --- Application Launch ---
 if __name__ == '__main__':
-    # Run in debug mode for easier development
-    # In production environment, use a WSGI server like gunicorn or waitress
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    # Upewnij się, że katalogi istnieją
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    os.makedirs(REPORTS_FOLDER, exist_ok=True)
+    
+    # Uruchom aplikację na porcie 8080
+    app.run(host='127.0.0.1', port=8080, debug=False)
