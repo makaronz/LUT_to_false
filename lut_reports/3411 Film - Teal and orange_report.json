@@ -1,0 +1,232 @@
+{
+  "metadata": {
+    "filename": "3411 Film - Teal and orange.cube",
+    "filesize": 970403,
+    "comments": [
+      "(null)",
+      "3 columns rgb, 35937 rows",
+      "created by dwsgrading 2017-03-24 09:18:32 +0000"
+    ],
+    "size": 33,
+    "min_values": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "max_values": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "mean_values": [
+      0.47554991179007705,
+      0.4784923620502579,
+      0.4274778878593081
+    ],
+    "std_values": [
+      0.35398430412736714,
+      0.32202625805308244,
+      0.25196649132011
+    ],
+    "inferred_source_space": "Unknown",
+    "inferred_target_space": "Rec.709 (Stylized)",
+    "inferred_gamma": "Unknown"
+  },
+  "source_space": "Unknown",
+  "target_space": "Rec.709 (Stylized)",
+  "lut_analysis": {
+    "metadata": {
+      "filename": "3411 Film - Teal and orange.cube",
+      "filesize": 970403,
+      "comments": [
+        "(null)",
+        "3 columns rgb, 35937 rows",
+        "created by dwsgrading 2017-03-24 09:18:32 +0000"
+      ],
+      "size": 33,
+      "min_values": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max_values": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "mean_values": [
+        0.47554991179007705,
+        0.4784923620502579,
+        0.4274778878593081
+      ],
+      "std_values": [
+        0.35398430412736714,
+        0.32202625805308244,
+        0.25196649132011
+      ],
+      "inferred_source_space": "Unknown",
+      "inferred_target_space": "Rec.709 (Stylized)",
+      "inferred_gamma": "Unknown"
+    },
+    "color_stats": {
+      "min": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "max": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "mean": [
+        0.47554991179007705,
+        0.4784923620502579,
+        0.4274778878593081
+      ],
+      "std": [
+        0.35398430412736714,
+        0.32202625805308244,
+        0.25196649132011
+      ]
+    },
+    "dynamic_range": {
+      "shadow_clip": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "avg": 0.0
+      },
+      "highlight_clip": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "avg": 1.0
+      },
+      "dynamic_range_ratio": 1000000.0
+    },
+    "color_bias": {
+      "segments": [
+        {
+          "brightness": 0.03129698998051767,
+          "r_ratio": 0.07026121457761474,
+          "g_ratio": 0.6350085499204383,
+          "b_ratio": 2.294634382701116,
+          "color_deviation": 0.9440535206507427
+        },
+        {
+          "brightness": 0.18197625837276185,
+          "r_ratio": 0.29696293776301935,
+          "g_ratio": 0.8655439670154946,
+          "b_ratio": 1.837476609645064,
+          "color_deviation": 0.6360572844476443
+        },
+        {
+          "brightness": 0.28116217339270805,
+          "r_ratio": 0.5520319607203853,
+          "g_ratio": 0.979324134500137,
+          "b_ratio": 1.468633234818815,
+          "color_deviation": 0.37448629897900937
+        },
+        {
+          "brightness": 0.3764988258651081,
+          "r_ratio": 0.8465678140350836,
+          "g_ratio": 1.0182601643460085,
+          "b_ratio": 1.1351640534877327,
+          "color_deviation": 0.11852452717473978
+        },
+        {
+          "brightness": 0.46289587948789307,
+          "r_ratio": 1.016485511532714,
+          "g_ratio": 1.0184077753188479,
+          "b_ratio": 0.9651002322233487,
+          "color_deviation": 0.02468881028285096
+        },
+        {
+          "brightness": 0.5351439970312645,
+          "r_ratio": 1.1610558056686948,
+          "g_ratio": 0.9815264946059828,
+          "b_ratio": 0.8574120937680267,
+          "color_deviation": 0.12464824364891466
+        },
+        {
+          "brightness": 0.5955855726876335,
+          "r_ratio": 1.1668121246470218,
+          "g_ratio": 1.0118443054773654,
+          "b_ratio": 0.8213385328245145,
+          "color_deviation": 0.141287522858336
+        },
+        {
+          "brightness": 0.6520736442156045,
+          "r_ratio": 1.1294645503494696,
+          "g_ratio": 1.0921056996868899,
+          "b_ratio": 0.7784251492633579,
+          "color_deviation": 0.15741658551320825
+        },
+        {
+          "brightness": 0.7064369868262362,
+          "r_ratio": 1.1321422437893374,
+          "g_ratio": 1.1419005109838254,
+          "b_ratio": 0.7259529985695847,
+          "color_deviation": 0.19382043803319787
+        },
+        {
+          "brightness": 0.7813717580555556,
+          "r_ratio": 1.153615766306848,
+          "g_ratio": 1.0622284243394344,
+          "b_ratio": 0.7841519699570029,
+          "color_deviation": 0.15712049783774001
+        }
+      ],
+      "overall_bias": {
+        "r_ratio": 1.0326643627277827,
+        "g_ratio": 1.0390539412924105,
+        "b_ratio": 0.9282751814310474,
+        "dominant_channel": "G"
+      }
+    },
+    "tonal_smoothness": {
+      "smoothness_scores": {
+        "r": 0.29414440013387955,
+        "g": 0.2975565581606476,
+        "b": 0.30467942321482,
+        "overall": 0.29872936426551633
+      },
+      "banding_regions": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0
+      }
+    },
+    "plot_paths": {
+      "distribution": "lut_reports/3411 Film - Teal and orange_distribution.png",
+      "curves": "lut_reports/3411 Film - Teal and orange_curves.png"
+    }
+  },
+  "transform_analysis": {
+    "metadata": {
+      "filename": "3411 Film - Teal and orange.cube",
+      "title": "",
+      "source_space": "Unknown",
+      "target_space": "Rec.709 (Stylized)"
+    },
+    "transformation_accuracy": {
+      "mean_absolute_error": 0.27019348693429257,
+      "max_absolute_error": 1.0,
+      "channel_errors": {
+        "r": 0.38201496623276915,
+        "g": 0.16009634327822359,
+        "b": 0.26846915129188514
+      },
+      "rmse": 0.36874445945572504,
+      "correlation": 0.40462346096691504,
+      "accuracy_score": 0.0
+    },
+    "plot_path": "lut_reports/3411 Film - Teal and orange_transform_comparison.png"
+  },
+  "visualizations": {
+    "colorchecker": "lut_reports/3411 Film - Teal and orange_colorchecker.png",
+    "linear_ramps": "lut_reports/3411 Film - Teal and orange_linear_ramps.png",
+    "log_ramps": "lut_reports/3411 Film - Teal and orange_log_ramps.png"
+  }
+}

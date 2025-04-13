@@ -1,0 +1,232 @@
+{
+  "metadata": {
+    "filename": "5122 City.cube",
+    "filesize": 970403,
+    "comments": [
+      "(null)",
+      "3 columns rgb, 35937 rows",
+      "created by dwsgrading 2017-03-24 09:18:49 +0000"
+    ],
+    "size": 33,
+    "min_values": [
+      0.0,
+      0.003098,
+      0.0
+    ],
+    "max_values": [
+      1.0,
+      0.928557,
+      1.0
+    ],
+    "mean_values": [
+      0.5345487442747073,
+      0.5084336948548838,
+      0.5062944298911982
+    ],
+    "std_values": [
+      0.2821212414664665,
+      0.28335005633337135,
+      0.2524939466857176
+    ],
+    "inferred_source_space": "Unknown",
+    "inferred_target_space": "Unknown",
+    "inferred_gamma": "Unknown"
+  },
+  "source_space": "Unknown",
+  "target_space": "Unknown",
+  "lut_analysis": {
+    "metadata": {
+      "filename": "5122 City.cube",
+      "filesize": 970403,
+      "comments": [
+        "(null)",
+        "3 columns rgb, 35937 rows",
+        "created by dwsgrading 2017-03-24 09:18:49 +0000"
+      ],
+      "size": 33,
+      "min_values": [
+        0.0,
+        0.003098,
+        0.0
+      ],
+      "max_values": [
+        1.0,
+        0.928557,
+        1.0
+      ],
+      "mean_values": [
+        0.5345487442747073,
+        0.5084336948548838,
+        0.5062944298911982
+      ],
+      "std_values": [
+        0.2821212414664665,
+        0.28335005633337135,
+        0.2524939466857176
+      ],
+      "inferred_source_space": "Unknown",
+      "inferred_target_space": "Unknown",
+      "inferred_gamma": "Unknown"
+    },
+    "color_stats": {
+      "min": [
+        0.0,
+        0.003098,
+        0.0
+      ],
+      "max": [
+        1.0,
+        0.928557,
+        1.0
+      ],
+      "mean": [
+        0.5345487442747073,
+        0.5084336948548838,
+        0.5062944298911982
+      ],
+      "std": [
+        0.2821212414664665,
+        0.28335005633337135,
+        0.2524939466857176
+      ]
+    },
+    "dynamic_range": {
+      "shadow_clip": {
+        "r": 0.010971,
+        "g": 0.055787,
+        "b": 0.0,
+        "avg": 0.022252666666666667
+      },
+      "highlight_clip": {
+        "r": 1.0,
+        "g": 0.923705,
+        "b": 1.0,
+        "avg": 0.9745683333333334
+      },
+      "dynamic_range_ratio": 43.79360704602987
+    },
+    "color_bias": {
+      "segments": [
+        {
+          "brightness": 0.17094778216903236,
+          "r_ratio": 0.9374297784026505,
+          "g_ratio": 0.8187064076713111,
+          "b_ratio": 1.243846264810087,
+          "color_deviation": 0.17911206920934183
+        },
+        {
+          "brightness": 0.2718074348269784,
+          "r_ratio": 1.0687977498344012,
+          "g_ratio": 0.8129157089909625,
+          "b_ratio": 1.118275503989562,
+          "color_deviation": 0.13381922772657334
+        },
+        {
+          "brightness": 0.35080397021987203,
+          "r_ratio": 1.1767011392916975,
+          "g_ratio": 0.8049696085324379,
+          "b_ratio": 1.0183207004156145,
+          "color_deviation": 0.1523108600443137
+        },
+        {
+          "brightness": 0.4213987943222934,
+          "r_ratio": 1.1259750985083967,
+          "g_ratio": 0.8179702969347851,
+          "b_ratio": 1.0560474854266235,
+          "color_deviation": 0.13184063466671184
+        },
+        {
+          "brightness": 0.4877437612951108,
+          "r_ratio": 1.0456831923147831,
+          "g_ratio": 0.9024151408132088,
+          "b_ratio": 1.0518955161139931,
+          "color_deviation": 0.06904805906686162
+        },
+        {
+          "brightness": 0.5552843403840801,
+          "r_ratio": 0.9967039068694471,
+          "g_ratio": 1.0037757977581114,
+          "b_ratio": 0.9995148927446716,
+          "color_deviation": 0.002907243709262967
+        },
+        {
+          "brightness": 0.6235594201688469,
+          "r_ratio": 0.98697983978719,
+          "g_ratio": 1.0658994691582824,
+          "b_ratio": 0.9471158799730302,
+          "color_deviation": 0.04935920971349421
+        },
+        {
+          "brightness": 0.6903256492253456,
+          "r_ratio": 0.999638513128441,
+          "g_ratio": 1.07987161024243,
+          "b_ratio": 0.9204855308603492,
+          "color_deviation": 0.06506959246771155
+        },
+        {
+          "brightness": 0.7589252717320716,
+          "r_ratio": 1.0229964939029124,
+          "g_ratio": 1.073322054299825,
+          "b_ratio": 0.9036774988441082,
+          "color_deviation": 0.07114067425950579
+        },
+        {
+          "brightness": 0.8328433503703704,
+          "r_ratio": 1.0343258499291867,
+          "g_ratio": 1.0487102437307252,
+          "b_ratio": 0.9169603042264413,
+          "color_deviation": 0.059010007308105
+        }
+      ],
+      "overall_bias": {
+        "r_ratio": 1.035091376897374,
+        "g_ratio": 0.9845226256820291,
+        "b_ratio": 0.9803801882700492,
+        "dominant_channel": "R"
+      }
+    },
+    "tonal_smoothness": {
+      "smoothness_scores": {
+        "r": 0.29868339407003736,
+        "g": 0.2982874863462606,
+        "b": 0.2952549230858076,
+        "overall": 0.29740068803715025
+      },
+      "banding_regions": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0
+      }
+    },
+    "plot_paths": {
+      "distribution": "lut_reports/5122 City_distribution.png",
+      "curves": "lut_reports/5122 City_curves.png"
+    }
+  },
+  "transform_analysis": {
+    "metadata": {
+      "filename": "5122 City.cube",
+      "title": "",
+      "source_space": "Unknown",
+      "target_space": "Unknown"
+    },
+    "transformation_accuracy": {
+      "mean_absolute_error": 0.23630794827822346,
+      "max_absolute_error": 0.922545,
+      "channel_errors": {
+        "r": 0.29585497577822345,
+        "g": 0.1326714132782235,
+        "b": 0.2803974557782234
+      },
+      "rmse": 0.31289696988203486,
+      "correlation": 0.5830923867455882,
+      "accuracy_score": 0.0
+    },
+    "plot_path": "lut_reports/5122 City_transform_comparison.png"
+  },
+  "visualizations": {
+    "colorchecker": "lut_reports/5122 City_colorchecker.png",
+    "linear_ramps": "lut_reports/5122 City_linear_ramps.png",
+    "log_ramps": "lut_reports/5122 City_log_ramps.png"
+  }
+}

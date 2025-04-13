@@ -6,6 +6,24 @@ LUTcompareTool is a comprehensive toolkit for filmmakers, colorists, and develop
 
 The application provides a web interface for uploading LUT files, selecting reference curves, and generating analysis reports in both PNG and PDF formats.
 
+## About
+
+LUTcompareTool is a professional-grade tool designed to help filmmakers and colorists analyze and compare Look-Up Tables (LUTs) used in digital film production. It provides detailed insights into how LUTs transform color spaces and helps ensure accurate color reproduction across different camera systems and workflows.
+
+Key capabilities include:
+- Analysis of .cube LUT files against industry-standard color spaces
+- Support for major camera log curves (S-Log3, LogC, RED Log, etc.)
+- Detailed visualization of LUT transformations
+- Comprehensive PDF reports with technical analysis
+- Web-based interface for easy access and use
+
+This tool is particularly useful for:
+- Colorists verifying LUT accuracy
+- DITs (Digital Imaging Technicians) validating on-set LUTs
+- Post-production teams ensuring color consistency
+- Camera manufacturers testing LUT implementations
+- Educational purposes in film and media production
+
 ## Features
 
 - **LUT File Analysis**: Upload and analyze `.cube` LUT files

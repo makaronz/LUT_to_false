@@ -1,0 +1,70 @@
+{
+  "luts": [
+    {
+      "filename": "PATI_night.cube",
+      "source_space": "Unknown",
+      "target_space": "Unknown",
+      "report_path": "PATI_night_report.json"
+    },
+    {
+      "filename": "3231 Retro.cube",
+      "source_space": "Unknown",
+      "target_space": "Rec.709 (Stylized)",
+      "report_path": "3231 Retro_report.json"
+    },
+    {
+      "filename": "5210 Vibrant.cube",
+      "source_space": "Unknown",
+      "target_space": "Unknown",
+      "report_path": "5210 Vibrant_report.json"
+    },
+    {
+      "filename": "3150 Film process - Bleach bypass.cube",
+      "source_space": "Unknown",
+      "target_space": "Rec.709 (Stylized)",
+      "report_path": "3150 Film process - Bleach bypass_report.json"
+    },
+    {
+      "filename": "3411 Film - Teal and orange.cube",
+      "source_space": "Unknown",
+      "target_space": "Rec.709 (Stylized)",
+      "report_path": "3411 Film - Teal and orange_report.json"
+    },
+    {
+      "filename": "V2_Sl3Sg3_B&W_HC1.cube",
+      "source_space": "S-Log3/S-Gamut3",
+      "target_space": "Rec.709 (B&W)",
+      "report_path": "V2_Sl3Sg3_B&W_HC1_report.json"
+    },
+    {
+      "filename": "5122 City.cube",
+      "source_space": "Unknown",
+      "target_space": "Unknown",
+      "report_path": "5122 City_report.json"
+    },
+    {
+      "filename": "MM_dzien.cube",
+      "source_space": "Unknown",
+      "target_space": "Unknown",
+      "report_path": "MM_dzien_report.json"
+    },
+    {
+      "filename": "V2_Sl3Sg3_B&W_ZERO.cube",
+      "source_space": "S-Log3/S-Gamut3",
+      "target_space": "Rec.709 (B&W)",
+      "report_path": "V2_Sl3Sg3_B&W_ZERO_report.json"
+    },
+    {
+      "filename": "Anywhere_LUT_v0.1.cube",
+      "source_space": "Unknown",
+      "target_space": "Unknown",
+      "report_path": "Anywhere_LUT_v0.1_report.json"
+    },
+    {
+      "filename": "pati_day_wnetrze.cube",
+      "source_space": "Unknown",
+      "target_space": "Unknown",
+      "report_path": "pati_day_wnetrze_report.json"
+    }
+  ]
+}

@@ -1,0 +1,232 @@
+{
+  "metadata": {
+    "filename": "3150 Film process - Bleach bypass.cube",
+    "filesize": 970403,
+    "comments": [
+      "(null)",
+      "3 columns rgb, 35937 rows",
+      "created by dwsgrading 2017-03-24 09:18:22 +0000"
+    ],
+    "size": 33,
+    "min_values": [
+      0.044099,
+      0.051957,
+      0.051438
+    ],
+    "max_values": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "mean_values": [
+      0.5524689096752637,
+      0.5408134848206613,
+      0.5624931078275883
+    ],
+    "std_values": [
+      0.3084485304858091,
+      0.3195842066483553,
+      0.27979983239894224
+    ],
+    "inferred_source_space": "Unknown",
+    "inferred_target_space": "Rec.709 (Stylized)",
+    "inferred_gamma": "Unknown"
+  },
+  "source_space": "Unknown",
+  "target_space": "Rec.709 (Stylized)",
+  "lut_analysis": {
+    "metadata": {
+      "filename": "3150 Film process - Bleach bypass.cube",
+      "filesize": 970403,
+      "comments": [
+        "(null)",
+        "3 columns rgb, 35937 rows",
+        "created by dwsgrading 2017-03-24 09:18:22 +0000"
+      ],
+      "size": 33,
+      "min_values": [
+        0.044099,
+        0.051957,
+        0.051438
+      ],
+      "max_values": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "mean_values": [
+        0.5524689096752637,
+        0.5408134848206613,
+        0.5624931078275883
+      ],
+      "std_values": [
+        0.3084485304858091,
+        0.3195842066483553,
+        0.27979983239894224
+      ],
+      "inferred_source_space": "Unknown",
+      "inferred_target_space": "Rec.709 (Stylized)",
+      "inferred_gamma": "Unknown"
+    },
+    "color_stats": {
+      "min": [
+        0.044099,
+        0.051957,
+        0.051438
+      ],
+      "max": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "mean": [
+        0.5524689096752637,
+        0.5408134848206613,
+        0.5624931078275883
+      ],
+      "std": [
+        0.3084485304858091,
+        0.3195842066483553,
+        0.27979983239894224
+      ]
+    },
+    "dynamic_range": {
+      "shadow_clip": {
+        "r": 0.044099,
+        "g": 0.051957,
+        "b": 0.051438,
+        "avg": 0.04916466666666667
+      },
+      "highlight_clip": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "avg": 1.0
+      },
+      "dynamic_range_ratio": 20.339396733492883
+    },
+    "color_bias": {
+      "segments": [
+        {
+          "brightness": 0.2009334172928843,
+          "r_ratio": 0.8797410900098204,
+          "g_ratio": 0.9028133334581524,
+          "b_ratio": 1.217430646287421,
+          "color_deviation": 0.15403845781298026
+        },
+        {
+          "brightness": 0.32345967464514336,
+          "r_ratio": 0.9394001520936863,
+          "g_ratio": 0.8419346143977161,
+          "b_ratio": 1.218655958810821,
+          "color_deviation": 0.15965320331547078
+        },
+        {
+          "brightness": 0.39968789516652753,
+          "r_ratio": 0.9993438075250033,
+          "g_ratio": 0.8614407898885271,
+          "b_ratio": 1.1392078967487136,
+          "color_deviation": 0.11339888858023967
+        },
+        {
+          "brightness": 0.4645536077558215,
+          "r_ratio": 1.0378502565528613,
+          "g_ratio": 0.9155969717973615,
+          "b_ratio": 1.046546313851383,
+          "color_deviation": 0.05978593036867232
+        },
+        {
+          "brightness": 0.5255861253363021,
+          "r_ratio": 1.038199664371598,
+          "g_ratio": 0.9474596353955268,
+          "b_ratio": 1.0143349923305016,
+          "color_deviation": 0.03840658044801354
+        },
+        {
+          "brightness": 0.5853522857407922,
+          "r_ratio": 1.0246134440513002,
+          "g_ratio": 0.9687051591850521,
+          "b_ratio": 1.0066762716536104,
+          "color_deviation": 0.023307804731009685
+        },
+        {
+          "brightness": 0.6445689029594582,
+          "r_ratio": 1.000718882574736,
+          "g_ratio": 1.006162457038475,
+          "b_ratio": 0.9931140061204538,
+          "color_deviation": 0.00535131053717145
+        },
+        {
+          "brightness": 0.7069337086928287,
+          "r_ratio": 0.9914371921921524,
+          "g_ratio": 1.0528079957383742,
+          "b_ratio": 0.9557505683960996,
+          "color_deviation": 0.04008332272788616
+        },
+        {
+          "brightness": 0.7795258340291307,
+          "r_ratio": 1.0045359169821915,
+          "g_ratio": 1.056784869603039,
+          "b_ratio": 0.9386753649263411,
+          "color_deviation": 0.04832462043542597
+        },
+        {
+          "brightness": 0.8879954796296295,
+          "r_ratio": 0.999373243365317,
+          "g_ratio": 1.0162542168194575,
+          "b_ratio": 0.9843691614234535,
+          "color_deviation": 0.013024534529041676
+        }
+      ],
+      "overall_bias": {
+        "r_ratio": 1.0009833602139415,
+        "g_ratio": 0.9798656355214462,
+        "b_ratio": 1.0191455687549789,
+        "dominant_channel": "B"
+      }
+    },
+    "tonal_smoothness": {
+      "smoothness_scores": {
+        "r": 0.3072598050967944,
+        "g": 0.3024642716842239,
+        "b": 0.3096586374729227,
+        "overall": 0.3064316046100985
+      },
+      "banding_regions": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0
+      }
+    },
+    "plot_paths": {
+      "distribution": "lut_reports/3150 Film process - Bleach bypass_distribution.png",
+      "curves": "lut_reports/3150 Film process - Bleach bypass_curves.png"
+    }
+  },
+  "transform_analysis": {
+    "metadata": {
+      "filename": "3150 Film process - Bleach bypass.cube",
+      "title": "",
+      "source_space": "Unknown",
+      "target_space": "Rec.709 (Stylized)"
+    },
+    "transformation_accuracy": {
+      "mean_absolute_error": 0.24408604174427115,
+      "max_absolute_error": 0.963439,
+      "channel_errors": {
+        "r": 0.32033611471380946,
+        "g": 0.10875891269624426,
+        "b": 0.30316309782275985
+      },
+      "rmse": 0.35338156272279325,
+      "correlation": 0.4840157435139996,
+      "accuracy_score": 0.0
+    },
+    "plot_path": "lut_reports/3150 Film process - Bleach bypass_transform_comparison.png"
+  },
+  "visualizations": {
+    "colorchecker": "lut_reports/3150 Film process - Bleach bypass_colorchecker.png",
+    "linear_ramps": "lut_reports/3150 Film process - Bleach bypass_linear_ramps.png",
+    "log_ramps": "lut_reports/3150 Film process - Bleach bypass_log_ramps.png"
+  }
+}

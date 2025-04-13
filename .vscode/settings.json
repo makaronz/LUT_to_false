@@ -1,5 +1,6 @@
 {
     "cursor.cpp.disabledLanguages": [],
     "cursor.general.gitGraphIndexing": "enabled",
-    "workbench.commandPalette.experimental.enableNaturalLanguageSearch": true
+    "workbench.commandPalette.experimental.enableNaturalLanguageSearch": true,
+    "cmake.ignoreCMakeListsMissing": true
 }
