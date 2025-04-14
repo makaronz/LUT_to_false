@@ -3,8 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>{% block title %}LUTcompareTool{% endblock %}</title>
+    <title>{% block title %}PixelPasta{% endblock %}</title>
     <!-- Google Fonts - Press Start 2P -->
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -16,8 +20,9 @@
     <header>
         <div class="container">
             <!-- Zakładam, że logo jest w static/images/pixel_pasta_logo.png -->
-            <img src="{{ url_for('static', filename='images/pixel_pasta_logo.png') }}" alt="LUTcompareTool Logo" class="logo">
-            <h1>LUTcompareTool</h1>
+            <!-- TODO: Verify logo path and update if needed -->
+            <img src="{{ url_for('static', filename='images/pixel_pasta_logo.png') }}" alt="PixelPasta Logo" class="logo">
+            <h1>PixelPasta</h1>
         </div>
     </header>
 
@@ -39,7 +44,7 @@
 
     <footer>
         <div class="container">
-            <p>&copy; LUTcompareTool. All rights reserved.</p>
+            <p>&copy; PixelPasta. All rights reserved.</p>
         </div>
     </footer>
 

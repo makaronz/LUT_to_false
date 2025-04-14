@@ -1,23 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Upload LUT - LUTcompareTool{% endblock %}
+{% block title %}Analyze LUT - PixelPasta{% endblock %}
 
 {% block content %}
-    <h2>LUT Analyzer</h2>
-    <p>Welcome to LUTcompareTool for analyzing .cube LUT files.</p>
-    <p>Upload your LUT file and select a reference curve to generate a comparison report.</p>
-
-    <div class="feature-links">
-        <a href="{{ url_for('batch_page') }}" class="feature-card">
-            <h3>Batch Analysis</h3>
-            <p>Process multiple LUT files at once</p>
-        </a>
-        <a href="{{ url_for('compare_page') }}" class="feature-card">
-            <h3>Compare Two LUTs</h3>
-            <p>Compare two different LUT files</p>
-        </a>
-    </div>
-
+    <h2>Analyze LUT File</h2>
+    <p>Upload your .cube LUT file and select the input color space/gamma curve it was designed for to generate an analysis report.</p>
+    <!-- Feature links removed for initial simplicity based on UI plan -->
     <form method="post" action="{{ url_for('analyze_lut_route') }}" enctype="multipart/form-data" class="upload-form">
         <div class="form-group">
             <label for="lut_file">Select a .cube file:</label>
@@ -25,7 +13,7 @@
         </div>
 
         <div class="form-group">
-            <label for="curve_select">Select a reference curve:</label>
+            <label for="curve_select">Select Input Color Space / Gamma Curve:</label>
             <select name="curve_select" id="curve_select" class="form-control">
                 <optgroup label="Sony Curves">
                     <option value="slog3">S-Log3 (S-Gamut3)</option>
@@ -58,6 +46,6 @@
     </form>
     
     <div class="nav-links">
-        <a href="{{ url_for('about_page') }}" class="btn btn-link">About LUTcompareTool</a>
+        <a href="{{ url_for('about_page') }}" class="btn btn-link">About PixelPasta</a>
     </div>
 {% endblock %}
