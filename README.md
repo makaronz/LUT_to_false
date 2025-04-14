@@ -25,6 +25,7 @@ LUT Analyzer is a comprehensive command-line tool for analyzing Look-Up Tables (
   - Comprehensive technical documentation in Markdown
   - Summary reports for batch analysis
   - Visual quality assessment
+  - Integration with repomix for AI-friendly code analysis
 
 - **Color Space Support**
   - S-Log3/S-Gamut3
@@ -34,12 +35,19 @@ LUT Analyzer is a comprehensive command-line tool for analyzing Look-Up Tables (
   - Rec.709
   - Custom gamma curves
 
+- **Development Tools**
+  - repomix integration for code analysis
+  - Automated documentation generation
+  - Code quality checks
+  - Performance profiling tools
+
 ## Installation
 
 ### Prerequisites
 - Python 3.8+
 - NumPy
 - Matplotlib
+- Node.js (for development tools)
 - Additional dependencies in `requirements.txt`
 
 ### Setup
@@ -52,7 +60,11 @@ LUT Analyzer is a comprehensive command-line tool for analyzing Look-Up Tables (
 
 2. Install dependencies:
    ```bash
+   # Python dependencies
    pip install -r requirements.txt
+   
+   # Development tools (optional)
+   npm install -g repomix
    ```
 
 ## Usage
@@ -81,6 +93,13 @@ Custom output directory:
 python cube_analyzer.py path/to/lut.cube --output custom_output_dir
 ```
 
+### Development Tools
+
+Generate AI-friendly code documentation:
+```bash
+repomix --style markdown --include "**/*.py,**/*.md"
+```
+
 ### Output
 
 The analyzer generates:
@@ -93,6 +112,7 @@ The analyzer generates:
   - Transformation accuracy
 - A comprehensive technical document (Markdown)
 - Summary report for batch analysis
+- AI-friendly code documentation (via repomix)
 
 ## Technical Details
 
@@ -126,6 +146,15 @@ The project is structured for easy extension:
 - Extensible visualization system
 - Support for additional LUT formats (planned)
 - API for integration with other tools (planned)
+- Integration with AI tools for code analysis
+
+### Development Tools
+
+The project includes several development tools:
+- repomix for AI-friendly code documentation
+- Automated testing suite
+- Code quality checks
+- Performance profiling tools
 
 ## License
 
@@ -134,3 +163,125 @@ This project is licensed under the MIT License.
 ## Author
 
 makaronz
+
+## API Reference
+
+The LUT Analyzer provides a RESTful API available at `http://localhost:8080/api`. This allows you to integrate LUT analysis capabilities into your own applications.
+
+### API Endpoints
+
+#### Analyze LUT
+```http
+POST /api/analyze
+Content-Type: multipart/form-data
+
+file: LUT file (.cube format)
+```
+
+Response:
+```json
+{
+  "analysis": {
+    "colorSpaceInfo": { ... },
+    "transformationMetrics": { ... },
+    "qualityMetrics": { ... }
+  },
+  "visualizations": {
+    "rgbDistribution": "base64...",
+    "colorCurves": "base64...",
+    "gradientRamps": "base64..."
+  }
+}
+```
+
+#### Batch Analysis
+```http
+POST /api/analyze/batch
+Content-Type: multipart/form-data
+
+files: Multiple LUT files
+```
+
+Response:
+```json
+{
+  "results": [
+    {
+      "filename": "lut1.cube",
+      "analysis": { ... }
+    },
+    {
+      "filename": "lut2.cube",
+      "analysis": { ... }
+    }
+  ],
+  "summary": {
+    "totalFiles": 2,
+    "averageMetrics": { ... }
+  }
+}
+```
+
+#### Get Color Space Info
+```http
+GET /api/colorspaces
+```
+
+Response:
+```json
+{
+  "supported": [
+    "S-Log3/S-Gamut3",
+    "ARRI LogC/AWG",
+    "RED Log3G10/REDWideGamut",
+    "V-Log/V-Gamut",
+    "Rec.709"
+  ]
+}
+```
+
+### API Usage Examples
+
+Using curl:
+```bash
+# Analyze single LUT
+curl -X POST -F "file=@path/to/lut.cube" http://localhost:8080/api/analyze
+
+# Batch analysis
+curl -X POST -F "files=@lut1.cube" -F "files=@lut2.cube" http://localhost:8080/api/analyze/batch
+
+# Get supported color spaces
+curl http://localhost:8080/api/colorspaces
+```
+
+Using Python requests:
+```python
+import requests
+
+# Analyze single LUT
+with open('path/to/lut.cube', 'rb') as f:
+    response = requests.post('http://localhost:8080/api/analyze', files={'file': f})
+    results = response.json()
+
+# Batch analysis
+files = [
+    ('files', open('lut1.cube', 'rb')),
+    ('files', open('lut2.cube', 'rb'))
+]
+response = requests.post('http://localhost:8080/api/analyze/batch', files=files)
+batch_results = response.json()
+```
+
+### Running the API Server
+
+Start the API server:
+```bash
+python api_server.py
+```
+
+The server will be available at `http://localhost:8080/api`.
+
+For development, you can enable debug mode:
+```bash
+python api_server.py --debug
+```
