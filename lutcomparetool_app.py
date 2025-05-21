@@ -281,7 +281,7 @@ def analyze_lut_route():
                 'lut_info': {
                     'title': lut_data.get('title', filename),
                     'size': f"{lut_data.get('size')}",
-                    'domain_min': float(lut_data.get('domain_min')),
+                    'domain_min': float(lut_data.get('domain_min')[0] if isinstance(lut_data.get('domain_min'), list) and lut_data.get('domain_min') else lut_data.get('domain_min') or 0.0),
                     'domain_max': float(lut_data.get('domain_max')),
                     'curve_name': curve_info['description'],
                     'report_pdf': os.path.basename(report_pdf_path),
