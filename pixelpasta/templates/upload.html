@@ -36,20 +36,56 @@
         <section class="results-section" id="results" style="display: none;">
             <h2>Wyniki analizy</h2>
             
-            <div class="tabs">
-                <button class="tab-btn active" data-tab="curve-tab">Krzywa tonalna</button>
-                <button class="tab-btn" data-tab="table-tab">Tabela porównawcza</button>
-                <button class="tab-btn" data-tab="info-tab">Informacje o LUT</button>
+            <div class="tabs" role="tablist" aria-label="Sekcje wyników">
+                <button 
+                    id="curve-tab-btn"
+                    class="tab-btn active" 
+                    role="tab"
+                    aria-selected="true"
+                    aria-controls="curve-tab"
+                    tabindex="0"
+                    data-tab="curve-tab">
+                    <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 3v18h18V3H3zm16 16H5V5h14v14zM9 9v6h2V9H9zm4 3v3h2v-3h-2z"/>
+                    </svg>
+                    Krzywa tonalna
+                </button>
+                <button 
+                    id="table-tab-btn"
+                    class="tab-btn" 
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="table-tab"
+                    tabindex="-1"
+                    data-tab="table-tab">
+                    <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 5v14h18V5H3zm16 2v2H5V7h14zM5 11v2h14v-2H5zm0 4v2h14v-2H5z"/>
+                    </svg>
+                    Tabela porównawcza
+                </button>
+                <button 
+                    id="info-tab-btn"
+                    class="tab-btn" 
+                    role="tab"
+                    aria-selected="false"
+                    aria-controls="info-tab"
+                    tabindex="-1"
+                    data-tab="info-tab">
+                    <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                    </svg>
+                    Informacje o LUT
+                </button>
             </div>
             
             <div class="tab-content">
-                <div id="curve-tab" class="tab-pane active">
+                <div id="curve-tab" class="tab-pane active" role="tabpanel" aria-labelledby="curve-tab-btn">
                     <div class="chart-container">
                         <canvas id="curve-chart"></canvas>
                     </div>
                 </div>
                 
-                <div id="table-tab" class="tab-pane">
+                <div id="table-tab" class="tab-pane" role="tabpanel" aria-labelledby="table-tab-btn" hidden>
                     <div class="table-container">
                         <table id="comparison-table">
                             <thead>
@@ -68,7 +104,7 @@
                     </div>
                 </div>
                 
-                <div id="info-tab" class="tab-pane">
+                <div id="info-tab" class="tab-pane" role="tabpanel" aria-labelledby="info-tab-btn" hidden>
                     <div class="info-container">
                         <h3>Informacje o pliku LUT</h3>
                         <div id="lut-info">
