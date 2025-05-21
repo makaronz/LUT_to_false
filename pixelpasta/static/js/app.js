@@ -199,4 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
+
+    if (document.getElementById('comparison-table-container')) {
+        new ComparisonTable();
+    }
 }); 
