@@ -164,6 +164,36 @@ This project is licensed under the MIT License.
 
 makaronz
 
+## API
+
+LUT Analyzer udostępnia kompletne API REST do integracji z innymi aplikacjami. Szczegółowa dokumentacja API jest dostępna w pliku [docs/API.md](docs/API.md).
+
+Główne funkcje API:
+- Analiza pojedynczych plików LUT
+- Analiza wsadowa wielu plików
+- Informacje o przestrzeniach kolorów
+- Generowanie raportów i wizualizacji
+
+Przykład użycia API w Python:
+```python
+import requests
+
+# Inicjalizacja klienta API
+api_url = "http://localhost:8080/api"
+headers = {"Authorization": "Bearer your_token"}
+
+# Analiza pliku LUT
+with open("path/to/lut.cube", "rb") as f:
+    response = requests.post(
+        f"{api_url}/analyze",
+        headers=headers,
+        files={"file": f}
+    )
+    results = response.json()
+```
+
+Więcej przykładów i szczegółowa dokumentacja dostępne w [docs/API.md](docs/API.md).
+
 ## API Reference
 
 The LUT Analyzer provides a RESTful API available at `http://localhost:8080/api`. This allows you to integrate LUT analysis capabilities into your own applications.

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PixelPasta - Analiza plików LUT</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
 </head>
 <body>
     <header>
@@ -17,25 +18,19 @@
     <main class="container">
         <section class="upload-section">
             <h2>Prześlij plik LUT</h2>
-            <form id="upload-form" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="cube-file">Wybierz plik .CUBE:</label>
-                    <input type="file" id="cube-file" name="cube-file" accept=".cube" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="color-space">Wybierz przestrzeń barwną kamery:</label>
-                    <select id="color-space" name="color-space" required>
-                        <option value="">-- Wybierz przestrzeń --</option>
-                        <option value="S-Gamut3">S-Gamut3/S-Log3</option>
-                        <option value="S-Gamut3.Cine">S-Gamut3.Cine/S-Log3</option>
-                        <option value="LogC">ARRI LogC</option>
-                        <option value="LogC4">ARRI LogC4</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Analizuj</button>
-            </form>
+            <div id="file-upload-component-container"></div>
+            
+            <div class="form-group">
+                <label for="color-space">Wybierz przestrzeń barwną kamery:</label>
+                <select id="color-space" name="color-space" required>
+                    <option value="">-- Wybierz przestrzeń --</option>
+                    <option value="S-Gamut3">S-Gamut3/S-Log3</option>
+                    <option value="S-Gamut3.Cine">S-Gamut3.Cine/S-Log3</option>
+                    <option value="LogC">ARRI LogC</option>
+                    <option value="LogC4">ARRI LogC4</option>
+                </select>
+            </div>
+            <button type="button" id="analyze-button" class="btn btn-primary" style="display: none;">Analizuj</button>
         </section>
 
         <section class="results-section" id="results" style="display: none;">
@@ -92,6 +87,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/components/FileUpload.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
