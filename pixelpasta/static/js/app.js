@@ -135,8 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
         analyzeButton.textContent = 'Analizowanie...';
 
         const formData = new FormData();
-        formData.append('cube-file', selectedFile);
-        formData.append('color-space', colorSpaceSelect.value);
+        formData.append('lut_file', selectedFile);
+        formData.append('curve_select', colorSpaceSelect.value);
 
         fetch('/analyze', { 
             method: 'POST',
@@ -155,18 +155,31 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .then(data => {
-            console.log('Odpowiedź z serwera:', data);
+            console.log('Pełna odpowiedź z serwera:', data);
             if (data.error) {
                 alert(`Błąd analizy: ${data.error}`);
                 resultsSection.style.display = 'none';
             } else {
                 // Walidacja czy dane istnieją przed renderowaniem
-                if (data.curve_data) renderCurveChart(data.curve_data);
-                if (data.table_data && data.table_data.length > 0) renderComparisonTable(data.table_data);
-                if (data.lut_info) displayLutInfo(data.lut_info);
+                const hasData = data.curve_data || 
+                               (data.table_data && data.table_data.length > 0) || 
+                               data.lut_info;
                 
-                resultsSection.style.display = 'block';
-                // alert('Analiza zakończona sukcesem!'); // Można usunąć lub zmienić na mniej inwazyjne powiadomienie
+                if (hasData) {
+                    if (data.curve_data) renderCurveChart(data.curve_data);
+                    if (data.table_data && data.table_data.length > 0) renderComparisonTable(data.table_data);
+                    if (data.lut_info) displayLutInfo(data.lut_info);
+                    
+                    // Inicjalizuj tabelę porównawczą jeśli istnieje kontener
+                    if (document.getElementById('comparison-table-container')) {
+                        new ComparisonTable('comparison-table-container');
+                    }
+                    
+                    resultsSection.style.display = 'block';
+                } else {
+                    alert('Serwer nie zwrócił żadnych danych do wyświetlenia.');
+                    resultsSection.style.display = 'none';
+                }
             }
         })
         .catch(error => {
