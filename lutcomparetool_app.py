@@ -268,16 +268,21 @@ def analyze_lut_route():
             session['lut_title'] = lut_data.get('title', filename)
             session['curve_name'] = curve_info['description']
 
+            # Serialize numpy arrays in comparison_data for JSON
+            serialized_curve_data = {
+                k: v.tolist() if hasattr(v, 'tolist') else v
+                for k, v in comparison_data.items()
+            }
             # Zamiast przekierowania, zwracamy dane JSON
             return jsonify({
                 'status': 'success',
-                'curve_data': comparison_data,
+                'curve_data': serialized_curve_data,
                 'table_data': table_data,
                 'lut_info': {
                     'title': lut_data.get('title', filename),
                     'size': f"{lut_data.get('size')}",
-                    'domain_min': lut_data.get('domain_min'),
-                    'domain_max': lut_data.get('domain_max'),
+                    'domain_min': float(lut_data.get('domain_min')),
+                    'domain_max': float(lut_data.get('domain_max')),
                     'curve_name': curve_info['description'],
                     'report_pdf': os.path.basename(report_pdf_path),
                     'report_png': os.path.basename(report_png_path)
