@@ -8,7 +8,7 @@ from pathlib import Path
 
 # Adding type hint for Pylance to help with import resolution
 from flask import (Flask, request, render_template, redirect, url_for,  # type: ignore
-                   send_from_directory, flash, session, send_file)
+                   send_from_directory, flash, session, send_file, jsonify)
 from werkzeug.utils import secure_filename  # type: ignore
 import traceback # For detailed error logging
 try:
@@ -239,12 +239,25 @@ def analyze_lut_route():
                 use_tetrahedral=True  # Używaj dokładniejszej interpolacji tetrahedral
             )
             
+            # Przygotuj dane do tabeli porównawczej
+            table_data = []
+            input_vals = comparison_data['input_values']
+            curve_vals = comparison_data['curve_values']
+            lut_vals = comparison_data['lut_values']
+            for i in range(len(input_vals)):
+                table_data.append({
+                    'input': float(input_vals[i]),
+                    'curve': float(curve_vals[i]),
+                    'lut': float(lut_vals[i]),
+                    'delta': float(lut_vals[i] - curve_vals[i])
+                })
+            session['table_data'] = table_data
+            
             plot_title = f"LUT '{lut_data.get('title', filename)}' vs {curve_info['description']}"
             plot_lut_vs_curve(comparison_data, plot_title, report_png_path)
             
             # Użyj pełnej informacji o krzywej w raporcie
-            generate_pdf_report(lut_data, report_png_path, report_pdf_path, 
-                               curve_name=curve_info['description'])
+            generate_pdf_report(lut_data, report_png_path, report_pdf_path)
 
             print(f"Analysis completed. Reports in: {app.config['REPORTS_FOLDER']}")
             flash('Analysis completed successfully!', 'success')
@@ -335,12 +348,25 @@ def analyze_batch_route():
                     use_tetrahedral=True  # Używaj dokładniejszej interpolacji tetrahedral
                 )
                 
+                # Przygotuj dane do tabeli porównawczej
+                table_data = []
+                input_vals = comparison_data['input_values']
+                curve_vals = comparison_data['curve_values']
+                lut_vals = comparison_data['lut_values']
+                for i in range(len(input_vals)):
+                    table_data.append({
+                        'input': float(input_vals[i]),
+                        'curve': float(curve_vals[i]),
+                        'lut': float(lut_vals[i]),
+                        'delta': float(lut_vals[i] - curve_vals[i])
+                    })
+                session['table_data'] = table_data
+                
                 plot_title = f"LUT '{lut_data.get('title', filename)}' vs {curve_info['description']}"
                 plot_lut_vs_curve(comparison_data, plot_title, report_png_path)
                 
                 # Użyj pełnej informacji o krzywej w raporcie
-                generate_pdf_report(lut_data, report_png_path, report_pdf_path, 
-                                   curve_name=curve_info['description'])
+                generate_pdf_report(lut_data, report_png_path, report_pdf_path)
                 
                 successful_files.append({
                     'filename': filename,
@@ -538,6 +564,12 @@ def serve_report(filename):
 def about_page():
     """Displays information about the application."""
     return render_template('about.html')
+
+@app.route('/table-data')
+def table_data():
+    """Zwraca dane do tabeli porównawczej w formacie JSON."""
+    table = session.get('table_data', [])
+    return jsonify(table)
 
 # --- Error Handlers ---
 @app.errorhandler(404)
