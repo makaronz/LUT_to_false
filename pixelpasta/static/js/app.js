@@ -1,8 +1,7 @@
-console.log('PixelPasta App Initialized');
+import Toast from './components/Toast.js';
+import FileUpload from './components/FileUpload.js';
 
-// Zakładamy, że FileUpload.js dodał klasę FileUpload do window
-// W przyszłości można to zmienić na import modułów ES6:
-// import FileUpload from './components/FileUpload.js';
+console.log('PixelPasta App Initialized');
 
 let curveChartInstance = null; // Zmienna do przechowywania instancji wykresu
 
@@ -82,6 +81,61 @@ function displayLutInfo(lutInfo) {
     }
 }
 
+function setupTabs() {
+    const tabButtons = document.querySelectorAll('.tabs [role="tab"]');
+    const tabPanels = document.querySelectorAll('.tab-content [role="tabpanel"]');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchTab(button);
+        });
+
+        // Obsługa klawiatury
+        button.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                switchTab(button);
+            }
+
+            // Nawigacja strzałkami
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                const direction = e.key === 'ArrowRight' ? 1 : -1;
+                const nextIndex = (Array.from(tabButtons).indexOf(button) + direction + tabButtons.length) % tabButtons.length;
+                tabButtons[nextIndex].focus();
+            }
+        });
+    });
+
+    function switchTab(button) {
+        const targetId = button.getAttribute('aria-controls');
+        
+        // Zaktualizuj stan przycisków
+        tabButtons.forEach(btn => {
+            btn.setAttribute('aria-selected', 'false');
+            btn.setAttribute('tabindex', '-1');
+            btn.classList.remove('active');
+        });
+        
+        button.setAttribute('aria-selected', 'true');
+        button.setAttribute('tabindex', '0');
+        button.classList.add('active');
+        
+        // Zaktualizuj panele
+        tabPanels.forEach(panel => {
+            panel.classList.remove('active');
+            panel.setAttribute('hidden', '');
+        });
+        
+        const targetPanel = document.getElementById(targetId);
+        targetPanel.classList.add('active');
+        targetPanel.removeAttribute('hidden');
+        
+        // Przewiń do zawartości (dla urządzeń mobilnych)
+        targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded and parsed');
 
@@ -98,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectedFile = null;
                 analyzeButton.style.display = 'none';
                 resultsSection.style.display = 'none';
+                Toast.error(error);
             } else {
                 console.log('Wybrany plik:', file.name);
                 selectedFile = file;
@@ -122,11 +177,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     analyzeButton.addEventListener('click', () => {
         if (!selectedFile) {
-            alert('Proszę najpierw wybrać plik .CUBE.');
+            Toast.warning('Proszę najpierw wybrać plik .CUBE.');
             return;
         }
         if (!colorSpaceSelect.value) {
-            alert('Proszę wybrać przestrzeń barwną kamery.');
+            Toast.warning('Proszę wybrać przestrzeń barwną kamery.');
             return;
         }
 
@@ -144,11 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(response => {
             if (!response.ok) {
-                // Spróbuj odczytać błąd jako JSON, jeśli serwer tak go wysyła
                 return response.json().then(errData => {
                     throw new Error(errData.error || `Błąd serwera: ${response.status}`);
                 }).catch(() => {
-                    // Jeśli odpowiedź błędu nie jest JSONem
                     throw new Error(`Błąd serwera: ${response.status} ${response.statusText}`);
                 });
             }
@@ -157,10 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             console.log('Pełna odpowiedź z serwera:', data);
             if (data.error) {
-                alert(`Błąd analizy: ${data.error}`);
+                Toast.error(`Błąd analizy: ${data.error}`);
                 resultsSection.style.display = 'none';
             } else {
-                // Walidacja czy dane istnieją przed renderowaniem
                 const hasData = data.curve_data || 
                                (data.table_data && data.table_data.length > 0) || 
                                data.lut_info;
@@ -170,21 +222,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.table_data && data.table_data.length > 0) renderComparisonTable(data.table_data);
                     if (data.lut_info) displayLutInfo(data.lut_info);
                     
-                    // Inicjalizuj tabelę porównawczą jeśli istnieje kontener
                     if (document.getElementById('comparison-table-container')) {
                         new ComparisonTable('comparison-table-container');
                     }
                     
                     resultsSection.style.display = 'block';
+                    Toast.success('Analiza zakończona pomyślnie!'); // Success toast
                 } else {
-                    alert('Serwer nie zwrócił żadnych danych do wyświetlenia.');
+                    Toast.info('Serwer nie zwrócił żadnych danych do wyświetlenia.');
                     resultsSection.style.display = 'none';
                 }
             }
         })
         .catch(error => {
+            Toast.error(`Wystąpił błąd: ${error.message}`);
             console.error('Błąd podczas wysyłania żądania analizy:', error);
-            alert(`Wystąpił błąd: ${error.message}`);
             resultsSection.style.display = 'none';
         })
         .finally(() => {
@@ -193,25 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Obsługa zakładek (tabs)
-    const tabButtons = document.querySelectorAll('.tabs .tab-btn');
-    const tabPanes = document.querySelectorAll('.tab-content .tab-pane');
-
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-
-            const targetTab = button.getAttribute('data-tab');
-            tabPanes.forEach(pane => {
-                if (pane.id === targetTab) {
-                    pane.classList.add('active');
-                } else {
-                    pane.classList.remove('active');
-                }
-            });
-        });
-    });
+    setupTabs(); // Inicjalizacja zakładek
 
     if (document.getElementById('comparison-table-container')) {
         new ComparisonTable('comparison-table-container');
