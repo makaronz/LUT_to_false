@@ -141,6 +141,13 @@ CURVE_INFO = {
         "color_transform": red_wide_gamut_rgb_to_rec709,
         "description": "RED Log Film"
     },
+    "red_ipp2_odt_approx": {
+        "curve_func": linear_to_red_ipp2_odt_approx,
+        "inverse_func": red_ipp2_odt_approx_to_linear,
+        "color_space": "red_wide_gamut_rgb",
+        "color_transform": red_wide_gamut_rgb_to_rec709,
+        "description": "RED IPP2 ODT Approximation"
+    },
     
     # Other Curves
     "vlog": {
