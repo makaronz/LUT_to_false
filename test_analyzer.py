@@ -2,33 +2,25 @@ from gemini_analyzer import GeminiAnalyzer
 from config import GEMINI_API_KEY
 import os
 
+
 def test_analyzer():
-    try:
-        # Inicjalizacja analizatora
-        analyzer = GeminiAnalyzer(GEMINI_API_KEY)
-        
-        # Testowa analiza pliku
-        test_file = "example.txt"
-        
-        if not os.path.exists(test_file):
-            print(f"Błąd: Plik {test_file} nie istnieje!")
-            return
-            
-        results = analyzer.analyze_file(test_file, "general")
-        
-        if "error" in results:
-            print(f"Błąd podczas analizy: {results['error']}")
-            return
-            
-        print("\nWyniki analizy:")
-        print(f"Nazwa pliku: {results.get('file_name', 'Brak')}")
-        print(f"Typ analizy: {results.get('analysis_type', 'Brak')}")
-        print("\nPodsumowanie:")
-        print(results.get('content_summary', 'Brak podsumowania'))
-        print(f"\nUżyte tokeny: {results.get('tokens_used', 'Brak informacji')}")
-        
-    except Exception as e:
-        print(f"Nieoczekiwany błąd: {str(e)}")
+    """Test basic file analysis using GeminiAnalyzer."""
+
+    analyzer = GeminiAnalyzer(GEMINI_API_KEY)
+    test_file = "example.txt"
+
+    # Plik testowy musi istnieć
+    assert os.path.exists(test_file), f"Plik {test_file} nie istnieje"
+
+    # Wykonaj analizę
+    results = analyzer.analyze_file(test_file, "general")
+
+    # Sprawdzenie poprawności wyników
+    assert "error" not in results, f"Błąd podczas analizy: {results.get('error')}"
+    assert results.get("file_name") == os.path.basename(test_file)
+    assert results.get("analysis_type") == "general"
+    assert "content_summary" in results
+
 
 if __name__ == "__main__":
-    test_analyzer() 
+    test_analyzer()
