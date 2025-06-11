@@ -1,5 +1,32 @@
 import numpy as np
 import pytest
+import pytest
+
+try:
+    import lut_analysis
+except ImportError:
+    pytest.skip("lut_analysis module not available", allow_module_level=True)
+
+from lut_analysis import (
+    load_cube_file,
+    slog3_curve,
+    inverse_slog3_curve,
+    rec709_oetf,
+    rec709_curve,
+    interpolate_1d_lut,
+    interpolate_3d_lut,
+    arri_logc4_encode,
+    arri_logc4_decode,
+    arri_logc4_to_xyz,
+    arri_logc4_to_aces,
+    slog3_encode,
+    slog3_decode,
+    log3g10_encode,
+    log3g10_decode,
+    s_gamut3_to_rec709,
+    s_gamut3_cine_to_rec709,
+    generate_table
+)
 from lut_analysis import (
     load_cube_file,
     slog3_curve,
