@@ -306,12 +306,7 @@ batch_results = response.json()
 
 Start the API server:
 ```bash
-python api_server.py
+python lutcomparetool_app.py
 ```
 
 The server will be available at `http://localhost:8080/api`.
-
-For development, you can enable debug mode:
-```bash
-python api_server.py --debug
-```
