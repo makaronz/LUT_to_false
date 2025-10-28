@@ -2,5 +2,13 @@
     "cursor.cpp.disabledLanguages": [],
     "cursor.general.gitGraphIndexing": "enabled",
     "workbench.commandPalette.experimental.enableNaturalLanguageSearch": true,
-    "cmake.ignoreCMakeListsMissing": true
+    "cmake.ignoreCMakeListsMissing": true,
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/.hg/store/**": true,
+        "**/.git/**": true,
+        "**/node_modules/**": true,
+        "**/.vscode/**": true
+    }
 }
