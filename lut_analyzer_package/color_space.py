@@ -10,47 +10,56 @@ from typing import List, Union, Optional
 # Precyzyjne transformacje przestrzeni kolorów
 # =========================================
 
-# Oficjalne macierze transformacji z dokumentacji producentów
-# Wszystkie macierze są zdefiniowane z maksymalną precyzją
+# Macierze konwersji gamutu (RGB -> RGB, oba w bieli D65).
+#
+# Wyprowadzone z oficjalnie publikowanych chromatyczności primaries każdej
+# przestrzeni metodą normalized primary matrix (NPM):
+#     M_src->709 = NPM(Rec.709, D65)^-1 @ NPM(src, D65)
+# Poprawność zweryfikowana względem oficjalnie opublikowanej macierzy
+# ARRI AWG3 -> Rec.709 (zgodność do ~1e-6). Każdy wiersz sumuje się do 1,
+# co jest wymogiem dla konwersji D65 -> D65.
+#
+# Primaries (x, y):
+#   S-Gamut3        R(0.730, 0.280)   G(0.140, 0.855)   B(0.100, -0.050)
+#   S-Gamut3.Cine   R(0.766, 0.275)   G(0.225, 0.800)   B(0.089, -0.087)
+#   ARRI AWG3       R(0.6840,0.3130)  G(0.2210,0.8480)  B(0.0861,-0.1020)
+#   ARRI AWG4       R(0.7347,0.2653)  G(0.1424,0.8576)  B(0.0991,-0.0308)
+#   RED Wide Gamut  R(0.780308,0.304253) G(0.121595,1.493994) B(0.095612,-0.084589)
+#   Biała D65       (0.3127, 0.3290)
 MATRIX_MAP = {
-    # Sony S-Gamut3 -> Rec.709 
-    # Źródło: Oficjalna dokumentacja Sony
+    # Sony S-Gamut3 -> Rec.709
     "sgamut3_to_rec709": np.array([
-        [ 1.71665119,  -0.66662969,  -0.05002750],
-        [-0.35567078,   1.61648124,  -0.26081045],
-        [-0.25336628,  -0.50001507,   1.75337735]
+        [ 1.87791513, -0.79416876, -0.08374637],
+        [-0.17680698,  1.35099962, -0.17419264],
+        [-0.02620113, -0.14842226,  1.17462339]
     ], dtype=np.float64),
-    
-    # Sony S-Gamut3.cine -> Rec.709
-    # Źródło: Oficjalna dokumentacja Sony
+
+    # Sony S-Gamut3.Cine -> Rec.709
     "sgamut3_cine_to_rec709": np.array([
-        [ 1.84667249,  -0.55303082,  -0.29364168],
-        [-0.42109258,   1.42019374,  -0.01909525],
-        [-0.01412169,  -0.11498444,   1.12910614]
+        [ 1.62694741, -0.54013854, -0.08680887],
+        [-0.17851553,  1.41794093, -0.23942540],
+        [-0.04443612, -0.19591997,  1.24035608]
     ], dtype=np.float64),
-    
+
     # ARRI Wide Gamut 4 -> Rec.709
-    # Źródło: Dokumentacja ARRI
     "arri_wide_gamut4_to_rec709": np.array([
-        [ 2.15099497,  -0.68851802,  -0.46247694],
-        [-0.54128936,   1.81933229,  -0.27802148],
-        [ 0.00281646,  -0.08611581,   1.08329936]
+        [ 1.89312344, -0.78088150, -0.11224194],
+        [-0.20570036,  1.34025749, -0.13455713],
+        [-0.01270574, -0.15218488,  1.16489062]
     ], dtype=np.float64),
-    
+
     # ARRI Wide Gamut 3 -> Rec.709
-    # Źródło: Dokumentacja ARRI
     "arri_wide_gamut3_to_rec709": np.array([
-        [ 1.79627079,  -0.53681690,  -0.25945389],
-        [-0.48520276,   1.67177116,  -0.18656840],
-        [ 0.02785537,  -0.10264606,   1.07479068]
+        [ 1.61752344, -0.53728662, -0.08023681],
+        [-0.07057274,  1.33461306, -0.26404032],
+        [-0.02110173, -0.22695388,  1.24805560]
     ], dtype=np.float64),
-    
+
     # RED Wide Gamut RGB -> Rec.709
-    # Źródło: Dokumentacja RED
     "red_wide_gamut_rgb_to_rec709": np.array([
-        [ 1.36224675,  -0.14331954,  -0.21892721],
-        [-0.22619444,   1.27722674,  -0.05103232],
-        [ 0.07081574,  -0.15063514,   1.07981942]
+        [ 1.98197602, -0.90043184, -0.08154418],
+        [-0.17814318,  1.50046836, -0.32232518],
+        [-0.10179597, -0.53526346,  1.63705943]
     ], dtype=np.float64),
 }
 

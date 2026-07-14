@@ -391,8 +391,9 @@ class LUTTransformationAnalyzer:
                 g_idx = min(int(g * scale), scale)
                 b_idx = min(int(b * scale), scale)
                 
-                # Get LUT value (assuming LUT is stored in RGB order)
-                lut_idx = r_idx * lut_size * lut_size + g_idx * lut_size + b_idx
+                # Adobe .cube order: red varies fastest, so it has stride 1
+                # and blue the largest stride (N*N).
+                lut_idx = b_idx * lut_size * lut_size + g_idx * lut_size + r_idx
                 if lut_idx < len(self.lut_data):
                     output[i] = self.lut_data[lut_idx]
                 else:

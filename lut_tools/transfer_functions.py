@@ -105,133 +105,94 @@ class TransferFunctions:
         S-Log3 to linear conversion
         Based on Sony's S-Log3 specification
         """
-        if isinstance(slog3, np.ndarray):
-            result = np.zeros_like(slog3)
-            low_range = slog3 < 171.2102946929 / 1023.0
-            high_range = ~low_range
-            
-            result[low_range] = (slog3[low_range] * 1023.0 / 95.0) - (171.2102946929 / 95.0)
-            result[high_range] = np.power(10.0, ((slog3[high_range] * 1023.0 - 420.0) / 261.5)) * (0.18 + 0.01) - 0.01
-            return result
-        else:
-            if slog3 < 171.2102946929 / 1023.0:
-                return (slog3 * 1023.0 / 95.0) - (171.2102946929 / 95.0)
-            else:
-                return np.power(10.0, ((slog3 * 1023.0 - 420.0) / 261.5)) * (0.18 + 0.01) - 0.01
-    
+        scalar = not isinstance(slog3, np.ndarray)
+        s = np.asarray(slog3, dtype=np.float64)
+        cv = s * 1023.0
+        result = np.where(
+            cv >= 171.2102946929,
+            np.power(10.0, (cv - 420.0) / 261.5) * (0.18 + 0.01) - 0.01,
+            (cv - 95.0) * 0.01125 / (171.2102946929 - 95.0),
+        )
+        return float(result) if scalar else result
+
     @staticmethod
     def linear_to_slog3(linear):
         """
         Linear to S-Log3 conversion
         Based on Sony's S-Log3 specification
         """
-        if isinstance(linear, np.ndarray):
-            result = np.zeros_like(linear)
-            low_range = linear < 0.01125000
-            high_range = ~low_range
-            
-            result[low_range] = (95.0 * linear[low_range] + 171.2102946929) / 1023.0
-            result[high_range] = (420.0 + 261.5 * np.log10((linear[high_range] + 0.01) / (0.18 + 0.01))) / 1023.0
-            return result
-        else:
-            if linear < 0.01125000:
-                return (95.0 * linear + 171.2102946929) / 1023.0
-            else:
-                return (420.0 + 261.5 * np.log10((linear + 0.01) / (0.18 + 0.01))) / 1023.0
+        scalar = not isinstance(linear, np.ndarray)
+        lin = np.asarray(linear, dtype=np.float64)
+        result = np.where(
+            lin >= 0.01125,
+            (420.0 + 261.5 * np.log10((lin + 0.01) / (0.18 + 0.01))) / 1023.0,
+            (lin * (171.2102946929 - 95.0) / 0.01125 + 95.0) / 1023.0,
+        )
+        return float(result) if scalar else result
     
+    # ARRI LogC3 EI800 parameters (encode: t = c*log10(a*x+b)+d for x>cut,
+    # else e*x+f; decode is the exact inverse). The previous implementation
+    # scrambled these roles and produced values like -4.93 for 18% grey.
+    _LOGC = dict(cut=0.010591, a=5.555556, b=0.052272,
+                 c=0.247190, d=0.385537, e=5.367655, f=0.092809)
+
     @staticmethod
     def logc_to_linear(logc):
         """
-        ARRI LogC to linear conversion (EI 800, SUP 3.x)
+        ARRI LogC3 to linear conversion (EI 800)
         """
-        if isinstance(logc, np.ndarray):
-            result = np.zeros_like(logc)
-            low_range = logc < 0.1496582
-            high_range = ~low_range
-            
-            # LogC parameters for EI 800
-            cut = 0.010591
-            a = 5.555556
-            b = 0.052272
-            c = 0.247190
-            d = 0.385537
-            e = 5.367655
-            f = 0.092809
-            
-            result[low_range] = (logc[low_range] - c) / a
-            result[high_range] = (np.power(10.0, (logc[high_range] - d) / e) - f) / b
-            return result
-        else:
-            # LogC parameters for EI 800
-            cut = 0.010591
-            a = 5.555556
-            b = 0.052272
-            c = 0.247190
-            d = 0.385537
-            e = 5.367655
-            f = 0.092809
-            
-            if logc < 0.1496582:
-                return (logc - c) / a
-            else:
-                return (np.power(10.0, (logc - d) / e) - f) / b
-    
+        p = TransferFunctions._LOGC
+        scalar = not isinstance(logc, np.ndarray)
+        t = np.asarray(logc, dtype=np.float64)
+        log_cut = p['e'] * p['cut'] + p['f']  # 0.149658
+        result = np.where(
+            t > log_cut,
+            (np.power(10.0, (t - p['d']) / p['c']) - p['b']) / p['a'],
+            (t - p['f']) / p['e'],
+        )
+        return float(result) if scalar else result
+
     @staticmethod
     def linear_to_logc(linear):
         """
-        Linear to ARRI LogC conversion (EI 800, SUP 3.x)
+        Linear to ARRI LogC3 conversion (EI 800)
         """
-        if isinstance(linear, np.ndarray):
-            result = np.zeros_like(linear)
-            low_range = linear < 0.010591
-            high_range = ~low_range
-            
-            # LogC parameters for EI 800
-            cut = 0.010591
-            a = 5.555556
-            b = 0.052272
-            c = 0.247190
-            d = 0.385537
-            e = 5.367655
-            f = 0.092809
-            
-            result[low_range] = c + a * linear[low_range]
-            result[high_range] = d + e * np.log10(b * linear[high_range] + f)
-            return result
-        else:
-            # LogC parameters for EI 800
-            cut = 0.010591
-            a = 5.555556
-            b = 0.052272
-            c = 0.247190
-            d = 0.385537
-            e = 5.367655
-            f = 0.092809
-            
-            if linear < cut:
-                return c + a * linear
-            else:
-                return d + e * np.log10(b * linear + f)
+        p = TransferFunctions._LOGC
+        scalar = not isinstance(linear, np.ndarray)
+        x = np.asarray(linear, dtype=np.float64)
+        result = np.where(
+            x > p['cut'],
+            p['c'] * np.log10(p['a'] * x + p['b']) + p['d'],
+            p['e'] * x + p['f'],
+        )
+        return float(result) if scalar else result
     
     @staticmethod
     def redlog3g10_to_linear(redlog):
         """
-        RED Log3G10 to linear conversion
+        RED Log3G10 (v2) to linear conversion
         """
-        if isinstance(redlog, np.ndarray):
-            return (np.power(10.0, (redlog - 0.616596 - 0.03) / 0.224282) - 1) / 155.975327
-        else:
-            return (np.power(10.0, (redlog - 0.616596 - 0.03) / 0.224282) - 1) / 155.975327
-    
+        scalar = not isinstance(redlog, np.ndarray)
+        y = np.asarray(redlog, dtype=np.float64)
+        x = np.where(y >= 0.0,
+                     (np.power(10.0, y / 0.224282) - 1.0) / 155.975327,
+                     y / 15.1927)
+        result = x - 0.01
+        return float(result) if scalar else result
+
     @staticmethod
     def linear_to_redlog3g10(linear):
         """
-        Linear to RED Log3G10 conversion
+        Linear to RED Log3G10 (v2) conversion.
+        y = 0.224282*log10(x'*155.975327+1) for x' >= 0 (x' = linear+0.01),
+        else y = x'*15.1927. The previous +0.616596 offset was spurious.
         """
-        if isinstance(linear, np.ndarray):
-            return 0.224282 * np.log10(155.975327 * linear + 1.0) + 0.616596 + 0.03
-        else:
-            return 0.224282 * np.log10(155.975327 * linear + 1.0) + 0.616596 + 0.03
+        scalar = not isinstance(linear, np.ndarray)
+        x = np.asarray(linear, dtype=np.float64) + 0.01
+        result = np.where(x >= 0.0,
+                          0.224282 * np.log10(x * 155.975327 + 1.0),
+                          x * 15.1927)
+        return float(result) if scalar else result
     
     @staticmethod
     def vlog_to_linear(vlog):

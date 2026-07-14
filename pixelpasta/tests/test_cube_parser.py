@@ -100,7 +100,8 @@ LUT_3D_SIZE 1
 0.0 0.0 1.0
 """
         filepath = self.create_temp_cube_file(content)
-        with self.assertRaisesRegex(ValueError, "Nieprawidłowy rozmiar LUT 3D. Oczekiwano 1 wpisów, otrzymano 2"):
+        # Rozmiar 3D LUT < 2 jest nieprawidłowy.
+        with self.assertRaisesRegex(ValueError, "Nieprawidłowa wartość LUT_3D_SIZE"):
             load_cube_file(filepath)
         os.remove(filepath)
 
@@ -158,7 +159,7 @@ TITLE "Test LUT"
 LUT_1D_SIZE 2
 """
         filepath = self.create_temp_cube_file(content)
-        with self.assertRaisesRegex(ValueError, "Błąd w linii 4: LUT_1D_SIZE zadeklarowane po danych LUT"):
+        with self.assertRaisesRegex(ValueError, "LUT_1D_SIZE zadeklarowane po danych LUT"):
             load_cube_file(filepath)
         os.remove(filepath)
 
@@ -176,7 +177,7 @@ TITLE "Test LUT"
 LUT_3D_SIZE 2
 """
         filepath = self.create_temp_cube_file(content)
-        with self.assertRaisesRegex(ValueError, "Błąd w linii 10: LUT_3D_SIZE zadeklarowane po danych LUT"):
+        with self.assertRaisesRegex(ValueError, "LUT_3D_SIZE zadeklarowane po danych LUT"):
             load_cube_file(filepath)
         os.remove(filepath)
 

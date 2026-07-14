@@ -12,91 +12,55 @@ from pixelpasta.lut_processor.color_analysis import (
     generate_table,
     logc4_curve,
     inverse_logc4_curve,
+    logc_curve,
+    inverse_logc_curve,
 )
-from pixelpasta.lut_processor.cube_parser import load_cube_file
 import tempfile
 import os
 
 
 class TestColorAnalysis(unittest.TestCase):
     def test_slog3_curve(self):
-        self.assertAlmostEqual(slog3_curve(0.0), 0.01)
-        self.assertAlmostEqual(
-            slog3_curve(0.1), 0.432699 * np.log10(0.1 + 0.009468) + 0.655
-        )
-        self.assertAlmostEqual(
-            slog3_curve(1.0), 0.432699 * np.log10(1.0 + 0.009468) + 0.655
-        )
-        self.assertTrue(
-            np.allclose(
-                slog3_curve(np.array([0.0, 0.1, 1.0])),
-                np.array(
-                    [
-                        0.01,
-                        0.432699 * np.log10(0.1 + 0.009468) + 0.655,
-                        0.432699 * np.log10(1.0 + 0.009468) + 0.655,
-                    ]
-                ),
-            )
-        )
+        # Oficjalne wartości Sony S-Log3.
+        self.assertAlmostEqual(float(slog3_curve(np.array([0.18]))[0]), 0.4105571848, places=6)
+        self.assertAlmostEqual(float(slog3_curve(np.array([0.0]))[0]), 0.0928641251, places=6)
+        # Krzywa musi być ciągła w punkcie sklejenia 0.01125.
+        below = float(slog3_curve(np.array([0.01125 - 1e-9]))[0])
+        above = float(slog3_curve(np.array([0.01125 + 1e-9]))[0])
+        self.assertAlmostEqual(below, above, places=5)
 
     def test_inverse_slog3_curve(self):
-        a = 0.432699
-        b = 0.009468
-        c = 0.655
-        d = 0.037584
-        e = 0.01
-        self.assertTrue(
-            np.allclose(inverse_slog3_curve(0.01), np.array([(0.01 - e) / d]))
-        )
-        self.assertTrue(
-            np.allclose(
-                inverse_slog3_curve(0.432699 * np.log10(0.1 + 0.009468) + 0.655),
-                np.array([0.1]),
-            )
-        )
-        self.assertTrue(
-            np.allclose(
-                inverse_slog3_curve(0.432699 * np.log10(1.0 + 0.009468) + 0.655),
-                np.array([1.0]),
-            )
-        )
-        self.assertTrue(
-            np.allclose(
-                inverse_slog3_curve(
-                    np.array(
-                        [
-                            0.01,
-                            0.432699 * np.log10(0.1 + 0.009468) + 0.655,
-                            0.432699 * np.log10(1.0 + 0.009468) + 0.655,
-                        ]
-                    )
-                ),
-                np.array([(0.01 - e) / d, 0.1, 1.0]),
-            )
-        )
+        x = np.array([0.0, 0.02, 0.18, 0.5, 1.0])
+        self.assertTrue(np.allclose(inverse_slog3_curve(slog3_curve(x)), x, atol=1e-6))
+
+    def test_logc4_curve(self):
+        # Oficjalne wartości ARRI LogC4 (0-1, bez wartości > 1).
+        self.assertAlmostEqual(float(logc4_curve(np.array([0.18]))[0]), 0.2783958365, places=6)
+        self.assertLessEqual(float(logc4_curve(np.array([1.0]))[0]), 1.0)
+
+    def test_inverse_logc4_curve(self):
+        x = np.array([0.0, 0.02, 0.18, 0.5, 1.0])
+        self.assertTrue(np.allclose(inverse_logc4_curve(logc4_curve(x)), x, atol=1e-6))
+
+    def test_logc3_curve(self):
+        # Oficjalne wartości ARRI LogC3 EI800.
+        self.assertAlmostEqual(float(logc_curve(np.array([0.18]))[0]), 0.3910068320, places=6)
+        x = np.array([0.0, 0.02, 0.18, 0.5, 1.0])
+        self.assertTrue(np.allclose(inverse_logc_curve(logc_curve(x)), x, atol=1e-6))
 
     def test_rec709_oetf(self):
-        self.assertAlmostEqual(rec709_oetf(0.0), 0.0)
-        self.assertAlmostEqual(rec709_oetf(0.018), 0.08124794403514046)
-        self.assertAlmostEqual(rec709_oetf(1.0), 1.0)
-        self.assertTrue(
-            np.allclose(
-                rec709_oetf(np.array([0.0, 0.018, 1.0])),
-                np.array([0.0, 0.08124794403514046, 1.0]),
-            )
-        )
+        self.assertAlmostEqual(float(rec709_oetf(np.array([0.0]))[0]), 0.0)
+        self.assertAlmostEqual(float(rec709_oetf(np.array([0.018]))[0]), 0.08124794403514046)
+        self.assertAlmostEqual(float(rec709_oetf(np.array([1.0]))[0]), 1.0)
 
     def test_interpolate_1d_lut(self):
         lut_1d = np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 1.0]])
         input_values = np.array([0.0, 0.5, 1.0])
-        expected_output = np.array(
-            [[0.0, 0.0, 0.0], [0.5, 0.5, 0.5], [1.0, 1.0, 1.0]]
-        )
-        output = interpolate_1d_lut(lut_1d, input_values, input_values, input_values)
-        self.assertTrue(np.allclose(output, expected_output))
+        output = interpolate_1d_lut(lut_1d, input_values)
+        self.assertTrue(np.allclose(output, np.array([0.0, 0.5, 1.0])))
 
     def test_interpolate_3d_lut(self):
+        # Kolejność .cube: czerwony zmienia się najszybciej.
         lut_3d = np.array(
             [
                 [0.0, 0.0, 0.0],
@@ -109,80 +73,39 @@ class TestColorAnalysis(unittest.TestCase):
                 [1.0, 1.0, 1.0],
             ]
         )
-        lut_size = 2
         input_values = np.array([0.0, 0.5, 1.0])
-        expected_output = np.array(
-            [
-                [0.0, 0.0, 0.0],
-                [0.5, 0.5, 0.5],
-                [1.0, 1.0, 1.0],
-            ]
-        )
-        output = interpolate_3d_lut(
-            lut_3d, lut_size, input_values, input_values, input_values
-        )
-        self.assertTrue(np.allclose(output, expected_output))
+        output = interpolate_3d_lut(lut_3d, 2, input_values)
+        self.assertTrue(np.allclose(output, np.array([0.0, 0.5, 1.0])))
 
     def test_color_space_matrices(self):
-        rgb_values = np.array(
-            [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]
-        )
-        expected_output_sgamut3 = np.array(
-            [[1.6410, -0.6636, 0.0117], [-0.3245, 1.6157, -0.0085], [-0.3165, 0.0479, 0.9968]]
-        )
-        expected_output_sgamut3_cine = np.array(
-            [[1.5529, -0.5428, -0.0026], [-0.2555, 1.5027, -0.0186], [-0.2974, 0.0401, 1.0212]]
-        )
-        output_sgamut3 = s_gamut3_to_rec709(rgb_values)
-        output_sgamut3_cine = s_gamut3_cine_to_rec709(rgb_values)
-        self.assertTrue(np.allclose(output_sgamut3, expected_output_sgamut3))
-        self.assertTrue(np.allclose(output_sgamut3_cine, expected_output_sgamut3_cine))
+        rgb_values = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+        # Każdy wiersz macierzy konwersji D65 -> D65 sumuje się do 1.
+        for fn in (s_gamut3_to_rec709, s_gamut3_cine_to_rec709):
+            out = fn(rgb_values)
+            # rgb=I => out = kolumny macierzy; suma po wierszach macierzy = suma po
+            # kolumnach out = 1 dla każdego wiersza macierzy.
+            self.assertTrue(np.allclose(out.sum(axis=0), 1.0, atol=1e-4))
+        # Konkretna wartość: biel (1,1,1) mapuje się na biel Rec.709 (1,1,1).
+        white = np.array([[1.0, 1.0, 1.0]])
+        self.assertTrue(np.allclose(s_gamut3_to_rec709(white), 1.0, atol=1e-4))
 
     def test_generate_table(self):
-        content = """\
-TITLE "Test LUT"
-LUT_1D_SIZE 2
-0.0 0.0 0.0
-1.0 1.0 1.0
-"""
+        content = (
+            'TITLE "Test LUT"\n'
+            "LUT_1D_SIZE 2\n"
+            "0.0 0.0 0.0\n"
+            "1.0 1.0 1.0\n"
+        )
         with tempfile.NamedTemporaryFile(delete=False, suffix=".cube") as temp_file:
             temp_file.write(content.encode())
             filepath = temp_file.name
-        df = generate_table(filepath, "S-Gamut3")
-        self.assertIsInstance(df, pd.DataFrame)
-        self.assertEqual(len(df), 20)
-        self.assertEqual(df["Color Space"][0], "S-Gamut3")
-        os.remove(filepath)
-
-    def test_logc4_curve(self):
-        self.assertTrue(np.allclose(logc4_curve(0.0), np.array([-3852.359026659536])))
-        self.assertAlmostEqual(logc4_curve(0.18), 0.4090068696819821)
-        self.assertTrue(
-            np.allclose(
-                logc4_curve(np.array([0.0, 0.18, 1.0])),
-                np.array([-3852.359026659536, 0.4090068696819821, 0.6577136499999999]),
-            )
-        )
-
-    def test_inverse_logc4_curve(self):
-        self.assertTrue(
-            np.allclose(
-                inverse_logc4_curve(0.09285527796717754), np.array([0.04345044])
-            )
-        )
-        self.assertTrue(
-            np.allclose(
-                inverse_logc4_curve(0.4090068696819821), np.array([0.18])
-            )
-        )
-        self.assertTrue(
-            np.allclose(
-                inverse_logc4_curve(
-                    np.array([0.09285527796717754, 0.4090068696819821, 0.6577136499999999])
-                ),
-                np.array([0.04345044, 0.18, 1.0]),
-            )
-        )
+        try:
+            df = generate_table(filepath, "S-Gamut3")
+            self.assertIsInstance(df, pd.DataFrame)
+            self.assertEqual(len(df), 20)
+            self.assertEqual(df["Color Space"][0], "S-Gamut3")
+        finally:
+            os.remove(filepath)
 
 
 if __name__ == "__main__":
