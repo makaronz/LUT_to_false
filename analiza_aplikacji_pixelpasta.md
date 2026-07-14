@@ -1,3 +1,13 @@
+> ## ⚠️ ERRATA (sprostowanie)
+>
+> Ten dokument opisuje elementy, których **nie ma** w repozytorium:
+> - katalog `ios_app` ze „szkieletem aplikacji mobilnej Flutter" — nie istnieje,
+> - zależność `scikit-learn` („uczenie maszynowe") — nie jest używana ani
+>   wymieniona w `requirements.txt`.
+>
+> Faktycznie używana, a pominięta w opisie zależność to `pandas`. Poniższą treść
+> pozostawiono jako zapis historyczny — należy ją czytać krytycznie.
+
 # Analiza aplikacji PixelPasta do przetwarzania plików LUT
 
 ## 1. Ogólny przegląd aplikacji

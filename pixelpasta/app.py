@@ -192,4 +192,7 @@ def test():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Debug wyłączony domyślnie; włącz świadomie przez FLASK_DEBUG=1.
+    # debug=True udostępnia debugger Werkzeuga (zdalne wykonanie kodu).
+    debug = os.environ.get('FLASK_DEBUG', '').lower() in ('1', 'true', 'yes')
+    app.run(debug=debug)

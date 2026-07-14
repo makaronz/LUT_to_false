@@ -164,149 +164,40 @@ This project is licensed under the MIT License.
 
 makaronz
 
-## API
+## Web application (lutcomparetool_app.py)
 
-LUT Analyzer udostępnia kompletne API REST do integracji z innymi aplikacjami. Szczegółowa dokumentacja API jest dostępna w pliku [docs/API.md](docs/API.md).
+The web front-end is a Flask application that serves HTML pages and a small set
+of form-based endpoints. It is **not** a REST/JSON API with authentication — the
+routes below reflect what the code actually exposes.
 
-Główne funkcje API:
-- Analiza pojedynczych plików LUT
-- Analiza wsadowa wielu plików
-- Informacje o przestrzeniach kolorów
-- Generowanie raportów i wizualizacji
-
-Przykład użycia API w Python:
-```python
-import requests
-
-# Inicjalizacja klienta API
-api_url = "http://localhost:8080/api"
-headers = {"Authorization": "Bearer your_token"}
-
-# Analiza pliku LUT
-with open("path/to/lut.cube", "rb") as f:
-    response = requests.post(
-        f"{api_url}/analyze",
-        headers=headers,
-        files={"file": f}
-    )
-    results = response.json()
-```
-
-Więcej przykładów i szczegółowa dokumentacja dostępne w [docs/API.md](docs/API.md).
-
-## API Reference
-
-The LUT Analyzer provides a RESTful API available at `http://localhost:8080/api`. This allows you to integrate LUT analysis capabilities into your own applications.
-
-### API Endpoints
-
-#### Analyze LUT
-```http
-POST /api/analyze
-Content-Type: multipart/form-data
-
-file: LUT file (.cube format)
-```
-
-Response:
-```json
-{
-  "analysis": {
-    "colorSpaceInfo": { ... },
-    "transformationMetrics": { ... },
-    "qualityMetrics": { ... }
-  },
-  "visualizations": {
-    "rgbDistribution": "base64...",
-    "colorCurves": "base64...",
-    "gradientRamps": "base64..."
-  }
-}
-```
-
-#### Batch Analysis
-```http
-POST /api/analyze/batch
-Content-Type: multipart/form-data
-
-files: Multiple LUT files
-```
-
-Response:
-```json
-{
-  "results": [
-    {
-      "filename": "lut1.cube",
-      "analysis": { ... }
-    },
-    {
-      "filename": "lut2.cube",
-      "analysis": { ... }
-    }
-  ],
-  "summary": {
-    "totalFiles": 2,
-    "averageMetrics": { ... }
-  }
-}
-```
-
-#### Get Color Space Info
-```http
-GET /api/colorspaces
-```
-
-Response:
-```json
-{
-  "supported": [
-    "S-Log3/S-Gamut3",
-    "ARRI LogC/AWG",
-    "RED Log3G10/REDWideGamut",
-    "V-Log/V-Gamut",
-    "Rec.709"
-  ]
-}
-```
-
-### API Usage Examples
-
-Using curl:
-```bash
-# Analyze single LUT
-curl -X POST -F "file=@path/to/lut.cube" http://localhost:8080/api/analyze
-
-# Batch analysis
-curl -X POST -F "files=@lut1.cube" -F "files=@lut2.cube" http://localhost:8080/api/analyze/batch
-
-# Get supported color spaces
-curl http://localhost:8080/api/colorspaces
-```
-
-Using Python requests:
-```python
-import requests
-
-# Analyze single LUT
-with open('path/to/lut.cube', 'rb') as f:
-    response = requests.post('http://localhost:8080/api/analyze', files={'file': f})
-    results = response.json()
-
-# Batch analysis
-files = [
-    ('files', open('lut1.cube', 'rb')),
-    ('files', open('lut2.cube', 'rb'))
-]
-response = requests.post('http://localhost:8080/api/analyze/batch', files=files)
-batch_results = response.json()
-```
-
-### Running the API Server
-
-Start the API server:
+Start the server:
 ```bash
 python lutcomparetool_app.py
 ```
+It listens on `http://localhost:8080/`.
 
-The server will be available at `http://localhost:8080/api`.
+### Actual routes
+
+| Method & path        | Purpose                                                        |
+|----------------------|----------------------------------------------------------------|
+| `GET /`              | Upload page for a single LUT                                   |
+| `GET /batch`         | Batch upload page                                              |
+| `GET /compare`       | Two-LUT comparison page                                        |
+| `POST /analyze`      | Analyze one LUT. Form fields: `lut_file` + `curve_select`. Returns JSON `{status, curve_data, table_data, lut_info}` |
+| `POST /analyze-batch`| Analyze several LUTs (form fields `lut_files` + `curve_select`)|
+| `POST /compare-luts` | Compare two LUTs and render `results.html`                     |
+| `GET /results`       | Last single-analysis result (from session)                    |
+| `GET /batch-results` | Last batch result (from session)                              |
+| `GET /table-data`    | JSON of the current comparison table                          |
+| `GET /reports/<file>`| Serve a generated PNG/PDF report                              |
+| `GET /about`         | About page                                                    |
+
+Example (single analysis):
+```bash
+curl -X POST -F "lut_file=@path/to/lut.cube" -F "curve_select=slog3" \
+     http://localhost:8080/analyze
+```
+
+> Note: a separate experimental app, `pixelpasta/app.py`, exposes a
+> `POST /api/analyze` route (form fields `cube-file` + `color-space`) on the
+> default Flask port 5000. It is independent from the app above.

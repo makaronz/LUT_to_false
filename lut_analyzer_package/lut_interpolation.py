@@ -71,10 +71,14 @@ def interpolate_3d_lut(lut_3d_data: np.ndarray, lut_size: int, input_rgb: np.nda
         raise ValueError("domain_min and domain_max must be lists of 3 floats.")
 
 
-    # Reshape LUT data into a 3D grid format (N x N x N x 3)
+    # Reshape LUT data into a 3D grid format (N x N x N x 3).
+    # Adobe .cube spec: RED varies fastest in the flat data. A C-order reshape
+    # makes the LAST axis the fastest-varying, so the raw grid is indexed
+    # [blue, green, red]. Transpose to [red, green, blue] so axis 0 == R and the
+    # query/domain order below (R, G, B) is correct.
     try:
-        # Assume standard order: Blue varies fastest, then Green, then Red.
         lut_grid = lut_3d_data.reshape((lut_size, lut_size, lut_size, 3))
+        lut_grid = np.transpose(lut_grid, (2, 1, 0, 3))
     except ValueError:
          raise ValueError("Could not reshape lut_3d_data to (N, N, N, 3). Check data order and size.")
 
@@ -147,9 +151,14 @@ def interpolate_tetrahedral_3d_lut(lut_3d_data: np.ndarray, lut_size: int, input
     if len(domain_min) != 3 or len(domain_max) != 3:
         raise ValueError("domain_min and domain_max must be lists of 3 floats.")
 
-    # Użycie float64 dla maksymalnej precyzji wewnętrznej
+    # Użycie float64 dla maksymalnej precyzji wewnętrznej.
+    # Transpozycja [blue, green, red] -> [red, green, blue] zgodnie ze
+    # specyfikacją Adobe .cube (czerwony zmienia się najszybciej), aby oś 0
+    # odpowiadała kanałowi R indeksowanemu przez x poniżej.
     input_rgb_64 = np.asarray(input_rgb, dtype=np.float64)
-    lut_grid = lut_3d_data.reshape((lut_size, lut_size, lut_size, 3)).astype(np.float64)
+    lut_grid = np.transpose(
+        lut_3d_data.reshape((lut_size, lut_size, lut_size, 3)), (2, 1, 0, 3)
+    ).astype(np.float64)
     
     # Clipowanie wartości wejściowych do zakresu domeny LUT
     clipped_rgb = np.clip(input_rgb_64, domain_min, domain_max)

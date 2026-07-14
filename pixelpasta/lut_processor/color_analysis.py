@@ -12,17 +12,13 @@ def slog3_curve(L):
     Returns:
         numpy.ndarray: Wartości S-Log3 (0-1)
     """
-    a = 0.432699
-    b = 0.009468
-    c = 0.655
-    d = 0.037584
-    e = 0.01
-    L_threshold = 0.01125000
-
+    # Oficjalna krzywa Sony S-Log3 (poprzednie stałe a=0.432699 należały do
+    # starego S-Log1, dawały nieciągłość i 0.342 zamiast 0.4106 dla szarości 18%).
+    L = np.asarray(L, dtype=np.float64)
     V = np.where(
-        L >= L_threshold,
-        a * np.log10(L + b) + c,
-        d * L + e
+        L >= 0.01125,
+        (420.0 + 261.5 * np.log10((L + 0.01) / 0.19)) / 1023.0,
+        (L * (171.2102946929 - 95.0) / 0.01125 + 95.0) / 1023.0,
     )
     return V
 
@@ -36,17 +32,13 @@ def inverse_slog3_curve(V):
     Returns:
         numpy.ndarray: Wartości liniowe (0-1)
     """
-    a = 0.432699
-    b = 0.009468
-    c = 0.655
-    d = 0.037584
-    e = 0.01
-    V_threshold = slog3_curve(0.01125)
-
+    # Odwrotność oficjalnej krzywej Sony S-Log3.
+    V = np.asarray(V, dtype=np.float64)
+    cv = V * 1023.0
     L = np.where(
-        V >= V_threshold,
-        np.power(10, (V - c) / a) - b,
-        (V - e) / d
+        cv >= 171.2102946929,
+        np.power(10.0, (cv - 420.0) / 261.5) * 0.19 - 0.01,
+        (cv - 95.0) * 0.01125 / (171.2102946929 - 95.0),
     )
     return L
 
@@ -68,110 +60,71 @@ def rec709_oetf(L):
     )
     return V
 
-def logc4_curve(E_scene, bit=12, s=1.0, n=0.01, o=1.0):
+def _logc4_params():
+    """Stałe oficjalnej krzywej ARRI LogC4 (whitepaper 2022-08)."""
+    a = (2.0**18 - 16.0) / 117.45
+    b = (1023.0 - 95.0) / 1023.0
+    c = 95.0 / 1023.0
+    s = (7.0 * np.log(2.0) * 2.0**(7.0 - 14.0 * c / b)) / (a * b)
+    t = (2.0**(14.0 * (-c / b) + 6.0) - 64.0) / a
+    return a, b, c, s, t
+
+def logc4_curve(E_scene):
     """
-    Konwertuje wartości liniowe na LogC4.
+    Konwertuje wartości liniowe na ARRI LogC4.
 
-    Args:
-        E_scene (numpy.ndarray): Wartości liniowe (0-1)
-        bit (int): Ilość bitów (domyślnie 12)
-        s (float): cut (domyślnie 1.0)
-        n (float): offset (domyślnie 0.01)
-        o (float): gain (domyślnie 1.0)
-
-    Returns:
-        numpy.ndarray: Wartości LogC4 (0-1)
+    Poprzednia parametryzacja (bit=12, s=1.0, ...) była wymyślona i dawała
+    wartości >1 (np. ~1.58 dla szarości 18%). To jest oficjalna krzywa LogC4.
     """
-    a = (2**bit - 16) / (2**bit - 64) * (o / (s - n))
-    b = 16 * ((2**bit - 64) / (2**bit - 16)) - (n * o)
-    c = ((2**bit - 64) / (2**bit - 16)) * (1 / np.log2(s / n))
-    d = ((2**bit - 64) / (2**bit - 16))
-    t = n
-
+    a, b, c, s, t = _logc4_params()
+    E_scene = np.asarray(E_scene, dtype=np.float64)
     V = np.where(
         E_scene >= t,
-        np.log2(E_scene * a + b) * c + d,
-        E_scene * a + b
+        (np.log2(a * E_scene + 64.0) - 6.0) / 14.0 * b + c,
+        (E_scene - t) / s,
     )
     return V
 
-def inverse_logc4_curve(E, bit=12, s=1.0, n=0.01, o=1.0):
+def inverse_logc4_curve(E):
     """
-    Konwertuje wartości LogC4 na liniowe.
-
-    Args:
-        E (numpy.ndarray): Wartości LogC4
-        bit (int): Ilość bitów (domyślnie 12)
-        s (float): cut (domyślnie 1.0)
-        n (float): offset (domyślnie 0.01)
-        o (float): gain (domyślnie 1.0)
-
-    Returns:
-        numpy.ndarray: Wartości liniowe
+    Konwertuje wartości ARRI LogC4 na liniowe.
     """
-    a = (2**bit - 16) / (2**bit - 64) * (o / (s - n))
-    b = 16 * ((2**bit - 64) / (2**bit - 16)) - (n * o)
-    c = ((2**bit - 64) / (2**bit - 16)) * (1 / np.log2(s / n))
-    d = ((2**bit - 64) / (2**bit - 16))
-    t = n
-
+    a, b, c, s, t = _logc4_params()
+    E = np.asarray(E, dtype=np.float64)
     L = np.where(
-        E >= (t * a + b),
-        (2**((E - d) / c) - b) / a,
-        (E - b) / a
+        E >= 0.0,
+        (np.power(2.0, 14.0 * (E - c) / b + 6.0) - 64.0) / a,
+        E * s + t,
     )
     return L
 
-def logc_curve(E_scene, bit=10, s=1023.0, n=95.0/1023.0, o=5.5555):
+def logc_curve(E_scene):
     """
-    Konwertuje wartości liniowe na LogC.
+    Konwertuje wartości liniowe na ARRI LogC3 (EI800).
 
-    Args:
-        E_scene (numpy.ndarray): Wartości liniowe (0-1)
-        bit (int): Ilość bitów (domyślnie 10)
-        s (float): cut (domyślnie 1023.0)
-        n (float): offset (domyślnie 95.0/1023.0)
-        o (float): gain (domyślnie 5.5555)
-
-    Returns:
-        numpy.ndarray: Wartości LogC (0-1)
+    Poprzednia parametryzacja mieszała 10-bitowe code value z wejściem 0-1
+    i dawała >1 (np. ~1.23 dla szarości 18%). To jest oficjalna krzywa LogC3.
     """
-
-    a = (2**bit - 16) / (2**bit - 64) * (o / (s - n))
-    b = 16 * ((2**bit - 64) / (2**bit - 16)) - (n * o)
-    c = ((2**bit - 64) / (2**bit - 16)) * (1 / np.log2(s / n))
-    d = ((2**bit - 64) / (2**bit - 16))
-    t = n
+    cut, a, b, c, d, e, f = 0.010591, 5.555556, 0.052272, 0.247190, 0.385537, 5.367655, 0.092809
+    E_scene = np.asarray(E_scene, dtype=np.float64)
     V = np.where(
-        E_scene >= t,
-        np.log2(E_scene * a + b) * c + d,
-        E_scene * a + b
+        E_scene > cut,
+        c * np.log10(a * E_scene + b) + d,
+        e * E_scene + f,
     )
     return V
 
-def inverse_logc_curve(E, bit=10, s=1023.0, n=95.0/1023.0, o=5.5555):
+def inverse_logc_curve(E):
     """
-    Konwertuje wartości LogC na liniowe.
-
-    Args:
-        E (numpy.ndarray): Wartości LogC
-        bit (int): Ilość bitów (domyślnie 10)
-        s (float): cut (domyślnie 1023.0)
-        n (float): offset (domyślnie 95.0/1023.0)
-        o (float): gain (domyślnie 5.5555)
-    Returns:
-        numpy.ndarray: Wartości liniowe
+    Konwertuje wartości ARRI LogC3 (EI800) na liniowe.
     """
-    a = (2**bit - 16) / (2**bit - 64) * (o / (s - n))
-    b = 16 * ((2**bit - 64) / (2**bit - 16)) - (n * o)
-    c = ((2**bit - 64) / (2**bit - 16)) * (1 / np.log2(s / n))
-    d = ((2**bit - 64) / (2**bit - 16))
-    t = n
-
+    cut, a, b, c, d, e, f = 0.010591, 5.555556, 0.052272, 0.247190, 0.385537, 5.367655, 0.092809
+    E = np.asarray(E, dtype=np.float64)
+    log_cut = e * cut + f  # 0.149658
     L = np.where(
-        E >= (t * a + b),
-        (2**((E - d) / c) - b) / a,
-        (E - b) / a
+        E > log_cut,
+        (np.power(10.0, (E - d) / c) - b) / a,
+        (E - f) / e,
     )
     return L
 
@@ -206,8 +159,9 @@ def interpolate_3d_lut(lut_3d, lut_size, input_values):
     """
     # Utworzenie siatki wejściowej dla R, G, B
     grid = np.linspace(0, 1, lut_size)
-    # Przekształcenie lut_3d
-    lut_3d = lut_3d.reshape((lut_size, lut_size, lut_size, 3))
+    # Przekształcenie lut_3d. Spec Adobe .cube: czerwony zmienia się najszybciej,
+    # więc po reshape oś 0 to niebieski — transponujemy do [red, green, blue].
+    lut_3d = np.transpose(lut_3d.reshape((lut_size, lut_size, lut_size, 3)), (2, 1, 0, 3))
     interpolator = RegularGridInterpolator((grid, grid, grid), lut_3d, bounds_error=False, fill_value=None)
 
     # Przygotowanie punktów wejściowych, gdzie R=G=B
@@ -230,10 +184,13 @@ def s_gamut3_to_rec709(rgb_values):
         numpy.ndarray: Wartości RGB w przestrzeni Rec.709
     """
     # Macierz transformacji z S-Gamut3 do Rec.709
+    # S-Gamut3 -> Rec.709 (D65), wyprowadzone z oficjalnych primaries Sony.
+    # Poprzednia macierz była w rzeczywistości macierzą XYZ -> ACES AP1,
+    # błędnie podpisaną jako konwersja Sony.
     matrix = np.array([
-        [1.6410, -0.3245, -0.3165],
-        [-0.6636, 1.6157, 0.0479],
-        [0.0117, -0.0085, 0.9968]
+        [ 1.87791513, -0.79416876, -0.08374637],
+        [-0.17680698,  1.35099962, -0.17419264],
+        [-0.02620113, -0.14842226,  1.17462339]
     ])
     return np.dot(rgb_values, matrix.T)
 
@@ -248,10 +205,11 @@ def s_gamut3_cine_to_rec709(rgb_values):
         numpy.ndarray: Wartości RGB w przestrzeni Rec.709
     """
     # Macierz transformacji z S-Gamut3.Cine do Rec.709
+    # S-Gamut3.Cine -> Rec.709 (D65), wyprowadzone z oficjalnych primaries Sony.
     matrix = np.array([
-        [1.5529, -0.2555, -0.2974],
-        [-0.5428, 1.5027, 0.0401],
-        [-0.0026, -0.0186, 1.0212]
+        [ 1.62694741, -0.54013854, -0.08680887],
+        [-0.17851553,  1.41794093, -0.23942540],
+        [-0.04443612, -0.19591997,  1.24035608]
     ])
     return np.dot(rgb_values, matrix.T)
 

@@ -110,22 +110,25 @@ def linear_to_logc3(linear_exposure: np.ndarray) -> np.ndarray:
     """
     # Użycie float64 dla wszystkich obliczeń wewnętrznych
     e_scene = np.asarray(linear_exposure, dtype=np.float64)
-    
-    # Dokładne wartości z oficjalnej specyfikacji ARRI dla LogC v3
-    # Wartości dla "EI800 (native)" z dokumentacji ARRI
-    a = 5.555556  # Dokładna wartość z dokumentacji
-    b = 0.052272  # Dokładna wartość z dokumentacji
-    c = 0.247190  # Dokładna wartość z dokumentacji
-    d = 0.385537  # Dokładna wartość z dokumentacji
-    cut = 0.011361  # Precyzyjny punkt odcięcia
+
+    # Oficjalne parametry ARRI LogC3 dla EI800 (native).
+    # Segment liniowy to e*x + f, a nie skalowana krzywa log — dzięki temu
+    # czerń (x=0) koduje się na f = 0.092809, zgodnie ze specyfikacją.
+    cut = 0.010591
+    a = 5.555556
+    b = 0.052272
+    c = 0.247190
+    d = 0.385537
+    e = 5.367655
+    f = 0.092809
 
     # Wysokoprecyzyjne obliczenia
     log_segment = c * np.log10(a * e_scene + b) + d
-    lin_segment = e_scene * (c * np.log10(a * cut + b) + d) / cut
-    
+    lin_segment = e * e_scene + f
+
     # Zastosowanie wektoryzacji numpy dla lepszej wydajności
     log_c3_val = np.where(e_scene > cut, log_segment, lin_segment)
-    
+
     # Konwersja z powrotem do float32 po zakończeniu precyzyjnych obliczeń
     return np.clip(log_c3_val, 0.0, 1.0).astype(np.float32)
 
@@ -147,23 +150,24 @@ def logc3_to_linear(logc3_value: np.ndarray) -> np.ndarray:
     """
     # Użycie float64 dla wszystkich obliczeń wewnętrznych
     e_prime = np.asarray(logc3_value, dtype=np.float64)
-    
-    # Dokładne wartości z oficjalnej specyfikacji ARRI dla LogC v3
-    # Wartości dla "EI800 (native)" z dokumentacji ARRI
+
+    # Oficjalne parametry ARRI LogC3 dla EI800 (native).
+    cut = 0.010591
     a = 5.555556
     b = 0.052272
     c = 0.247190
     d = 0.385537
-    cut = 0.011361
-    log_cut = c * np.log10(a * cut + b) + d  # Wartość LogC w punkcie odcięcia
+    e = 5.367655
+    f = 0.092809
+    log_cut = e * cut + f  # Wartość LogC w punkcie odcięcia (= 0.149658)
 
     # Wysokoprecyzyjne obliczenia
     log_segment = (np.power(10.0, (e_prime - d) / c) - b) / a
-    lin_segment = e_prime * cut / log_cut
-    
+    lin_segment = (e_prime - f) / e
+
     # Zastosowanie wektoryzacji numpy dla lepszej wydajności
     linear_exp = np.where(e_prime > log_cut, log_segment, lin_segment)
-    
+
     # Konwersja z powrotem do float32 po zakończeniu precyzyjnych obliczeń
     return np.maximum(linear_exp, 0.0).astype(np.float32)
 
@@ -220,18 +224,20 @@ def slog3_to_linear(slog3_signal: np.ndarray) -> np.ndarray:
     c = 261.5
     d = 420.0
     
-    # Progi odcięcia
-    cut2 = 171.2102946929 / 1023.0  # Wartość w zakresie 0-1
-    
+    # Próg odcięcia (kod S-Log3 dla progu 0.01125 w liniowej) w zakresie 0-1
+    cut2 = 171.2102946929 / 1023.0
+
     # Scale to 0-1023 range used in formula derivation
     slog3_scaled = slog3 * 1023.0
-    
+
     # Wysokoprecyzyjne obliczenia
     log_segment = (np.power(10.0, (slog3_scaled - d) / c) * (b + a)) - a
     lin_segment = (slog3_scaled - 95.0) * 0.01125 / (171.2102946929 - 95.0)
-    
-    linear_val = np.where(slog3_scaled >= cut2, log_segment, lin_segment)
-    
+
+    # Porównanie w tej samej skali (0-1): naprawiono błąd porównywania
+    # slog3_scaled (0-1023) z cut2 (0-1), który wybierał złą gałąź dla cieni.
+    linear_val = np.where(slog3 >= cut2, log_segment, lin_segment)
+
     # Ensure non-negative output i konwersja do float32
     return np.maximum(linear_val, 0.0).astype(np.float32)
 
@@ -291,18 +297,19 @@ def slog3_cine_to_linear(slog3_signal: np.ndarray) -> np.ndarray:
     c = 261.5
     d = 420.0
     
-    # Progi odcięcia
+    # Próg odcięcia w zakresie 0-1
     cut2 = 171.2102946929 / 1023.0
-    
+
     # Scale to 0-1023 range used in formula derivation
     slog3_scaled = slog3 * 1023.0
-    
+
     # Wysokoprecyzyjne obliczenia
     log_segment = (np.power(10.0, (slog3_scaled - d) / c) * (b + a)) - a
     lin_segment = (slog3_scaled - 95.0) * 0.01125 / (171.2102946929 - 95.0)
-    
-    linear_val = np.where(slog3_scaled >= cut2, log_segment, lin_segment)
-    
+
+    # Porównanie w tej samej skali (0-1) — patrz slog3_to_linear.
+    linear_val = np.where(slog3 >= cut2, log_segment, lin_segment)
+
     # Ensure non-negative output i konwersja do float32
     return np.maximum(linear_val, 0.0).astype(np.float32)
 
@@ -357,41 +364,35 @@ def slog2_to_linear(slog2_signal: np.ndarray) -> np.ndarray:
     return np.maximum(linear_val, 0.0) # Ensure non-negative output
 
 
-# --- RED Log3G10 ---
-# Source: RED Cine-X Documentation / Community implementations. Formula from Kod 2 seems plausible.
-# Note: Official RED formulas often involve gamma adjustments depending on ISO/settings. This is simplified.
+# --- RED Log3G10 (v2) ---
+# Source: RED Digital Cinema — Log3G10 v2 specification.
+# y = a*log10(x' * b + 1) for x' >= 0, else y = x'*g,  where x' = x + c.
 def linear_to_log3g10(linear_signal: np.ndarray) -> np.ndarray:
-    """RED Log3G10 Encoding Function (Simplified)."""
-    # Using a common approximation structure based on Colour Science library form:
-    # log = gain * log10(black_offset + linear * slope)
-    # Constants adjusted to roughly match expected range 0-1
-    gain = 0.171752
-    slope = 155.975314
-    black_offset = 1.0
-    cut = 0.01 # Linear segment cut-off (approx)
-    lin = np.asarray(linear_signal)
-    lin = np.maximum(lin, 0.0)
+    """RED Log3G10 Encoding Function (official v2)."""
+    a = 0.224282
+    b = 155.975327
+    c = 0.01          # przesunięcie wejścia (offset)
+    g = 15.1927       # nachylenie segmentu liniowego dla x' < 0
+    x = np.asarray(linear_signal, dtype=np.float64) + c
 
-    log_val = np.where(lin > cut,
-                       gain * np.log10(black_offset + lin * slope),
-                       lin * (gain * np.log10(black_offset + cut * slope)) / cut # Linear segment
-                      )
-    return log_val
+    log_val = np.where(x >= 0.0,
+                       a * np.log10(x * b + 1.0),
+                       x * g)
+    return log_val.astype(np.float32)
 
 def log3g10_to_linear(log3g10_signal: np.ndarray) -> np.ndarray:
-    """RED Log3G10 Decoding Function (Simplified)."""
-    gain = 0.171752
-    slope = 155.975314
-    black_offset = 1.0
-    cut = 0.01
-    log_cut = gain * np.log10(black_offset + cut * slope)
-    log_val = np.asarray(log3g10_signal)
+    """RED Log3G10 Decoding Function (official v2)."""
+    a = 0.224282
+    b = 155.975327
+    c = 0.01
+    g = 15.1927
+    y = np.asarray(log3g10_signal, dtype=np.float64)
 
-    linear_val = np.where(log_val > log_cut,
-                          (np.power(10.0, log_val / gain) - black_offset) / slope,
-                          log_val * cut / log_cut
-                         )
-    return np.maximum(linear_val, 0.0)
+    # Wartość kodu w punkcie x' = 0 to 0; poniżej niego obowiązuje segment liniowy.
+    x = np.where(y >= 0.0,
+                 (np.power(10.0, y / a) - 1.0) / b,
+                 y / g)
+    return (x - c).astype(np.float32)
 
 # --- REDgamma3 / REDgamma4 (Display-referred approximations) ---
 # Source: Kod 2 - These are simple gamma curves, likely approximations.
@@ -435,133 +436,137 @@ def redlogfilm_to_linear(log_signal: np.ndarray) -> np.ndarray:
 # https://github.com/ampas/aces-dev/blob/master/documents/LaTeX/S-2016-001/S-2016-001.tex
 def linear_to_acescct(linear_signal: np.ndarray) -> np.ndarray:
     """ACEScct Encoding Function (Linear ACES 0-1 to ACEScct 0-1)."""
-    lin = np.asarray(linear_signal)
-    # Constants from spec
+    lin = np.asarray(linear_signal, dtype=np.float64)
+    # Stałe z ACES S-2016-001
     T = 0.0078125
-    alpha = 10.54023774
-    beta = 0.07290553419
-    # Formula scales output to approx 0-1 range
-    acescct_val = np.where(lin > T,
-                           (np.log2(lin + beta) + 9.72) / 17.52,
-                           alpha * lin + beta)
+    alpha = 10.5402377416545
+    beta = 0.0729055341958355
+    # Segment logarytmiczny nie zawiera przesunięcia wewnątrz log2 — dzięki temu
+    # obie gałęzie są ciągłe w punkcie T (naprawiono błędne +beta wewnątrz log2).
+    acescct_val = np.where(lin <= T,
+                           alpha * lin + beta,
+                           (np.log2(np.maximum(lin, 1e-10)) + 9.72) / 17.52)
     return acescct_val
 
 def acescct_to_linear(acescct_signal: np.ndarray) -> np.ndarray:
     """ACEScct Decoding Function (ACEScct 0-1 to Linear ACES 0-1)."""
-    cct = np.asarray(acescct_signal)
-    # Constants from spec
-    alpha = 10.54023774
-    beta = 0.07290553419
-    # Threshold value at T=0.0078125
-    cct_T = alpha * 0.0078125 + beta # = 0.15549153419...
+    cct = np.asarray(acescct_signal, dtype=np.float64)
+    # Stałe z ACES S-2016-001
+    alpha = 10.5402377416545
+    beta = 0.0729055341958355
+    # Wartość progowa dla T=0.0078125 (punkt sklejenia w domenie ACEScct)
+    cct_T = 0.155251141552511
 
-    linear_val = np.where(cct > cct_T,
-                          np.power(2.0, cct * 17.52 - 9.72) - beta,
-                          (cct - beta) / alpha)
+    linear_val = np.where(cct <= cct_T,
+                          (cct - beta) / alpha,
+                          np.power(2.0, cct * 17.52 - 9.72))
     return linear_val
 
 # --- ACEScc ---
 # Source: ACES Documentation S-2013-001
 def linear_to_acescc(linear_signal: np.ndarray) -> np.ndarray:
-    """ACEScc Encoding Function (Linear ACES 0-1 to ACEScc 0-1)."""
-    lin = np.asarray(linear_signal)
-    # Constants from spec
-    # Formula scales output to approx 0-1 range
-    acescc_val = np.where(lin > -1.0/32768.0, # Handle slightly negative values
-                          (np.log2(lin * 0.5 + 1.0/65536.0) + 9.72) / 17.52,
-                          -np.inf) # Or handle as needed
+    """ACEScc Encoding Function (Linear ACES 0-1 to ACEScc 0-1).
+
+    Trzy segmenty wg ACES S-2014-003: dla wartości <= 0 oraz w wąskim
+    zakresie bliskim zeru używa się przybliżenia log2(2^-16 + lin*0.5),
+    a dla wartości normalnych — pełnego log2(lin).
+    """
+    lin = np.asarray(linear_signal, dtype=np.float64)
+    near_zero = (np.log2(2.0**-16 + np.maximum(lin, 0.0) * 0.5) + 9.72) / 17.52
+    normal = (np.log2(np.maximum(lin, 2.0**-16)) + 9.72) / 17.52
+    acescc_val = np.where(lin <= 0.0,
+                          (np.log2(2.0**-16) + 9.72) / 17.52,
+                          np.where(lin < 2.0**-15, near_zero, normal))
     return acescc_val
 
 def acescc_to_linear(acescc_signal: np.ndarray) -> np.ndarray:
     """ACEScc Decoding Function (ACEScc 0-1 to Linear ACES 0-1)."""
-    cc = np.asarray(acescc_signal)
-    linear_val = (np.power(2.0, cc * 17.52 - 9.72) - (1.0/65536.0)) * 2.0
+    cc = np.asarray(acescc_signal, dtype=np.float64)
+    # Odwrotność trzech segmentów kodowania ACEScc.
+    threshold = (9.72 - 15.0) / 17.52  # granica segmentu near-zero
+    linear_val = np.where(cc < threshold,
+                          (np.power(2.0, cc * 17.52 - 9.72) - 2.0**-16) * 2.0,
+                          np.power(2.0, cc * 17.52 - 9.72))
     return linear_val
 
 # --- ACESproxy ---
 # Source: ACES Documentation S-2013-002 (10-bit) / S-2014-001 (12-bit)
 def linear_to_acesproxy10(linear_signal: np.ndarray) -> np.ndarray:
-    """ACESproxy 10-bit Encoding Function (Linear ACES 0-1 to ACESproxy10 0-1)."""
-    lin = np.asarray(linear_signal)
-    # Formula from spec (simplified, assumes input >= 0)
-    # Maps ACES range [-0.002, 6.1] roughly to 10-bit CV [64, 940] then scales 0-1
-    proxy10 = (np.log2(np.maximum(lin, 6.103515625e-05)) * 68.06754 + 659.34066) / 1023.0
-    return np.clip(proxy10, 0.0, 1.0)
+    """ACESproxy 10-bit Encoding Function (Linear ACES 0-1 to ACESproxy10 0-1).
+
+    Oficjalne stałe ACES S-2013-002: StepsPerStop=50, MidCVoffset=425,
+    MidLogOffset=2.5 -> CV = log2(lin)*50 + 550, przycięte do [64, 940].
+    """
+    lin = np.asarray(linear_signal, dtype=np.float64)
+    cv = np.log2(np.maximum(lin, 2.0**-9.72)) * 50.0 + 550.0
+    cv = np.clip(cv, 64.0, 940.0)
+    return (cv / 1023.0).astype(np.float32)
 
 def acesproxy10_to_linear(proxy10_signal: np.ndarray) -> np.ndarray:
     """ACESproxy 10-bit Decoding Function (ACESproxy10 0-1 to Linear ACES 0-1)."""
-    p10 = np.asarray(proxy10_signal) * 1023.0
-    linear_val = np.power(2.0, (p10 - 659.34066) / 68.06754)
-    return linear_val
+    cv = np.asarray(proxy10_signal, dtype=np.float64) * 1023.0
+    linear_val = np.power(2.0, (cv - 550.0) / 50.0)
+    return linear_val.astype(np.float32)
 
 
 # --- Panasonic V-Log ---
 # Source: Panasonic Documentation / Common implementations
 def linear_to_vlog(linear_signal: np.ndarray) -> np.ndarray:
     """Panasonic V-Log Encoding Function (Linear 0-1 to V-Log 0-1)."""
-    lin = np.asarray(linear_signal)
+    lin = np.asarray(linear_signal, dtype=np.float64)
     lin = np.maximum(lin, 0.0)
-    # Constants
+    # Oficjalne stałe Panasonic V-Log.
+    # V-Log = c*log10(lin+b) + d (nie c + d*log10(...) — to był błąd, który
+    # dawał wartości ujemne dla midtonów, np. -0.19 dla szarości 18%).
+    b = 0.00873
     c = 0.241514
     d = 0.598206
-    b = 0.00873 # Offset
-    cut = 0.01 # Linear segment threshold
-    # Formula from Kod 2 seems plausible structure: c + d * log10(a * x + b_offset)
-    # Let's use a verified form:
+    cut = 0.01  # próg segmentu liniowego
     vlog_val = np.where(lin >= cut,
-                        c + d * np.log10(lin + b),
-                        5.6 * lin + 0.125) # Linear segment
-    return vlog_val
+                        c * np.log10(lin + b) + d,
+                        5.6 * lin + 0.125)
+    return vlog_val.astype(np.float32)
 
 def vlog_to_linear(vlog_signal: np.ndarray) -> np.ndarray:
     """Panasonic V-Log Decoding Function (V-Log 0-1 to Linear 0-1)."""
-    vlog = np.asarray(vlog_signal)
-    # Constants
+    vlog = np.asarray(vlog_signal, dtype=np.float64)
+    b = 0.00873
     c = 0.241514
     d = 0.598206
-    b = 0.00873
     cut = 0.01
-    vlog_cut = 5.6 * cut + 0.125 # Value at cut point = 0.181
+    vlog_cut = 5.6 * cut + 0.125  # wartość w punkcie sklejenia = 0.181
 
     linear_val = np.where(vlog >= vlog_cut,
-                          np.power(10.0, (vlog - c) / d) - b,
+                          np.power(10.0, (vlog - d) / c) - b,
                           (vlog - 0.125) / 5.6)
-    return np.maximum(linear_val, 0.0)
+    return np.maximum(linear_val, 0.0).astype(np.float32)
 
 
 # --- Canon Log 2 ---
-# Source: Canon Whitepapers / Common implementations
+# Source: Canon "Canon Log / Canon Log 2 / Canon Log 3 Transfer Characteristics".
+# CLog2(x) = -0.281863093*log10(1-87.09937546*x)+0.035388128   dla x < 0
+#          =  0.281863093*log10(87.09937546*x+1)+0.035388128   dla x >= 0
 def linear_to_canonlog2(linear_signal: np.ndarray) -> np.ndarray:
-    """Canon Log 2 Encoding Function (Linear 0-1 to CLog2 0-1)."""
-    lin = np.asarray(linear_signal)
-    lin = np.maximum(lin, 0.0)
-    # Constants (approximate, may vary slightly by camera/setting)
-    a = 5.5556
-    b = 0.0646
-    c = 0.224282
-    d = 0.396286
-    cut = 0.013 # Approximate cut point
-    # Using a more standard form:
-    clog2_val = np.where(lin >= cut,
-                         c * np.log10(a * lin + b) + d,
-                         lin * (c * np.log10(a * cut + b) + d) / cut) # Linear segment
-    return clog2_val
+    """Canon Log 2 Encoding Function (Linear to CLog2)."""
+    x = np.asarray(linear_signal, dtype=np.float64)
+    k = 87.09937546
+    g = 0.281863093
+    o = 0.035388128
+    clog2_val = np.where(x < 0.0,
+                         -g * np.log10(1.0 - k * x) + o,
+                          g * np.log10(k * x + 1.0) + o)
+    return clog2_val.astype(np.float32)
 
 def canonlog2_to_linear(clog2_signal: np.ndarray) -> np.ndarray:
-    """Canon Log 2 Decoding Function (CLog2 0-1 to Linear 0-1)."""
-    clog2 = np.asarray(clog2_signal)
-    # Constants
-    a = 5.5556
-    b = 0.0646
-    c = 0.224282
-    d = 0.396286
-    cut = 0.013
-    clog2_cut = c * np.log10(a * cut + b) + d
-
-    linear_val = np.where(clog2 >= clog2_cut,
-                          (np.power(10.0, (clog2 - d) / c) - b) / a,
-                          clog2 * cut / clog2_cut)
-    return np.maximum(linear_val, 0.0)
+    """Canon Log 2 Decoding Function (CLog2 to Linear)."""
+    t = np.asarray(clog2_signal, dtype=np.float64)
+    k = 87.09937546
+    g = 0.281863093
+    o = 0.035388128
+    linear_val = np.where(t < o,
+                          -(np.power(10.0, (o - t) / g) - 1.0) / k,
+                           (np.power(10.0, (t - o) / g) - 1.0) / k)
+    return linear_val.astype(np.float32)
 
 
 # --- Rec.2020 PQ (ST 2084) ---

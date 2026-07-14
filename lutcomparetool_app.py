@@ -50,13 +50,24 @@ BATCH_FOLDER = 'batch_reports' # For batch processing results
 ALLOWED_EXTENSIONS = {'cube'}
 MAX_BATCH_FILES = 20  # Maximum number of files for batch processing
 
+
+def _domain_scalar(value, default):
+    """Zwraca pojedynczą liczbę z domeny LUT, która może być listą [R, G, B]."""
+    if isinstance(value, (list, tuple)):
+        return float(value[0]) if value else float(default)
+    if value is None:
+        return float(default)
+    return float(value)
+
+
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['REPORTS_FOLDER'] = REPORTS_FOLDER
 app.config['BATCH_FOLDER'] = BATCH_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max upload size
-# Required for flash messages (user notifications)
-app.config['SECRET_KEY'] = os.urandom(24)
+# Klucz sesji: stały z ENV (wymagane przy wielu workerach gunicorn, inaczej
+# każdy worker miałby inny klucz i sesje/wyniki znikałyby losowo).
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or os.urandom(24)
 
 # Ustawienie wysokiej precyzji dla obliczeń numerycznych
 np.set_printoptions(precision=15)
@@ -287,9 +298,9 @@ def analyze_lut_route():
                 'table_data': table_data,
                 'lut_info': {
                     'title': lut_data.get('title', filename),
-                    'size': f"{lut_data.get('size')}",
-                    'domain_min': float(lut_data.get('domain_min')[0] if isinstance(lut_data.get('domain_min'), list) and lut_data.get('domain_min') else lut_data.get('domain_min') or 0.0),
-                    'domain_max': float(lut_data.get('domain_max')),
+                    'size': f"{lut_data.get('lut_3d_size') or lut_data.get('lut_1d_size')}",
+                    'domain_min': _domain_scalar(lut_data.get('domain_min'), 0.0),
+                    'domain_max': _domain_scalar(lut_data.get('domain_max'), 1.0),
                     'curve_name': curve_info['description'],
                     'report_pdf': os.path.basename(report_pdf_path),
                     'report_png': os.path.basename(report_png_path)

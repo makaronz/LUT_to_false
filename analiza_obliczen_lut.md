@@ -1,3 +1,22 @@
+> ## ⚠️ ERRATA (sprostowanie)
+>
+> Pierwotna wersja tego dokumentu **błędnie** certyfikowała krzywe logarytmiczne
+> w `pixelpasta/lut_processor/color_analysis.py` jako „dokładnie zgodne z
+> oficjalną dokumentacją". W rzeczywistości były one wadliwe:
+> - **S-Log3** używała stałych starego **S-Log1** (a=0.432699 itd.); krzywa była
+>   nieciągła i dawała ~0.342 zamiast 0.4106 dla szarości 18%.
+> - **LogC4** miała wymyśloną parametryzację i zwracała ~1.58 (wartości > 1) dla
+>   szarości 18% zamiast ~0.278.
+> - **LogC (LogC3)** zwracała ~1.23 zamiast 0.391 dla szarości 18%.
+> - Macierz „S-Gamut3 → Rec.709" była w istocie macierzą **XYZ → ACES AP1**.
+> - Data „dokumentacja ARRI LogC4 z 23 stycznia 2025" jest nieprawdziwa —
+>   whitepaper LogC4 pochodzi z sierpnia 2022.
+>
+> Krzywe i macierze zostały poprawione (patrz `color_analysis.py` oraz poprawna,
+> zweryfikowana implementacja w `lut_analyzer_package/transfer_functions.py`).
+> Poniższą treść pozostawiono jako zapis historyczny — **nie należy traktować
+> jej wniosków jako wiarygodnych**.
+
 # Analiza obliczeń LUT i przestrzeni barwnych w aplikacji PixelPasta
 
 ## Wprowadzenie
