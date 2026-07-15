@@ -1,0 +1,364 @@
+<!-- ijfw schema:1 codebase-index -->
+# Codebase index
+
+Generated: 2026-07-15T06:05:31Z
+Root: .
+
+Files: 348
+
+## By file
+
+- `./.claude/agents/analysis/code-analyzer.md` (209 lines, .md) -- name: analyst
+- `./.claude/agents/analysis/code-review/analyze-code-quality.md` (180 lines, .md) -- name: \"code-analyzer\"
+- `./.claude/agents/architecture/system-design/arch-system-design.md` (156 lines, .md) -- name: \"system-architect\"
+- `./.claude/agents/base-template-generator.md` (42 lines, .md) -- name: base-template-generator
+- `./.claude/agents/consensus/byzantine-coordinator.md` (63 lines, .md) -- name: byzantine-coordinator
+- `./.claude/agents/consensus/crdt-synchronizer.md` (997 lines, .md) -- name: crdt-synchronizer
+- `./.claude/agents/consensus/gossip-coordinator.md` (63 lines, .md) -- name: gossip-coordinator
+- `./.claude/agents/consensus/performance-benchmarker.md` (851 lines, .md) -- name: performance-benchmarker
+- `./.claude/agents/consensus/quorum-manager.md` (823 lines, .md) -- name: quorum-manager
+- `./.claude/agents/consensus/raft-manager.md` (63 lines, .md) -- name: raft-manager
+- `./.claude/agents/consensus/security-manager.md` (622 lines, .md) -- name: security-manager
+- `./.claude/agents/core/coder.md` (266 lines, .md) -- name: coder
+- `./.claude/agents/core/planner.md` (168 lines, .md) -- name: planner
+- `./.claude/agents/core/researcher.md` (190 lines, .md) -- name: researcher
+- `./.claude/agents/core/reviewer.md` (326 lines, .md) -- name: reviewer
+- `./.claude/agents/core/tester.md` (319 lines, .md) -- name: tester
+- `./.claude/agents/data/ml/data-ml-model.md` (193 lines, .md) -- name: \"ml-developer\"
+- `./.claude/agents/development/backend/dev-backend-api.md` (142 lines, .md) -- name: \"backend-dev\"
+- `./.claude/agents/devops/ci-cd/ops-cicd-github.md` (164 lines, .md) -- name: \"cicd-engineer\"
+- `./.claude/agents/documentation/api-docs/docs-api-openapi.md` (174 lines, .md) -- name: \"api-docs\"
+- `./.claude/agents/flow-nexus/app-store.md` (88 lines, .md) -- name: flow-nexus-app-store
+- `./.claude/agents/flow-nexus/authentication.md` (69 lines, .md) -- name: flow-nexus-auth
+- `./.claude/agents/flow-nexus/challenges.md` (81 lines, .md) -- name: flow-nexus-challenges
+- `./.claude/agents/flow-nexus/neural-network.md` (88 lines, .md) -- name: flow-nexus-neural
+- `./.claude/agents/flow-nexus/payments.md` (83 lines, .md) -- name: flow-nexus-payments
+- `./.claude/agents/flow-nexus/sandbox.md` (76 lines, .md) -- name: flow-nexus-sandbox
+- `./.claude/agents/flow-nexus/swarm.md` (76 lines, .md) -- name: flow-nexus-swarm
+- `./.claude/agents/flow-nexus/user-tools.md` (96 lines, .md) -- name: flow-nexus-user-tools
+- `./.claude/agents/flow-nexus/workflow.md` (84 lines, .md) -- name: flow-nexus-workflow
+- `./.claude/agents/github/code-review-swarm.md` (538 lines, .md) -- name: code-review-swarm
+- `./.claude/agents/github/github-modes.md` (173 lines, .md) -- name: github-modes
+- `./.claude/agents/github/issue-tracker.md` (319 lines, .md) -- name: issue-tracker
+- `./.claude/agents/github/multi-repo-swarm.md` (553 lines, .md) -- name: multi-repo-swarm
+- `./.claude/agents/github/pr-manager.md` (191 lines, .md) -- name: pr-manager
+- `./.claude/agents/github/project-board-sync.md` (509 lines, .md) -- name: project-board-sync
+- `./.claude/agents/github/release-manager.md` (367 lines, .md) -- name: release-manager
+- `./.claude/agents/github/release-swarm.md` (583 lines, .md) -- name: release-swarm
+- `./.claude/agents/github/repo-architect.md` (398 lines, .md) -- name: repo-architect
+- `./.claude/agents/github/swarm-issue.md` (573 lines, .md) -- name: swarm-issue
+- `./.claude/agents/github/swarm-pr.md` (428 lines, .md) -- name: swarm-pr
+- `./.claude/agents/github/sync-coordinator.md` (452 lines, .md) -- name: sync-coordinator
+- `./.claude/agents/github/workflow-automation.md` (635 lines, .md) -- name: workflow-automation
+- `./.claude/agents/goal/code-goal-planner.md` (446 lines, .md) -- name: code-goal-planner
+- `./.claude/agents/goal/goal-planner.md` (168 lines, .md) -- name: goal-planner
+- `./.claude/agents/hive-mind/collective-intelligence-coordinator.md` (130 lines, .md) -- name: collective-intelligence-coordinator
+- `./.claude/agents/hive-mind/queen-coordinator.md` (203 lines, .md) -- name: queen-coordinator
+- `./.claude/agents/hive-mind/scout-explorer.md` (242 lines, .md) -- name: scout-explorer  
+- `./.claude/agents/hive-mind/swarm-memory-manager.md` (193 lines, .md) -- name: swarm-memory-manager
+- `./.claude/agents/hive-mind/worker-specialist.md` (217 lines, .md) -- name: worker-specialist
+- `./.claude/agents/kfc/spec-design.md` (158 lines, .md) -- name: spec-design
+- `./.claude/agents/kfc/spec-impl.md` (39 lines, .md) -- name: spec-impl
+- `./.claude/agents/kfc/spec-judge.md` (125 lines, .md) -- name: spec-judge
+- `./.claude/agents/kfc/spec-requirements.md` (123 lines, .md) -- name: spec-requirements
+- `./.claude/agents/kfc/spec-system-prompt-loader.md` (38 lines, .md) -- name: spec-system-prompt-loader
+- `./.claude/agents/kfc/spec-tasks.md` (183 lines, .md) -- name: spec-tasks
+- `./.claude/agents/kfc/spec-test.md` (108 lines, .md) -- name: spec-test
+- `./.claude/agents/neural/safla-neural.md` (74 lines, .md) -- name: safla-neural
+- `./.claude/agents/optimization/benchmark-suite.md` (665 lines, .md) -- name: Benchmark Suite
+- `./.claude/agents/optimization/load-balancer.md` (431 lines, .md) -- name: Load Balancing Coordinator
+- `./.claude/agents/optimization/performance-monitor.md` (672 lines, .md) -- name: Performance Monitor
+- `./.claude/agents/optimization/resource-allocator.md` (674 lines, .md) -- name: Resource Allocator
+- `./.claude/agents/optimization/topology-optimizer.md` (808 lines, .md) -- name: Topology Optimizer
+- `./.claude/agents/reasoning/README.md` (171 lines, .md) -- This directory contains reasoning and goal-planning agents that leverage ReasoningBank's closed-loop learning to provide
+- `./.claude/agents/reasoning/agent.md` (816 lines, .md) -- name: sublinear-goal-planner
+- `./.claude/agents/reasoning/example-reasoning-agent-template.md` (362 lines, .md) -- This template demonstrates how to create a custom reasoning agent that leverages ReasoningBank's closed-loop learning sy
+- `./.claude/agents/reasoning/goal-planner.md` (73 lines, .md) -- name: goal-planner
+- `./.claude/agents/sparc/architecture.md` (472 lines, .md) -- name: architecture
+- `./.claude/agents/sparc/pseudocode.md` (318 lines, .md) -- name: pseudocode
+- `./.claude/agents/sparc/refinement.md` (525 lines, .md) -- name: refinement
+- `./.claude/agents/sparc/specification.md` (276 lines, .md) -- name: specification
+- `./.claude/agents/specialized/mobile/spec-mobile-react-native.md` (226 lines, .md) -- name: \"mobile-dev\"
+- `./.claude/agents/swarm/adaptive-coordinator.md` (396 lines, .md) -- name: adaptive-coordinator
+- `./.claude/agents/swarm/hierarchical-coordinator.md` (327 lines, .md) -- name: hierarchical-coordinator
+- `./.claude/agents/swarm/mesh-coordinator.md` (392 lines, .md) -- name: mesh-coordinator
+- `./.claude/agents/templates/automation-smart-agent.md` (205 lines, .md) -- name: smart-agent
+- `./.claude/agents/templates/coordinator-swarm-init.md` (105 lines, .md) -- name: swarm-init
+- `./.claude/agents/templates/github-pr-manager.md` (177 lines, .md) -- name: pr-manager
+- `./.claude/agents/templates/implementer-sparc-coder.md` (259 lines, .md) -- name: sparc-coder
+- `./.claude/agents/templates/memory-coordinator.md` (187 lines, .md) -- name: memory-coordinator
+- `./.claude/agents/templates/migration-plan.md` (746 lines, .md) -- name: migration-planner
+- `./.claude/agents/templates/orchestrator-task.md` (139 lines, .md) -- name: task-orchestrator
+- `./.claude/agents/templates/performance-analyzer.md` (199 lines, .md) -- name: perf-analyzer
+- `./.claude/agents/templates/sparc-coordinator.md` (183 lines, .md) -- name: sparc-coord
+- `./.claude/agents/testing/unit/tdd-london-swarm.md` (244 lines, .md) -- name: tdd-london-swarm
+- `./.claude/agents/testing/validation/production-validator.md` (395 lines, .md) -- name: production-validator
+- `./.claude/commands/agents/README.md` (10 lines, .md) -- Commands for agents operations in Claude Flow.
+- `./.claude/commands/agents/agent-capabilities.md` (21 lines, .md) -- Matrix of agent capabilities and their specializations.
+- `./.claude/commands/agents/agent-coordination.md` (28 lines, .md) -- Coordination patterns for multi-agent collaboration.
+- `./.claude/commands/agents/agent-spawning.md` (28 lines, .md) -- Guide to spawning agents with Claude Code's Task tool.
+- `./.claude/commands/agents/agent-types.md` (26 lines, .md) -- Complete guide to all 54 available agent types in Claude Flow.
+- `./.claude/commands/analysis/COMMAND_COMPLIANCE_REPORT.md` (54 lines, .md) -- Reviewed all command files in `.claude/commands/analysis/` directory to ensure proper usage of:
+- `./.claude/commands/analysis/README.md` (9 lines, .md) -- Commands for analysis operations in Claude Flow.
+- `./.claude/commands/analysis/bottleneck-detect.md` (162 lines, .md) -- Analyze performance bottlenecks in swarm operations and suggest optimizations.
+- `./.claude/commands/analysis/performance-bottlenecks.md` (59 lines, .md) -- Identify and resolve performance bottlenecks in your development workflow.
+- `./.claude/commands/analysis/performance-report.md` (25 lines, .md) -- Generate comprehensive performance reports for swarm operations.
+- `./.claude/commands/analysis/token-efficiency.md` (45 lines, .md) -- Reduce token consumption while maintaining quality through intelligent coordination.
+- `./.claude/commands/analysis/token-usage.md` (25 lines, .md) -- Analyze token usage patterns and optimize for efficiency.
+- `./.claude/commands/automation/README.md` (9 lines, .md) -- Commands for automation operations in Claude Flow.
+- `./.claude/commands/automation/auto-agent.md` (122 lines, .md) -- Automatically spawn and manage agents based on task requirements.
+- `./.claude/commands/automation/self-healing.md` (106 lines, .md) -- Automatically detect and recover from errors without interrupting your flow.
+- `./.claude/commands/automation/session-memory.md` (90 lines, .md) -- Maintain context and learnings across Claude Code sessions for continuous improvement.
+- `./.claude/commands/automation/smart-agents.md` (73 lines, .md) -- Automatically spawn the right agents at the right time without manual intervention.
+- `./.claude/commands/automation/smart-spawn.md` (25 lines, .md) -- Intelligently spawn agents based on workload analysis.
+- `./.claude/commands/automation/workflow-select.md` (25 lines, .md) -- Automatically select optimal workflow based on task type.
+- `./.claude/commands/coordination/README.md` (9 lines, .md) -- Commands for coordination operations in Claude Flow.
+- `./.claude/commands/coordination/agent-spawn.md` (25 lines, .md) -- Spawn a new agent in the current swarm.
+- `./.claude/commands/coordination/init.md` (44 lines, .md) -- ```json
+- `./.claude/commands/coordination/orchestrate.md` (43 lines, .md) -- ```json
+- `./.claude/commands/coordination/spawn.md` (45 lines, .md) -- ```json
+- `./.claude/commands/coordination/swarm-init.md` (85 lines, .md) -- Initialize a Claude Flow swarm with specified topology and configuration.
+- `./.claude/commands/coordination/task-orchestrate.md` (25 lines, .md) -- Orchestrate complex tasks across the swarm.
+- `./.claude/commands/flow-nexus/app-store.md` (124 lines, .md) -- name: flow-nexus-app-store
+- `./.claude/commands/flow-nexus/challenges.md` (120 lines, .md) -- name: flow-nexus-challenges
+- `./.claude/commands/flow-nexus/login-registration.md` (65 lines, .md) -- name: flow-nexus-auth
+- `./.claude/commands/flow-nexus/neural-network.md` (134 lines, .md) -- name: flow-nexus-neural
+- `./.claude/commands/flow-nexus/payments.md` (116 lines, .md) -- name: flow-nexus-payments
+- `./.claude/commands/flow-nexus/sandbox.md` (83 lines, .md) -- name: flow-nexus-sandbox
+- `./.claude/commands/flow-nexus/swarm.md` (87 lines, .md) -- name: flow-nexus-swarm
+- `./.claude/commands/flow-nexus/user-tools.md` (152 lines, .md) -- name: flow-nexus-user-tools
+- `./.claude/commands/flow-nexus/workflow.md` (115 lines, .md) -- name: flow-nexus-workflow
+- `./.claude/commands/github/README.md` (11 lines, .md) -- Commands for github operations in Claude Flow.
+- `./.claude/commands/github/code-review-swarm.md` (514 lines, .md) -- Deploy specialized AI agents to perform comprehensive, intelligent code reviews that go beyond traditional static analys
+- `./.claude/commands/github/code-review.md` (25 lines, .md) -- Automated code review with swarm intelligence.
+- `./.claude/commands/github/github-modes.md` (147 lines, .md) -- This document describes all GitHub integration modes available in Claude-Flow with ruv-swarm coordination. Each mode is 
+- `./.claude/commands/github/github-swarm.md` (121 lines, .md) -- Create a specialized swarm for GitHub repository management.
+- `./.claude/commands/github/issue-tracker.md` (292 lines, .md) -- Intelligent issue management and project coordination with ruv-swarm integration for automated tracking, progress monito
+- `./.claude/commands/github/issue-triage.md` (25 lines, .md) -- Intelligent issue classification and triage.
+- `./.claude/commands/github/multi-repo-swarm.md` (519 lines, .md) -- Coordinate AI swarms across multiple repositories, enabling organization-wide automation and intelligent cross-project c
+- `./.claude/commands/github/pr-enhance.md` (26 lines, .md) -- AI-powered pull request enhancements.
+- `./.claude/commands/github/pr-manager.md` (170 lines, .md) -- Comprehensive pull request management with ruv-swarm coordination for automated reviews, testing, and merge workflows.
+- `./.claude/commands/github/project-board-sync.md` (471 lines, .md) -- Synchronize AI swarms with GitHub Projects for visual task management, progress tracking, and team coordination.
+- `./.claude/commands/github/release-manager.md` (338 lines, .md) -- Automated release coordination and deployment with ruv-swarm orchestration for seamless version management, testing, and
+- `./.claude/commands/github/release-swarm.md` (544 lines, .md) -- Orchestrate complex software releases using AI swarms that handle everything from changelog generation to multi-platform
+- `./.claude/commands/github/repo-analyze.md` (25 lines, .md) -- Deep analysis of GitHub repository with AI insights.
+- `./.claude/commands/github/repo-architect.md` (367 lines, .md) -- Repository structure optimization and multi-repo management with ruv-swarm coordination for scalable project architectur
+- `./.claude/commands/github/swarm-issue.md` (482 lines, .md) -- Transform GitHub Issues into intelligent swarm tasks, enabling automatic task decomposition and agent coordination.
+- `./.claude/commands/github/swarm-pr.md` (285 lines, .md) -- Create and manage AI swarms directly from GitHub Pull Requests, enabling seamless integration with your development work
+- `./.claude/commands/github/sync-coordinator.md` (301 lines, .md) -- Multi-package synchronization and version alignment with ruv-swarm coordination for seamless integration between claude-
+- `./.claude/commands/github/workflow-automation.md` (442 lines, .md) -- Integrate AI swarms with GitHub Actions to create intelligent, self-organizing CI/CD pipelines that adapt to your codeba
+- `./.claude/commands/hive-mind/README.md` (17 lines, .md) -- Commands for hive-mind operations in Claude Flow.
+- `./.claude/commands/hive-mind/hive-mind-consensus.md` (8 lines, .md) -- Command documentation for hive-mind-consensus in category hive-mind.
+- `./.claude/commands/hive-mind/hive-mind-init.md` (18 lines, .md) -- Initialize the Hive Mind collective intelligence system.
+- `./.claude/commands/hive-mind/hive-mind-memory.md` (8 lines, .md) -- Command documentation for hive-mind-memory in category hive-mind.
+- `./.claude/commands/hive-mind/hive-mind-metrics.md` (8 lines, .md) -- Command documentation for hive-mind-metrics in category hive-mind.
+- `./.claude/commands/hive-mind/hive-mind-resume.md` (8 lines, .md) -- Command documentation for hive-mind-resume in category hive-mind.
+- `./.claude/commands/hive-mind/hive-mind-sessions.md` (8 lines, .md) -- Command documentation for hive-mind-sessions in category hive-mind.
+- `./.claude/commands/hive-mind/hive-mind-spawn.md` (21 lines, .md) -- Spawn a Hive Mind swarm with queen-led coordination.
+- `./.claude/commands/hive-mind/hive-mind-status.md` (8 lines, .md) -- Command documentation for hive-mind-status in category hive-mind.
+- `./.claude/commands/hive-mind/hive-mind-stop.md` (8 lines, .md) -- Command documentation for hive-mind-stop in category hive-mind.
+- `./.claude/commands/hive-mind/hive-mind-wizard.md` (8 lines, .md) -- Command documentation for hive-mind-wizard in category hive-mind.
+- `./.claude/commands/hive-mind/hive-mind.md` (27 lines, .md) -- Hive Mind collective intelligence system for advanced swarm coordination.
+- `./.claude/commands/hooks/README.md` (11 lines, .md) -- Commands for hooks operations in Claude Flow.
+- `./.claude/commands/hooks/overview.md` (132 lines, .md) -- Automatically coordinate, format, and learn from Claude Code operations using hooks with MCP tool integration.
+- `./.claude/commands/hooks/post-edit.md` (117 lines, .md) -- Execute post-edit processing including formatting, validation, and memory updates.
+- `./.claude/commands/hooks/post-task.md` (112 lines, .md) -- Execute post-task cleanup, performance analysis, and memory storage.
+- `./.claude/commands/hooks/pre-edit.md` (113 lines, .md) -- Execute pre-edit validations and agent assignment before file modifications.
+- `./.claude/commands/hooks/pre-task.md` (111 lines, .md) -- Execute pre-task preparations and context loading.
+- `./.claude/commands/hooks/session-end.md` (118 lines, .md) -- Cleanup and persist session state before ending work.
+- `./.claude/commands/hooks/setup.md` (103 lines, .md) -- ```bash
+- `./.claude/commands/memory/README.md` (9 lines, .md) -- Commands for memory operations in Claude Flow.
+- `./.claude/commands/memory/memory-persist.md` (25 lines, .md) -- Persist memory across sessions.
+- `./.claude/commands/memory/memory-search.md` (25 lines, .md) -- Search through stored memory.
+- `./.claude/commands/memory/memory-usage.md` (25 lines, .md) -- Manage persistent memory storage.
+- `./.claude/commands/memory/neural.md` (47 lines, .md) -- ```json
+- `./.claude/commands/memory/usage.md` (46 lines, .md) -- ```json
+- `./.claude/commands/monitoring/README.md` (9 lines, .md) -- Commands for monitoring operations in Claude Flow.
+- `./.claude/commands/monitoring/agent-metrics.md` (25 lines, .md) -- View agent performance metrics.
+- `./.claude/commands/monitoring/agents.md` (44 lines, .md) -- ```json
+- `./.claude/commands/monitoring/real-time-view.md` (25 lines, .md) -- Real-time view of swarm activity.
+- `./.claude/commands/monitoring/status.md` (46 lines, .md) -- ```json
+- `./.claude/commands/monitoring/swarm-monitor.md` (25 lines, .md) -- Real-time swarm monitoring.
+- `./.claude/commands/optimization/README.md` (9 lines, .md) -- Commands for optimization operations in Claude Flow.
+- `./.claude/commands/optimization/auto-topology.md` (62 lines, .md) -- Automatically select the optimal swarm topology based on task complexity analysis.
+- `./.claude/commands/optimization/cache-manage.md` (25 lines, .md) -- Manage operation cache for performance.
+- `./.claude/commands/optimization/parallel-execute.md` (25 lines, .md) -- Execute tasks in parallel for maximum efficiency.
+- `./.claude/commands/optimization/parallel-execution.md` (50 lines, .md) -- Execute independent subtasks in parallel for maximum efficiency.
+- `./.claude/commands/optimization/topology-optimize.md` (25 lines, .md) -- Optimize swarm topology for current workload.
+- `./.claude/commands/pair/commands.md` (546 lines, .md) -- Complete reference for all pair programming session commands.
+- `./.claude/commands/pair/config.md` (510 lines, .md) -- Complete configuration guide for pair programming sessions.
+- `./.claude/commands/pair/examples.md` (512 lines, .md) -- Real-world examples and scenarios for pair programming sessions.
+- `./.claude/commands/pair/modes.md` (348 lines, .md) -- Detailed guide to pair programming modes and their optimal use cases.
+- `./.claude/commands/pair/session.md` (407 lines, .md) -- Complete guide to managing pair programming sessions.
+- `./.claude/commands/pair/start.md` (209 lines, .md) -- Start a new pair programming session with AI assistance.
+- `./.claude/commands/sparc/analyzer.md` (52 lines, .md) -- Deep code and data analysis with batch processing capabilities.
+- `./.claude/commands/sparc/architect.md` (53 lines, .md) -- System design with Memory-based coordination for scalable architectures.
+- `./.claude/commands/sparc/batch-executor.md` (54 lines, .md) -- Parallel task execution specialist using batch operations.
+- `./.claude/commands/sparc/coder.md` (54 lines, .md) -- Autonomous code generation with batch file operations.
+- `./.claude/commands/sparc/debugger.md` (54 lines, .md) -- Systematic debugging with TodoWrite and Memory integration.
+- `./.claude/commands/sparc/designer.md` (53 lines, .md) -- UI/UX design with Memory coordination for consistent experiences.
+- `./.claude/commands/sparc/documenter.md` (54 lines, .md) -- Documentation with batch file operations for comprehensive docs.
+- `./.claude/commands/sparc/innovator.md` (54 lines, .md) -- Creative problem solving with WebSearch and Memory integration.
+- `./.claude/commands/sparc/memory-manager.md` (54 lines, .md) -- Knowledge management with Memory tools for persistent insights.
+- `./.claude/commands/sparc/optimizer.md` (54 lines, .md) -- Performance optimization with systematic analysis and improvements.
+- `./.claude/commands/sparc/orchestrator.md` (132 lines, .md) -- Multi-agent task orchestration with TodoWrite/TodoRead/Task/Memory using MCP tools.
+- `./.claude/commands/sparc/researcher.md` (54 lines, .md) -- Deep research with parallel WebSearch/WebFetch and Memory coordination.
+- `./.claude/commands/sparc/reviewer.md` (54 lines, .md) -- Code review using batch file analysis for comprehensive reviews.
+- `./.claude/commands/sparc/sparc-modes.md` (174 lines, .md) -- SPARC (Specification, Planning, Architecture, Review, Code) is a comprehensive development methodology with 17 specializ
+- `./.claude/commands/sparc/swarm-coordinator.md` (54 lines, .md) -- Specialized swarm management with batch coordination capabilities.
+- `./.claude/commands/sparc/tdd.md` (54 lines, .md) -- Test-driven development with TodoWrite planning and comprehensive testing.
+- `./.claude/commands/sparc/tester.md` (54 lines, .md) -- Comprehensive testing with parallel execution capabilities.
+- `./.claude/commands/sparc/workflow-manager.md` (54 lines, .md) -- Process automation with TodoWrite planning and Task execution.
+- `./.claude/commands/stream-chain/pipeline.md` (121 lines, .md) -- Execute predefined pipelines for common development workflows.
+- `./.claude/commands/stream-chain/run.md` (70 lines, .md) -- Execute a custom stream chain with your own prompts.
+- `./.claude/commands/swarm/README.md` (15 lines, .md) -- Commands for swarm operations in Claude Flow.
+- `./.claude/commands/swarm/analysis.md` (95 lines, .md) -- Comprehensive analysis through distributed agent coordination.
+- `./.claude/commands/swarm/development.md` (96 lines, .md) -- Coordinated development through specialized agent teams.
+- `./.claude/commands/swarm/examples.md` (168 lines, .md) -- ```javascript
+- `./.claude/commands/swarm/maintenance.md` (102 lines, .md) -- System maintenance and updates through coordinated agents.
+- `./.claude/commands/swarm/optimization.md` (117 lines, .md) -- Performance optimization through specialized analysis.
+- `./.claude/commands/swarm/research.md` (136 lines, .md) -- Deep research through parallel information gathering.
+- `./.claude/commands/swarm/swarm-analysis.md` (8 lines, .md) -- Command documentation for swarm-analysis in category swarm.
+- `./.claude/commands/swarm/swarm-background.md` (8 lines, .md) -- Command documentation for swarm-background in category swarm.
+- `./.claude/commands/swarm/swarm-init.md` (19 lines, .md) -- Initialize a new swarm with specified topology.
+- `./.claude/commands/swarm/swarm-modes.md` (8 lines, .md) -- Command documentation for swarm-modes in category swarm.
+- `./.claude/commands/swarm/swarm-monitor.md` (8 lines, .md) -- Command documentation for swarm-monitor in category swarm.
+- `./.claude/commands/swarm/swarm-spawn.md` (19 lines, .md) -- Spawn agents in the swarm.
+- `./.claude/commands/swarm/swarm-status.md` (8 lines, .md) -- Command documentation for swarm-status in category swarm.
+- `./.claude/commands/swarm/swarm-strategies.md` (8 lines, .md) -- Command documentation for swarm-strategies in category swarm.
+- `./.claude/commands/swarm/swarm.md` (27 lines, .md) -- Main swarm orchestration command for Claude Flow.
+- `./.claude/commands/swarm/testing.md` (131 lines, .md) -- Comprehensive testing through distributed execution.
+- `./.claude/commands/training/README.md` (9 lines, .md) -- Commands for training operations in Claude Flow.
+- `./.claude/commands/training/model-update.md` (25 lines, .md) -- Update neural models with new data.
+- `./.claude/commands/training/neural-patterns.md` (74 lines, .md) -- Continuously improve coordination through neural network learning.
+- `./.claude/commands/training/neural-train.md` (25 lines, .md) -- Train neural patterns from operations.
+- `./.claude/commands/training/pattern-learn.md` (25 lines, .md) -- Learn patterns from successful operations.
+- `./.claude/commands/training/specialization.md` (63 lines, .md) -- Train agents to become experts in specific domains for better performance.
+- `./.claude/commands/truth/start.md` (143 lines, .md) -- View truth scores and reliability metrics for your codebase and agent tasks.
+- `./.claude/commands/verify/check.md` (50 lines, .md) -- Run verification checks on code, tasks, or agent outputs.
+- `./.claude/commands/verify/start.md` (128 lines, .md) -- Truth verification system for ensuring code quality and correctness with a 0.95 accuracy threshold.
+- `./.claude/commands/workflows/README.md` (9 lines, .md) -- Commands for workflows operations in Claude Flow.
+- `./.claude/commands/workflows/development.md` (78 lines, .md) -- Structure Claude Code's approach to complex development tasks for maximum efficiency.
+- `./.claude/commands/workflows/research.md` (63 lines, .md) -- Coordinate Claude Code's research activities for comprehensive, systematic exploration.
+- `./.claude/commands/workflows/workflow-create.md` (25 lines, .md) -- Create reusable workflow templates.
+- `./.claude/commands/workflows/workflow-execute.md` (25 lines, .md) -- Execute saved workflows.
+- `./.claude/commands/workflows/workflow-export.md` (25 lines, .md) -- Export workflows for sharing.
+- `./.claude/helpers/checkpoint-manager.sh` (251 lines, .sh) -- set -e
+- `./.claude/helpers/github-safe.js` (106 lines, .js) -- import { execSync } from 'child_process';
+- `./.claude/helpers/github-setup.sh` (28 lines, .sh) -- echo \"🔗 Setting up GitHub integration...\"
+- `./.claude/helpers/quick-start.sh` (19 lines, .sh) -- echo \"🚀 Claude Flow Quick Start\"
+- `./.claude/helpers/setup-mcp.sh` (18 lines, .sh) -- echo \"🚀 Setting up Claude Flow MCP server...\"
+- `./.claude/helpers/standard-checkpoint-hooks.sh` (179 lines, .sh) -- pre_edit_checkpoint() {
+- `./.claude/system-prompts/spec-workflow-starter.md` (306 lines, .md) -- <system>
+- `./.cursor/CHANGELOG.md` (100 lines, .md) -- - **Files Affected**: 
+- `./.cursor/dependency-analysis.md` (86 lines, .md) -- The repository is organized as a monorepo with multiple workspaces:
+- `./.cursor/error-analysis.md` (101 lines, .md) -- - **Path**: `frontend/src/types/websocket.ts` vs `backend/src/types/websocket.ts`
+- `./.cursor/fix-proposals.md` (393 lines, .md) -- Type definitions for WebSocket messages are inconsistent between frontend and backend.
+- `./.cursor/rules/dokumentacja.md` (155 lines, .md) -- Dobrze. W takim razie zacznę od wyszukania dokumentacji dla SvelteKit za pomocą ogólnego wyszukiwania w internecie, p
+- `./.cursor/rules/rules.md` (0 lines, .md) -- <empty>
+- `./.cursor/todo.md` (47 lines, .md) -- - [x] Clone the GitHub repository
+- `./.cursor/validation-results.md` (107 lines, .md) -- This document contains the results of validation and regression testing for all implemented fixes in the site2data repos
+- `./.hive-mind/README.md` (43 lines, .md) -- This directory contains the Claude Flow Hive Mind system configuration and data.
+- `./CLAUDE.md` (369 lines, .md) -- 1. ALL operations MUST be concurrent/parallel in a single message
+- `./DIT_DOCS/DCCM.md` (3629 lines, .md) -- 1. **Introduction & Theoretical Foundations**  
+- `./DIT_DOCS/DCCM_combined.md` (2809 lines, .md) -- This document provides a comprehensive guide to color management in digital cinema production. It covers the theoretical
+- `./DIT_DOCS/curves.py` (286 lines, .py) -- import numpy as np
+- `./README.md` (203 lines, .md) -- LUT Analyzer is a comprehensive command-line tool for analyzing Look-Up Tables (LUTs) in the `.cube` format. It provides
+- `./analiza_aplikacji_pixelpasta.md` (85 lines, .md) -- > ## ⚠️ ERRATA (sprostowanie)
+- `./analiza_obliczen_lut.md` (315 lines, .md) -- > ## ⚠️ ERRATA (sprostowanie)
+- `./check_models.py` (23 lines, .py) -- import google.generativeai as genai
+- `./cli_analyzer.py` (179 lines, .py) -- Główny skrypt analizatora LUT, wykorzystujący moduły z pakietu lut_analyzer_package.
+- `./config.py` (25 lines, .py) -- import os
+- `./cube_analyzer.py` (476 lines, .py) -- CUBE LUT Analyzer
+- `./curves.py` (385 lines, .py) -- curves.py — Verified digital-cinema colour-management reference.
+- `./deploy.sh` (31 lines, .sh) -- echo \"Updating repository...\"
+- `./docs/API.md` (37 lines, .md) -- > **Uwaga:** wcześniejsza wersja tego pliku opisywała rozbudowane REST API
+- `./gemini_analyzer.py` (95 lines, .py) -- import google.generativeai as genai
+- `./lut_analyzer.py` (106 lines, .py) -- import numpy as np
+- `./lut_analyzer_package/__init__.py` (33 lines, .py) -- LUT Analyzer Package - Narzędzia do analizy i porównywania plików LUT (Look-Up Table).
+- `./lut_analyzer_package/color_space.py` (219 lines, .py) -- Moduł zawierający funkcje do transformacji przestrzeni kolorów.
+- `./lut_analyzer_package/lut_interpolation.py` (227 lines, .py) -- Moduł odpowiedzialny za interpolację wartości przy użyciu LUT 1D i 3D.
+- `./lut_analyzer_package/lut_parsing.py` (204 lines, .py) -- Moduł odpowiedzialny za wczytywanie i parsowanie plików LUT, np. w formacie .cube.
+- `./lut_analyzer_package/reporting.py` (508 lines, .py) -- Moduł odpowiedzialny za generowanie raportów, wykresów i analiz porównawczych LUT.
+- `./lut_analyzer_package/transfer_functions.py` (670 lines, .py) -- Moduł zawierający implementacje różnych funkcji transferu
+- `./lut_tools/__init__.py` (4 lines, .py) -- from .lut_parser import LUTParser
+- `./lut_tools/analyzers.py` (570 lines, .py) -- import numpy as np
+- `./lut_tools/lut_parser.py` (167 lines, .py) -- import numpy as np
+- `./lut_tools/transfer_functions.py` (253 lines, .py) -- import numpy as np
+- `./lut_tools/visualizers.py` (358 lines, .py) -- import numpy as np
+- `./lutcomparetool_app.py` (629 lines, .py) -- import os
+- `./memory-bank/activeContext.md` (18 lines, .md) -- - Backend Flask obsługuje upload, analizę i porównanie LUT (.cube) względem referencyjnych krzywych (Sony, ARRI, RED
+- `./memory-bank/change_log2025.md` (50 lines, .md) -- - [x] ✅ Done: Integracja tabeli porównawczej na froncie (HTML, JS, CSS)
+- `./memory-bank/productContext.md` (26 lines, .md) -- Branża filmowa wymaga precyzyjnych narzędzi do analizy i kontroli LUT, które są kluczowe dla spójności obrazu na p
+- `./memory-bank/progress.md` (20 lines, .md) -- - Upload i analiza LUT (.cube) względem referencyjnych krzywych (Sony, ARRI, RED, Canon)
+- `./memory-bank/projectbrief.md` (20 lines, .md) -- PixelPasta to zaawansowane narzędzie webowe do analizy, porównywania i raportowania plików LUT (.cube) wykorzystywany
+- `./memory-bank/systemPatterns.md` (23 lines, .md) -- - Backend: Python (Flask), modularny, REST API, generowanie raportów, obsługa plików
+- `./memory-bank/techContext.md` (23 lines, .md) -- - Backend: Python 3.10+, Flask
+- `./memory/agents/README.md` (31 lines, .md) -- This directory stores agent-specific memory data, configurations, and persistent state information for individual Claude
+- `./memory/sessions/README.md` (32 lines, .md) -- This directory stores session-based memory data, conversation history, and contextual information for development sessio
+- `./pixelpasta/__init__.py` (1 lines, .py) -- <empty>
+- `./pixelpasta/app.py` (198 lines, .py) -- import os
+- `./pixelpasta/lut_processor/__init__.py` (1 lines, .py) -- <empty>
+- `./pixelpasta/lut_processor/color_analysis.py` (342 lines, .py) -- import numpy as np
+- `./pixelpasta/lut_processor/cube_parser.py` (137 lines, .py) -- import numpy as np
+- `./pixelpasta/not_mergrd/!README.md` (74 lines, .md) -- This document provides a comprehensive guide to color management in digital cinema production. It covers the theoretical
+- `./pixelpasta/not_mergrd/1.1_Basic_Color_Science.md` (59 lines, .md) -- Human vision is based on the tristimulus theory, which states that the human eye perceives color through three types of 
+- `./pixelpasta/not_mergrd/1.2_Gamma_Gamut_Log.md` (59 lines, .md) -- Gamma curves define the relationship between the input signal (light intensity from the scene) and the output signal (th
+- `./pixelpasta/not_mergrd/10.1_End_to_End_Pipelines.md` (86 lines, .md) -- This section provides simplified end-to-end workflow examples for ARRI, Sony, and RED cameras, from on-set capture to fi
+- `./pixelpasta/not_mergrd/10.2_ACES_Resolve_Baselight.md` (85 lines, .md) -- This section provides a guide to setting up and using ACES (Academy Color Encoding System) in two popular color grading 
+- `./pixelpasta/not_mergrd/10.3_On_Set_LUTs_Editorial.md` (48 lines, .md) -- On-set LUTs (Look Up Tables) and CDLs (Color Decision Lists) are created during production to preview a specific look an
+- `./pixelpasta/not_mergrd/10.4_Archival_Versioning.md` (80 lines, .md) -- Proper archival and versioning are essential for protecting your valuable film assets and ensuring that you can access a
+- `./pixelpasta/not_mergrd/11.1_Formulas.md` (150 lines, .md) -- This appendix provides a collection of formulas and mathematical representations relevant to color management in digital
+- `./pixelpasta/not_mergrd/11.2_Charts_Tables.md` (66 lines, .md) -- This appendix provides a collection of charts and tables that illustrate key concepts related to color management in dig
+- `./pixelpasta/not_mergrd/11.3_Block_Diagrams.md` (72 lines, .md) -- This appendix provides block diagrams to visually represent the flow of data and color transformations in various digita
+- `./pixelpasta/not_mergrd/11.4_References.md` (56 lines, .md) -- This appendix lists key references and resources for further learning about color management in digital cinema.
+- `./pixelpasta/not_mergrd/12.1_Summary.md` (64 lines, .md) -- This section summarizes the key concepts of color management for DITs (Digital Imaging Technicians) and colorists, provi
+- `./pixelpasta/not_mergrd/12.2_Camera_Comparisons.md` (71 lines, .md) -- This section provides a high-level comparison of the color science and key characteristics of three major digital cinema
+- `./pixelpasta/not_mergrd/12.3_Recommended_Practices.md` (110 lines, .md) -- This section provides a checklist of recommended practices for color management in digital cinema, covering pre-producti
+- `./pixelpasta/not_mergrd/2.1_ARRI_Cameras.md` (37 lines, .md) -- ARRI cameras are renowned in the film industry for their exceptional image quality, particularly their natural color ren
+- `./pixelpasta/not_mergrd/2.2_Sony_Cameras.md` (48 lines, .md) -- Sony's digital cinema cameras, particularly the VENICE series, are known for their full-frame sensors, wide dynamic rang
+- `./pixelpasta/not_mergrd/2.3_RED_Cameras.md` (57 lines, .md) -- RED Digital Cinema is known for its modular camera systems and high-resolution sensors.  Unlike ARRI and Sony, which hav
+- `./pixelpasta/not_mergrd/3.1_Log_Encodings.md` (72 lines, .md) -- Logarithmic encodings are designed to compress a wide dynamic range of scene luminance into a smaller range of code valu
+- `./pixelpasta/not_mergrd/3.2_RAW_vs_Log.md` (52 lines, .md) -- RAW and Log capture are two fundamentally different approaches to recording image data from a digital cinema camera.  Th
+- `./pixelpasta/not_mergrd/3.3_Exposing_Log_RAW.md` (36 lines, .md) -- Proper exposure is crucial for achieving optimal image quality, regardless of whether you're shooting Log or RAW. Howeve
+- `./pixelpasta/not_mergrd/4.1_1D_vs_3D_LUTs.md` (51 lines, .md) -- LUTs (Lookup Tables) are essential tools in color management and color grading. They are essentially pre-calculated tabl
+- `./pixelpasta/not_mergrd/4.2_Technical_vs_Creative_LUTs.md` (56 lines, .md) -- LUTs (Lookup Tables), both 1D and 3D, can be broadly categorized into two main types: technical LUTs and creative LUTs. 
+- `./pixelpasta/not_mergrd/4.3_Color_Management_Pipelines_LUTs.md` (52 lines, .md) -- Color management pipelines are standardized workflows designed to maintain color consistency and accuracy throughout the
+- `./pixelpasta/not_mergrd/4.4_Converting_Color_Spaces.md` (34 lines, .md) -- Converting to standardized color spaces is a critical step in color management. It ensures that your footage is displaye
+- `./pixelpasta/not_mergrd/5.1_ACES_Fundamentals.md` (44 lines, .md) -- ACES (Academy Color Encoding System) is a comprehensive, device-independent color management and interchange system deve
+- `./pixelpasta/not_mergrd/5.2_ACES_vs_Camera_Native.md` (53 lines, .md) -- When working with digital cinema footage, you have a choice between using an ACES workflow or a camera-native workflow (
+- `./pixelpasta/not_mergrd/5.3_Integrating_ACES.md` (41 lines, .md) -- Integrating ACES (Academy Color Encoding System) into your workflow involves several steps, both on set and in post-prod
+- `./pixelpasta/not_mergrd/6.1_PQ_HLG.md` (75 lines, .md) -- PQ (Perceptual Quantizer) and HLG (Hybrid Log-Gamma) are two fundamentally different transfer functions used in High Dyn
+- `./pixelpasta/not_mergrd/6.2_HDR_Standards_Grading.md` (62 lines, .md) -- High Dynamic Range (HDR) video offers a wider range of brightness and color than Standard Dynamic Range (SDR) video, res
+- `./pixelpasta/not_mergrd/6.3_Mapping_to_HDR.md` (38 lines, .md) -- \"Mapping to HDR\" generally refers to the process of converting existing Standard Dynamic Range (SDR) content to High D
+- `./pixelpasta/not_mergrd/6.4_HDR_Monitoring.md` (53 lines, .md) -- Accurate monitoring is absolutely critical for working with High Dynamic Range (HDR) content. You need a display that ca
+- `./pixelpasta/not_mergrd/7.1_On_Set_Hardware_Software.md` (68 lines, .md) -- On-set color management and live grading have become increasingly important in modern film production. They allow the ci
+- `./pixelpasta/not_mergrd/7.2_Reference_Monitors.md` (51 lines, .md) -- Setting up reference monitors correctly is crucial for on-set color management and ensuring that everyone is seeing an a
+- `./pixelpasta/not_mergrd/7.3_Wireless_Video_Color.md` (33 lines, .md) -- Wireless video transmission is increasingly common on film sets, allowing for greater mobility and flexibility. However,
+- `./pixelpasta/not_mergrd/7.4_On_Set_LUTs_CDLs.md` (59 lines, .md) -- Creating LUTs (Look Up Tables) and CDLs (Color Decision Lists) on set is a crucial part of a modern digital cinema workf
+- `./pixelpasta/not_mergrd/7.5_Maintaining_Color_Consistency.md` (45 lines, .md) -- Maintaining color consistency is a fundamental goal of color management in film production. It ensures that the image lo
+- `./pixelpasta/not_mergrd/8.1_Codecs_Overview.md` (64 lines, .md) -- A codec (coder-decoder) is a software or hardware component that encodes and decodes digital data, in this case, video d
+- `./pixelpasta/not_mergrd/8.2_Bit_Depth_Chroma_Compression.md` (56 lines, .md) -- Bit-depth, chroma subsampling, and compression are three fundamental concepts in digital video that significantly impact
+- `./pixelpasta/not_mergrd/8.3_Data_Rates_Storage.md` (83 lines, .md) -- Understanding data rates and storage requirements is crucial for planning and managing digital cinema workflows. The cho
+- `./pixelpasta/not_mergrd/8.4_Wrapping_Codecs.md` (56 lines, .md) -- In the context of digital video, the term \"wrapping\" refers to the process of packaging video and audio data, along wi
+- `./pixelpasta/not_mergrd/9.1_Monitoring_Differences.md` (80 lines, .md) -- Monitoring requirements and the types of displays used vary significantly across different stages of film production and
+- `./pixelpasta/not_mergrd/9.2_Standardized_Color_Spaces.md` (66 lines, .md) -- Standardized color spaces are crucial for ensuring consistent color reproduction across different devices and workflows.
+- `./pixelpasta/not_mergrd/9.3_Display_Scene_Referred.md` (53 lines, .md) -- The terms \"display-referred\" and \"scene-referred\" describe two fundamentally different approaches to representing an
+- `./pixelpasta/not_mergrd/9.4_Streaming_DCP.md` (68 lines, .md) -- This section covers the color management and technical requirements for delivering content to streaming platforms and fo
+- `./pixelpasta/static/js/app.js` (253 lines, .js) -- import Toast from './components/Toast.js';
+- `./pixelpasta/static/js/components/ComparisonTable.js` (54 lines, .js) -- class ComparisonTable {
+- `./pixelpasta/static/js/components/FileUpload.js` (74 lines, .js) -- class FileUpload {
+- `./pixelpasta/static/js/components/Toast.js` (29 lines, .js) -- class Toast {
+- `./pixelpasta/tests/test_color_analysis.py` (112 lines, .py) -- import unittest
+- `./pixelpasta/tests/test_cube_parser.py` (185 lines, .py) -- import unittest
+- `./pixelpasta/tests/test_lut_analysis.py` (171 lines, .py) -- import numpy as np
+- `./pixelpasta_ui_project_plan.md` (92 lines, .md) --     1.  Wczytywanie pliku LUT w formacie .CUBE (obsługa 1D i 3D).
+- `./setup.py` (19 lines, .py) -- from setuptools import setup, find_packages
+- `./system_prompt.md` (235 lines, .md) -- Provide comprehensive, reliable, and up-to-date technical support for DITs, cinematographers, and camera assistants in t
+- `./test_analyzer.py` (26 lines, .py) -- from gemini_analyzer import GeminiAnalyzer
+
+## By language
+- .md: 307
+- .py: 30
+- .sh: 6
+- .js: 5

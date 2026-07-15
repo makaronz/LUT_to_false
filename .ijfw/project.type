@@ -1,0 +1,40 @@
+{
+  "type": "software",
+  "primary_type": "software",
+  "secondary_types": [],
+  "confidence": 0.907,
+  "scan_incomplete": false,
+  "detected_at": "2026-07-15T06:05:31.581Z",
+  "signals": [
+    {
+      "kind": "manifest",
+      "weight": 0.9,
+      "manifests": [
+        "package.json",
+        "setup.py"
+      ]
+    },
+    {
+      "kind": "file_extension_ratio",
+      "weight": 0.7,
+      "domain": "software",
+      "ratio": 1,
+      "count": 35
+    },
+    {
+      "kind": "filename_pattern",
+      "weight": 0.2,
+      "domain": "content",
+      "name": "post-edit.md"
+    },
+    {
+      "kind": "filename_pattern",
+      "weight": 0.2,
+      "domain": "content",
+      "name": "post-task.md"
+    }
+  ],
+  "fallback_reason": null,
+  "file_tree_hash": "8d0b8d2bcbca93a9",
+  "branch_hash": "b440bebdd640df82"
+}
