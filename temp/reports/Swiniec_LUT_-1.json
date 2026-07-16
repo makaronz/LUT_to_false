@@ -1,0 +1,929 @@
+{
+  "anchor_points": [
+    {
+      "ev": -1.25,
+      "lut_rgb": [
+        0.2502743,
+        0.28800783,
+        0.27685809
+      ],
+      "rec709_y_ire": 27.91806674,
+      "scene_linear": 0.07568068,
+      "slog3_input": 0.32214546
+    },
+    {
+      "ev": -1.0,
+      "lut_rgb": [
+        0.29019272,
+        0.33047259,
+        0.31468976
+      ],
+      "rec709_y_ire": 32.07695686,
+      "scene_linear": 0.09,
+      "slog3_input": 0.33930199
+    },
+    {
+      "ev": -0.75,
+      "lut_rgb": [
+        0.33369362,
+        0.37597364,
+        0.35297474
+      ],
+      "rec709_y_ire": 36.53243895,
+      "scene_linear": 0.10702864,
+      "slog3_input": 0.35675888
+    },
+    {
+      "ev": 0.0,
+      "lut_rgb": [
+        0.47071868,
+        0.52084845,
+        0.46493492
+      ],
+      "rec709_y_ire": 50.61539063,
+      "scene_linear": 0.18,
+      "slog3_input": 0.41055718
+    },
+    {
+      "ev": 0.5,
+      "lut_rgb": [
+        0.55977798,
+        0.61805815,
+        0.5361985
+      ],
+      "rec709_y_ire": 59.97575143,
+      "scene_linear": 0.25455844,
+      "slog3_input": 0.44730727
+    },
+    {
+      "ev": 1.0,
+      "lut_rgb": [
+        0.64521575,
+        0.70449048,
+        0.60581177
+      ],
+      "rec709_y_ire": 68.47640718,
+      "scene_linear": 0.36,
+      "slog3_input": 0.48454612
+    },
+    {
+      "ev": 2.0,
+      "lut_rgb": [
+        0.79027784,
+        0.83434337,
+        0.72939372
+      ],
+      "rec709_y_ire": 81.73976761,
+      "scene_linear": 0.72,
+      "slog3_input": 0.5599852
+    },
+    {
+      "ev": 3.0,
+      "lut_rgb": [
+        0.89147717,
+        0.91356832,
+        0.82286888
+      ],
+      "rec709_y_ire": 90.23232402,
+      "scene_linear": 1.44,
+      "slog3_input": 0.63617172
+    }
+  ],
+  "clipping": {
+    "signal_ceiling_ire": 99.77228137,
+    "standard_threshold_ire": 99.0,
+    "threshold_ire": 99.0,
+    "uses_measured_ceiling": false
+  },
+  "confidence": {
+    "checks": {
+      "domain_zero_to_one": true,
+      "lut_size_33": true,
+      "neutral_axis_monotonic": true
+    },
+    "level": "high",
+    "score": 1.0
+  },
+  "grid_statistics": {
+    "channel_maximum": [
+      1.0,
+      1.0,
+      0.98732001
+    ],
+    "channel_minimum": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "entry_count": 35937,
+    "luma_ire": {
+      "maximum": 99.77228137,
+      "mean": 73.33093968,
+      "minimum": 2.0287502,
+      "standard_deviation": 27.20602072
+    },
+    "saturation_rate": 0.14513361,
+    "zero_rate": 0.0477224
+  },
+  "limitations": [
+    "Measurements describe display-referred Rec.709 luma after the LUT and do not replace a pre-LUT sensor clipping check.",
+    "EV mapping follows the neutral RGB axis and does not identify skin or any other chromatic subject.",
+    "LUT outputs are treated as display RGB and are not decoded through another display transfer function.",
+    "Inputs outside the declared LUT domain are clipped by the existing tetrahedral interpolator."
+  ],
+  "neutral_axis": {
+    "minimum_step_ire": 0.0,
+    "monotonic": true,
+    "samples": [
+      {
+        "ev": -8.0,
+        "lut_rgb": [
+          0.02167302,
+          0.02793148,
+          0.02233844
+        ],
+        "rec709_y_ire": 2.61971136,
+        "scene_linear": 0.00070312,
+        "slog3_input": 0.09752018
+      },
+      {
+        "ev": -7.75,
+        "lut_rgb": [
+          0.02187391,
+          0.02817925,
+          0.02265203
+        ],
+        "rec709_y_ire": 2.64396706,
+        "scene_linear": 0.00083616,
+        "slog3_input": 0.09840114
+      },
+      {
+        "ev": -7.5,
+        "lut_rgb": [
+          0.0221128,
+          0.02847391,
+          0.02302495
+        ],
+        "rec709_y_ire": 2.67281209,
+        "scene_linear": 0.00099437,
+        "slog3_input": 0.09944878
+      },
+      {
+        "ev": -7.25,
+        "lut_rgb": [
+          0.0223969,
+          0.02882431,
+          0.02346843
+        ],
+        "rec709_y_ire": 2.70711496,
+        "scene_linear": 0.00118251,
+        "slog3_input": 0.10069464
+      },
+      {
+        "ev": -7.0,
+        "lut_rgb": [
+          0.02273475,
+          0.02924102,
+          0.02399581
+        ],
+        "rec709_y_ire": 2.74790804,
+        "scene_linear": 0.00140625,
+        "slog3_input": 0.10217623
+      },
+      {
+        "ev": -6.75,
+        "lut_rgb": [
+          0.02313652,
+          0.02973656,
+          0.02462299
+        ],
+        "rec709_y_ire": 2.79641939,
+        "scene_linear": 0.00167232,
+        "slog3_input": 0.10393815
+      },
+      {
+        "ev": -6.5,
+        "lut_rgb": [
+          0.02361432,
+          0.03032587,
+          0.02536883
+        ],
+        "rec709_y_ire": 2.8541096,
+        "scene_linear": 0.00198874,
+        "slog3_input": 0.10603344
+      },
+      {
+        "ev": -6.25,
+        "lut_rgb": [
+          0.02418251,
+          0.03102668,
+          0.02625579
+        ],
+        "rec709_y_ire": 2.92271511,
+        "scene_linear": 0.00236502,
+        "slog3_input": 0.10852516
+      },
+      {
+        "ev": -6.0,
+        "lut_rgb": [
+          0.02485821,
+          0.03186009,
+          0.02731057
+        ],
+        "rec709_y_ire": 3.00430124,
+        "scene_linear": 0.0028125,
+        "slog3_input": 0.11148834
+      },
+      {
+        "ev": -5.75,
+        "lut_rgb": [
+          0.02566176,
+          0.03285118,
+          0.02856492
+        ],
+        "rec709_y_ire": 3.10132416,
+        "scene_linear": 0.00334465,
+        "slog3_input": 0.11501218
+      },
+      {
+        "ev": -5.5,
+        "lut_rgb": [
+          0.02661734,
+          0.0340298,
+          0.0300566
+        ],
+        "rec709_y_ire": 3.21670435,
+        "scene_linear": 0.00397748,
+        "slog3_input": 0.11920274
+      },
+      {
+        "ev": -5.25,
+        "lut_rgb": [
+          0.02775373,
+          0.03543141,
+          0.03183052
+        ],
+        "rec709_y_ire": 3.35391535,
+        "scene_linear": 0.00473004,
+        "slog3_input": 0.1241862
+      },
+      {
+        "ev": -5.0,
+        "lut_rgb": [
+          0.02995888,
+          0.03798945,
+          0.03452924
+        ],
+        "rec709_y_ire": 3.60323261,
+        "scene_linear": 0.005625,
+        "slog3_input": 0.13011256
+      },
+      {
+        "ev": -4.75,
+        "lut_rgb": [
+          0.03274288,
+          0.04120019,
+          0.0378501
+        ],
+        "rec709_y_ire": 3.91602874,
+        "scene_linear": 0.00668929,
+        "slog3_input": 0.13716023
+      },
+      {
+        "ev": -4.5,
+        "lut_rgb": [
+          0.03605363,
+          0.04501842,
+          0.04179929
+        ],
+        "rec709_y_ire": 4.28800846,
+        "scene_linear": 0.00795495,
+        "slog3_input": 0.14554136
+      },
+      {
+        "ev": -4.25,
+        "lut_rgb": [
+          0.0399908,
+          0.04955909,
+          0.0464957
+        ],
+        "rec709_y_ire": 4.73036944,
+        "scene_linear": 0.00946008,
+        "slog3_input": 0.15550827
+      },
+      {
+        "ev": -4.0,
+        "lut_rgb": [
+          0.04665319,
+          0.05733518,
+          0.05416402
+        ],
+        "rec709_y_ire": 5.48352279,
+        "scene_linear": 0.01125,
+        "slog3_input": 0.16736099
+      },
+      {
+        "ev": -3.75,
+        "lut_rgb": [
+          0.05272841,
+          0.06442982,
+          0.06114482
+        ],
+        "rec709_y_ire": 6.17049224,
+        "scene_linear": 0.01337858,
+        "slog3_input": 0.17795882
+      },
+      {
+        "ev": -3.5,
+        "lut_rgb": [
+          0.05967663,
+          0.07260013,
+          0.06917885
+        ],
+        "rec709_y_ire": 6.96055798,
+        "scene_linear": 0.0159099,
+        "slog3_input": 0.18937169
+      },
+      {
+        "ev": -3.25,
+        "lut_rgb": [
+          0.06931689,
+          0.08422428,
+          0.08058273
+        ],
+        "rec709_y_ire": 8.07920456,
+        "scene_linear": 0.01892017,
+        "slog3_input": 0.20157375
+      },
+      {
+        "ev": -3.0,
+        "lut_rgb": [
+          0.0795524,
+          0.09656617,
+          0.09269076
+        ],
+        "rec709_y_ire": 9.26692375,
+        "scene_linear": 0.0225,
+        "slog3_input": 0.21452926
+      },
+      {
+        "ev": -2.75,
+        "lut_rgb": [
+          0.09365964,
+          0.11302004,
+          0.10893443
+        ],
+        "rec709_y_ire": 10.8609038,
+        "scene_linear": 0.02675716,
+        "slog3_input": 0.22819438
+      },
+      {
+        "ev": -2.5,
+        "lut_rgb": [
+          0.10999931,
+          0.13187815,
+          0.12758929
+        ],
+        "rec709_y_ire": 12.69170536,
+        "scene_linear": 0.03181981,
+        "slog3_input": 0.24251938
+      },
+      {
+        "ev": -2.25,
+        "lut_rgb": [
+          0.13001405,
+          0.15477592,
+          0.15011531
+        ],
+        "rec709_y_ire": 14.91750481,
+        "scene_linear": 0.03784034,
+        "slog3_input": 0.25745076
+      },
+      {
+        "ev": -2.0,
+        "lut_rgb": [
+          0.15387352,
+          0.18189341,
+          0.17668089
+        ],
+        "rec709_y_ire": 17.5560036,
+        "scene_linear": 0.045,
+        "slog3_input": 0.27293331
+      },
+      {
+        "ev": -1.75,
+        "lut_rgb": [
+          0.18168084,
+          0.21305235,
+          0.206799
+        ],
+        "rec709_y_ire": 20.59312739,
+        "scene_linear": 0.05351432,
+        "slog3_input": 0.2889119
+      },
+      {
+        "ev": -1.5,
+        "lut_rgb": [
+          0.21380931,
+          0.24861321,
+          0.24076453
+        ],
+        "rec709_y_ire": 24.06472253,
+        "scene_linear": 0.06363961,
+        "slog3_input": 0.30533293
+      },
+      {
+        "ev": -1.25,
+        "lut_rgb": [
+          0.2502743,
+          0.28800783,
+          0.27685809
+        ],
+        "rec709_y_ire": 27.91806674,
+        "scene_linear": 0.07568068,
+        "slog3_input": 0.32214546
+      },
+      {
+        "ev": -1.0,
+        "lut_rgb": [
+          0.29019272,
+          0.33047259,
+          0.31468976
+        ],
+        "rec709_y_ire": 32.07695686,
+        "scene_linear": 0.09,
+        "slog3_input": 0.33930199
+      },
+      {
+        "ev": -0.75,
+        "lut_rgb": [
+          0.33369362,
+          0.37597364,
+          0.35297474
+        ],
+        "rec709_y_ire": 36.53243895,
+        "scene_linear": 0.10702864,
+        "slog3_input": 0.35675888
+      },
+      {
+        "ev": -0.5,
+        "lut_rgb": [
+          0.37884524,
+          0.42295036,
+          0.39175934
+        ],
+        "rec709_y_ire": 41.13216185,
+        "scene_linear": 0.12727922,
+        "slog3_input": 0.37447663
+      },
+      {
+        "ev": -0.25,
+        "lut_rgb": [
+          0.42477551,
+          0.47163081,
+          0.42837462
+        ],
+        "rec709_y_ire": 45.85462776,
+        "scene_linear": 0.15136135,
+        "slog3_input": 0.39241985
+      },
+      {
+        "ev": 0.0,
+        "lut_rgb": [
+          0.47071868,
+          0.52084845,
+          0.46493492
+        ],
+        "rec709_y_ire": 50.61539063,
+        "scene_linear": 0.18,
+        "slog3_input": 0.41055718
+      },
+      {
+        "ev": 0.25,
+        "lut_rgb": [
+          0.51549548,
+          0.57044333,
+          0.50063121
+        ],
+        "rec709_y_ire": 55.37209836,
+        "scene_linear": 0.21405728,
+        "slog3_input": 0.42886102
+      },
+      {
+        "ev": 0.5,
+        "lut_rgb": [
+          0.55977798,
+          0.61805815,
+          0.5361985
+        ],
+        "rec709_y_ire": 59.97575143,
+        "scene_linear": 0.25455844,
+        "slog3_input": 0.44730727
+      },
+      {
+        "ev": 0.75,
+        "lut_rgb": [
+          0.60360491,
+          0.66388863,
+          0.57163936
+        ],
+        "rec709_y_ire": 64.44119167,
+        "scene_linear": 0.30272271,
+        "slog3_input": 0.465875
+      },
+      {
+        "ev": 1.0,
+        "lut_rgb": [
+          0.64521575,
+          0.70449048,
+          0.60581177
+        ],
+        "rec709_y_ire": 68.47640718,
+        "scene_linear": 0.36,
+        "slog3_input": 0.48454612
+      },
+      {
+        "ev": 1.25,
+        "lut_rgb": [
+          0.68582207,
+          0.74308634,
+          0.6394186
+        ],
+        "rec709_y_ire": 72.3427144,
+        "scene_linear": 0.42811456,
+        "slog3_input": 0.5033051
+      },
+      {
+        "ev": 1.5,
+        "lut_rgb": [
+          0.72306657,
+          0.77622962,
+          0.67100763
+        ],
+        "rec709_y_ire": 75.73301278,
+        "scene_linear": 0.50911688,
+        "slog3_input": 0.52213858
+      },
+      {
+        "ev": 1.75,
+        "lut_rgb": [
+          0.75783664,
+          0.80659324,
+          0.70096809
+        ],
+        "rec709_y_ire": 78.86014503,
+        "scene_linear": 0.60544542,
+        "slog3_input": 0.54103519
+      },
+      {
+        "ev": 2.0,
+        "lut_rgb": [
+          0.79027784,
+          0.83434337,
+          0.72939372
+        ],
+        "rec709_y_ire": 81.73976761,
+        "scene_linear": 0.72,
+        "slog3_input": 0.5599852
+      },
+      {
+        "ev": 2.25,
+        "lut_rgb": [
+          0.8186844,
+          0.85764474,
+          0.75525492
+        ],
+        "rec709_y_ire": 84.19692245,
+        "scene_linear": 0.85622912,
+        "slog3_input": 0.57898036
+      },
+      {
+        "ev": 2.5,
+        "lut_rgb": [
+          0.84567815,
+          0.87928665,
+          0.78003299
+        ],
+        "rec709_y_ire": 86.49753667,
+        "scene_linear": 1.01823376,
+        "slog3_input": 0.59801364
+      },
+      {
+        "ev": 2.75,
+        "lut_rgb": [
+          0.86979884,
+          0.89744002,
+          0.80231059
+        ],
+        "rec709_y_ire": 88.46951571,
+        "scene_linear": 1.21089084,
+        "slog3_input": 0.61707911
+      },
+      {
+        "ev": 3.0,
+        "lut_rgb": [
+          0.89147717,
+          0.91356832,
+          0.82286888
+        ],
+        "rec709_y_ire": 90.23232402,
+        "scene_linear": 1.44,
+        "slog3_input": 0.63617172
+      },
+      {
+        "ev": 3.25,
+        "lut_rgb": [
+          0.91142339,
+          0.92826003,
+          0.84220886
+        ],
+        "rec709_y_ire": 91.84676638,
+        "scene_linear": 1.71245825,
+        "slog3_input": 0.65528721
+      },
+      {
+        "ev": 3.5,
+        "lut_rgb": [
+          0.9274686,
+          0.93968344,
+          0.85890627
+        ],
+        "rec709_y_ire": 93.12544509,
+        "scene_linear": 2.03646753,
+        "slog3_input": 0.674422
+      },
+      {
+        "ev": 3.75,
+        "lut_rgb": [
+          0.94238514,
+          0.95021576,
+          0.87447429
+        ],
+        "rec709_y_ire": 94.3082433,
+        "scene_linear": 2.42178168,
+        "slog3_input": 0.69357303
+      },
+      {
+        "ev": 4.0,
+        "lut_rgb": [
+          0.95529878,
+          0.95918977,
+          0.88789326
+        ],
+        "rec709_y_ire": 95.32149396,
+        "scene_linear": 2.88,
+        "slog3_input": 0.71273775
+      },
+      {
+        "ev": 4.25,
+        "lut_rgb": [
+          0.96596444,
+          0.96676809,
+          0.89945042
+        ],
+        "rec709_y_ire": 96.17368947,
+        "scene_linear": 3.42491649,
+        "slog3_input": 0.73191399
+      },
+      {
+        "ev": 4.5,
+        "lut_rgb": [
+          0.97547251,
+          0.97363156,
+          0.91004556
+        ],
+        "rec709_y_ire": 96.94320376,
+        "scene_linear": 4.07293506,
+        "slog3_input": 0.75109994
+      },
+      {
+        "ev": 4.75,
+        "lut_rgb": [
+          0.9828105,
+          0.97920799,
+          0.91878027
+        ],
+        "rec709_y_ire": 97.56110033,
+        "scene_linear": 4.84356335,
+        "slog3_input": 0.77029404
+      },
+      {
+        "ev": 5.0,
+        "lut_rgb": [
+          0.98944294,
+          0.98424292,
+          0.9268176
+        ],
+        "rec709_y_ire": 98.1202334,
+        "scene_linear": 5.76,
+        "slog3_input": 0.78949502
+      },
+      {
+        "ev": 5.25,
+        "lut_rgb": [
+          0.99513614,
+          0.98855686,
+          0.93392622
+        ],
+        "rec709_y_ire": 98.60112848,
+        "scene_linear": 6.84983298,
+        "slog3_input": 0.80870178
+      },
+      {
+        "ev": 5.5,
+        "lut_rgb": [
+          0.9981057,
+          0.99221742,
+          0.93963695
+        ],
+        "rec709_y_ire": 98.96729602,
+        "scene_linear": 8.14587012,
+        "slog3_input": 0.82791341
+      },
+      {
+        "ev": 5.75,
+        "lut_rgb": [
+          1.0,
+          0.9955771,
+          0.94480258
+        ],
+        "rec709_y_ire": 99.28514862,
+        "scene_linear": 9.6871267,
+        "slog3_input": 0.84712913
+      },
+      {
+        "ev": 6.0,
+        "lut_rgb": [
+          1.0,
+          0.99827951,
+          0.94902587
+        ],
+        "rec709_y_ire": 99.50891747,
+        "scene_linear": 11.52,
+        "slog3_input": 0.86634829
+      },
+      {
+        "ev": 6.25,
+        "lut_rgb": [
+          1.0,
+          0.99966645,
+          0.9528625
+        ],
+        "rec709_y_ire": 99.63581193,
+        "scene_linear": 13.69966596,
+        "slog3_input": 0.88557034
+      },
+      {
+        "ev": 6.5,
+        "lut_rgb": [
+          1.0,
+          0.99997652,
+          0.95638257
+        ],
+        "rec709_y_ire": 99.68340258,
+        "scene_linear": 16.29174024,
+        "slog3_input": 0.90479483
+      },
+      {
+        "ev": 6.75,
+        "lut_rgb": [
+          1.0,
+          1.0,
+          0.95913076
+        ],
+        "rec709_y_ire": 99.70492412,
+        "scene_linear": 19.37425341,
+        "slog3_input": 0.92402138
+      },
+      {
+        "ev": 7.0,
+        "lut_rgb": [
+          1.0,
+          1.0,
+          0.96163344
+        ],
+        "rec709_y_ire": 99.72299346,
+        "scene_linear": 23.04,
+        "slog3_input": 0.94324964
+      },
+      {
+        "ev": 7.25,
+        "lut_rgb": [
+          1.0,
+          1.0,
+          0.96370834
+        ],
+        "rec709_y_ire": 99.73797422,
+        "scene_linear": 27.39933193,
+        "slog3_input": 0.96247935
+      },
+      {
+        "ev": 7.5,
+        "lut_rgb": [
+          1.0,
+          1.0,
+          0.96526462
+        ],
+        "rec709_y_ire": 99.74921054,
+        "scene_linear": 32.58348048,
+        "slog3_input": 0.98171029
+      },
+      {
+        "ev": 7.75,
+        "lut_rgb": [
+          1.0,
+          1.0,
+          0.966506
+        ],
+        "rec709_y_ire": 99.75817335,
+        "scene_linear": 38.74850681,
+        "slog3_input": 1.00094224
+      },
+      {
+        "ev": 8.0,
+        "lut_rgb": [
+          1.0,
+          1.0,
+          0.966506
+        ],
+        "rec709_y_ire": 99.75817335,
+        "scene_linear": 46.08,
+        "slog3_input": 1.02017506
+      }
+    ],
+    "violation_count": 0
+  },
+  "smallhd_zones": [
+    {
+      "color": "#312E81",
+      "label": "DEEP SHADOW",
+      "maximum_ire": 27.91806674,
+      "minimum_ire": 0.0,
+      "semantic": "deep_shadow"
+    },
+    {
+      "color": "#22C55E",
+      "label": "-1 EV TARGET",
+      "maximum_ire": 36.53243895,
+      "minimum_ire": 27.91806674,
+      "semantic": "minus_one_ev"
+    },
+    {
+      "color": "#0891B2",
+      "label": "MID RANGE",
+      "maximum_ire": 59.97575143,
+      "minimum_ire": 36.53243895,
+      "semantic": "mid_range"
+    },
+    {
+      "color": "#FA8072",
+      "label": "FACE EXPOSURE",
+      "maximum_ire": 68.47640718,
+      "minimum_ire": 59.97575143,
+      "semantic": "face_exposure"
+    },
+    {
+      "color": "#D4A017",
+      "label": "BRIGHT SAFE",
+      "maximum_ire": 81.73976761,
+      "minimum_ire": 68.47640718,
+      "semantic": "bright_safe"
+    },
+    {
+      "color": "#FACC15",
+      "label": "WARN",
+      "maximum_ire": 90.23232402,
+      "minimum_ire": 81.73976761,
+      "semantic": "highlight_warn"
+    },
+    {
+      "color": "#F97316",
+      "label": "HIGH",
+      "maximum_ire": 99.0,
+      "minimum_ire": 90.23232402,
+      "semantic": "highlight_high"
+    },
+    {
+      "color": "#DC2626",
+      "label": "WHITE CLIPPING",
+      "maximum_ire": 100.0,
+      "minimum_ire": 99.0,
+      "semantic": "white_clipping"
+    }
+  ],
+  "source": {
+    "domain_max": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "domain_min": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "file_name": "Swiniec_LUT_-1.cube",
+    "lut_size": 33,
+    "sha256": "fcfc1e65dd09df257d0b2f43c1b379c3ac7f85b4d7015825687ba4eb9c1a33c2"
+  }
+}

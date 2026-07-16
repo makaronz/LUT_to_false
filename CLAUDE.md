@@ -356,7 +356,7 @@ Never save working files, text/mds and tests to the root folder.
 <ijfw-profile>
 Your portable working profile (derived from what you've said/edited; style + expertise only):
 style.formality: casual
-style.energy: high-energy
+style.energy: steady
 style.terseness: moderate
 style.emoji_use: rare
 expertise.markdown: novice

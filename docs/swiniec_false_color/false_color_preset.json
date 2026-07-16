@@ -1,0 +1,381 @@
+{
+  "name": "Swiniec_ExposureAssist_SmallHD_MAP",
+  "signal": "display_referred_rec709_y_ire_after_lut",
+  "input_assumed": "Sony S-Log3 / S-Gamut3.Cine",
+  "measurement_pages": {
+    "SENSOR_SAFETY": {
+      "measure": "before Look",
+      "purpose": "Protect sensor/log signal from clipping; not derived from post-LUT Rec.709 Y of these LUTs",
+      "note": "Use camera/monitor false color or waveform on the pre-Look path (S-Log3 or camera overlay)."
+    },
+    "LOOK_EXPOSURE": {
+      "measure": "after Look",
+      "purpose": "Look exposure assist for the applied Swiniec viewing LUT",
+      "maps": "per_lut_smallhd_zones"
+    }
+  },
+  "highlight_policy": {
+    "WARN": {
+      "color": "#FACC15",
+      "role": "yellow"
+    },
+    "HIGH": {
+      "color": "#F97316",
+      "role": "orange"
+    },
+    "WHITE_CLIPPING": {
+      "color": "#DC2626",
+      "role": "red_only_for_clipping"
+    }
+  },
+  "per_lut": {
+    "Swiniec_LUT_-1": {
+      "file_name": "Swiniec_LUT_-1.cube",
+      "sha256": "fcfc1e65dd09df257d0b2f43c1b379c3ac7f85b4d7015825687ba4eb9c1a33c2",
+      "clipping": {
+        "signal_ceiling_ire": 99.77228137,
+        "threshold_ire": 99.0,
+        "standard_threshold_ire": 99.0,
+        "uses_measured_ceiling": false
+      },
+      "confidence": {
+        "level": "high",
+        "score": 1.0,
+        "checks": {
+          "lut_size_33": true,
+          "domain_zero_to_one": true,
+          "neutral_axis_monotonic": true
+        }
+      },
+      "anchor_ire_by_ev": {
+        "-1.25": 27.91806674,
+        "-1.0": 32.07695686,
+        "-0.75": 36.53243895,
+        "0.0": 50.61539063,
+        "0.5": 59.97575143,
+        "1.0": 68.47640718,
+        "2.0": 81.73976761,
+        "3.0": 90.23232402
+      },
+      "smallhd_map_zones": [
+        {
+          "semantic": "deep_shadow",
+          "label": "DEEP SHADOW",
+          "minimum_ire": 0.0,
+          "maximum_ire": 27.91806674,
+          "color": "#312E81"
+        },
+        {
+          "semantic": "minus_one_ev",
+          "label": "-1 EV TARGET",
+          "minimum_ire": 27.91806674,
+          "maximum_ire": 36.53243895,
+          "color": "#22C55E"
+        },
+        {
+          "semantic": "mid_range",
+          "label": "MID RANGE",
+          "minimum_ire": 36.53243895,
+          "maximum_ire": 59.97575143,
+          "color": "#0891B2"
+        },
+        {
+          "semantic": "face_exposure",
+          "label": "FACE EXPOSURE",
+          "minimum_ire": 59.97575143,
+          "maximum_ire": 68.47640718,
+          "color": "#FA8072"
+        },
+        {
+          "semantic": "bright_safe",
+          "label": "BRIGHT SAFE",
+          "minimum_ire": 68.47640718,
+          "maximum_ire": 81.73976761,
+          "color": "#D4A017"
+        },
+        {
+          "semantic": "highlight_warn",
+          "label": "WARN",
+          "minimum_ire": 81.73976761,
+          "maximum_ire": 90.23232402,
+          "color": "#FACC15"
+        },
+        {
+          "semantic": "highlight_high",
+          "label": "HIGH",
+          "minimum_ire": 90.23232402,
+          "maximum_ire": 99.0,
+          "color": "#F97316"
+        },
+        {
+          "semantic": "white_clipping",
+          "label": "WHITE CLIPPING",
+          "minimum_ire": 99.0,
+          "maximum_ire": 100.0,
+          "color": "#DC2626"
+        }
+      ]
+    },
+    "Swiniec_LUT_0": {
+      "file_name": "Swiniec_LUT_0.cube",
+      "sha256": "c1f029a1ef5c7bd865c6ce32c349a67d8ca44c9023362f0bbf54fecde6e0929f",
+      "clipping": {
+        "signal_ceiling_ire": 97.57809635,
+        "threshold_ire": 97.57809635,
+        "standard_threshold_ire": 99.0,
+        "uses_measured_ceiling": true
+      },
+      "confidence": {
+        "level": "high",
+        "score": 1.0,
+        "checks": {
+          "lut_size_33": true,
+          "domain_zero_to_one": true,
+          "neutral_axis_monotonic": true
+        }
+      },
+      "anchor_ire_by_ev": {
+        "-1.25": 27.42111212,
+        "-1.0": 31.41912129,
+        "-0.75": 35.70258372,
+        "0.0": 49.24473847,
+        "0.5": 58.24788493,
+        "1.0": 66.42572169,
+        "2.0": 79.18624605,
+        "3.0": 87.35848276
+      },
+      "smallhd_map_zones": [
+        {
+          "semantic": "deep_shadow",
+          "label": "DEEP SHADOW",
+          "minimum_ire": 0.0,
+          "maximum_ire": 27.42111212,
+          "color": "#312E81"
+        },
+        {
+          "semantic": "minus_one_ev",
+          "label": "-1 EV TARGET",
+          "minimum_ire": 27.42111212,
+          "maximum_ire": 35.70258372,
+          "color": "#22C55E"
+        },
+        {
+          "semantic": "mid_range",
+          "label": "MID RANGE",
+          "minimum_ire": 35.70258372,
+          "maximum_ire": 58.24788493,
+          "color": "#0891B2"
+        },
+        {
+          "semantic": "face_exposure",
+          "label": "FACE EXPOSURE",
+          "minimum_ire": 58.24788493,
+          "maximum_ire": 66.42572169,
+          "color": "#FA8072"
+        },
+        {
+          "semantic": "bright_safe",
+          "label": "BRIGHT SAFE",
+          "minimum_ire": 66.42572169,
+          "maximum_ire": 79.18624605,
+          "color": "#D4A017"
+        },
+        {
+          "semantic": "highlight_warn",
+          "label": "WARN",
+          "minimum_ire": 79.18624605,
+          "maximum_ire": 87.35848276,
+          "color": "#FACC15"
+        },
+        {
+          "semantic": "highlight_high",
+          "label": "HIGH",
+          "minimum_ire": 87.35848276,
+          "maximum_ire": 97.57809635,
+          "color": "#F97316"
+        },
+        {
+          "semantic": "white_clipping",
+          "label": "WHITE CLIPPING",
+          "minimum_ire": 97.57809635,
+          "maximum_ire": 100.0,
+          "color": "#DC2626"
+        }
+      ]
+    },
+    "Swiniec_LUT_1": {
+      "file_name": "Swiniec_LUT_1.cube",
+      "sha256": "82ad34dfc03989c3f2201d40304a69b6566f567bbfb3a66340eced84301cdcb2",
+      "clipping": {
+        "signal_ceiling_ire": 98.01664631,
+        "threshold_ire": 98.01664631,
+        "standard_threshold_ire": 99.0,
+        "uses_measured_ceiling": true
+      },
+      "confidence": {
+        "level": "high",
+        "score": 1.0,
+        "checks": {
+          "lut_size_33": true,
+          "domain_zero_to_one": true,
+          "neutral_axis_monotonic": true
+        }
+      },
+      "anchor_ire_by_ev": {
+        "-1.25": 32.51988589,
+        "-1.0": 36.92337875,
+        "-0.75": 41.49698853,
+        "0.0": 55.4637701,
+        "0.5": 64.25910088,
+        "1.0": 71.86978051,
+        "2.0": 83.01740839,
+        "3.0": 89.77478606
+      },
+      "smallhd_map_zones": [
+        {
+          "semantic": "deep_shadow",
+          "label": "DEEP SHADOW",
+          "minimum_ire": 0.0,
+          "maximum_ire": 32.51988589,
+          "color": "#312E81"
+        },
+        {
+          "semantic": "minus_one_ev",
+          "label": "-1 EV TARGET",
+          "minimum_ire": 32.51988589,
+          "maximum_ire": 41.49698853,
+          "color": "#22C55E"
+        },
+        {
+          "semantic": "mid_range",
+          "label": "MID RANGE",
+          "minimum_ire": 41.49698853,
+          "maximum_ire": 64.25910088,
+          "color": "#0891B2"
+        },
+        {
+          "semantic": "face_exposure",
+          "label": "FACE EXPOSURE",
+          "minimum_ire": 64.25910088,
+          "maximum_ire": 71.86978051,
+          "color": "#FA8072"
+        },
+        {
+          "semantic": "bright_safe",
+          "label": "BRIGHT SAFE",
+          "minimum_ire": 71.86978051,
+          "maximum_ire": 83.01740839,
+          "color": "#D4A017"
+        },
+        {
+          "semantic": "highlight_warn",
+          "label": "WARN",
+          "minimum_ire": 83.01740839,
+          "maximum_ire": 89.77478606,
+          "color": "#FACC15"
+        },
+        {
+          "semantic": "highlight_high",
+          "label": "HIGH",
+          "minimum_ire": 89.77478606,
+          "maximum_ire": 98.01664631,
+          "color": "#F97316"
+        },
+        {
+          "semantic": "white_clipping",
+          "label": "WHITE CLIPPING",
+          "minimum_ire": 98.01664631,
+          "maximum_ire": 100.0,
+          "color": "#DC2626"
+        }
+      ]
+    },
+    "Swiniec_LUT_red": {
+      "file_name": "Swiniec_LUT_red.cube",
+      "sha256": "d5da1bab519c3f498ee863c47f188fe148526d2f3dc361a14e491da174d36e64",
+      "clipping": {
+        "signal_ceiling_ire": 96.37104656,
+        "threshold_ire": 96.37104656,
+        "standard_threshold_ire": 99.0,
+        "uses_measured_ceiling": true
+      },
+      "confidence": {
+        "level": "high",
+        "score": 1.0,
+        "checks": {
+          "lut_size_33": true,
+          "domain_zero_to_one": true,
+          "neutral_axis_monotonic": true
+        }
+      },
+      "anchor_ire_by_ev": {
+        "-1.25": 24.73118026,
+        "-1.0": 28.53684912,
+        "-0.75": 32.68479572,
+        "0.0": 46.05270308,
+        "0.5": 55.15758607,
+        "1.0": 63.54618753,
+        "2.0": 76.83627772,
+        "3.0": 85.46587266
+      },
+      "smallhd_map_zones": [
+        {
+          "semantic": "deep_shadow",
+          "label": "DEEP SHADOW",
+          "minimum_ire": 0.0,
+          "maximum_ire": 24.73118026,
+          "color": "#312E81"
+        },
+        {
+          "semantic": "minus_one_ev",
+          "label": "-1 EV TARGET",
+          "minimum_ire": 24.73118026,
+          "maximum_ire": 32.68479572,
+          "color": "#22C55E"
+        },
+        {
+          "semantic": "mid_range",
+          "label": "MID RANGE",
+          "minimum_ire": 32.68479572,
+          "maximum_ire": 55.15758607,
+          "color": "#0891B2"
+        },
+        {
+          "semantic": "face_exposure",
+          "label": "FACE EXPOSURE",
+          "minimum_ire": 55.15758607,
+          "maximum_ire": 63.54618753,
+          "color": "#FA8072"
+        },
+        {
+          "semantic": "bright_safe",
+          "label": "BRIGHT SAFE",
+          "minimum_ire": 63.54618753,
+          "maximum_ire": 76.83627772,
+          "color": "#D4A017"
+        },
+        {
+          "semantic": "highlight_warn",
+          "label": "WARN",
+          "minimum_ire": 76.83627772,
+          "maximum_ire": 85.46587266,
+          "color": "#FACC15"
+        },
+        {
+          "semantic": "highlight_high",
+          "label": "HIGH",
+          "minimum_ire": 85.46587266,
+          "maximum_ire": 96.37104656,
+          "color": "#F97316"
+        },
+        {
+          "semantic": "white_clipping",
+          "label": "WHITE CLIPPING",
+          "minimum_ire": 96.37104656,
+          "maximum_ire": 100.0,
+          "color": "#DC2626"
+        }
+      ]
+    }
+  }
+}

@@ -1,250 +1,593 @@
 /* pixelpasta/static/css/components.css */
 
+/* File Upload Component styling */
 .file-upload-container {
-    border: 2px dashed #ccc;
-    padding: 20px;
-    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 2.5rem;
+    border-radius: 12px;
     text-align: center;
-    margin-bottom: 20px;
-    background-color: #f9f9f9; /* Domyślny jasny, dostosujemy do ciemnego motywu */
+    margin-bottom: 1.5rem;
+    background-color: var(--card-bg);
+    transition: all 0.2s ease-in-out;
 }
 
 .file-upload-input-area {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
-}
-
-.file-upload-label {
-    /* Style dla przycisku, np. z bootstrapa lub własne */
-    padding: 10px 20px;
-    cursor: pointer;
-    /* Kolory dostosowane do motywu ciemnego/jasnego */
-}
-
-.file-upload-or {
-    color: #777;
-    margin: 5px 0;
+    gap: 1rem;
 }
 
 .file-upload-drop-area {
-    padding: 30px;
-    border: 2px dashed #007bff; /* Kolor akcentu */
-    border-radius: 6px;
-    background-color: #fff; /* Domyślny jasny */
     width: 100%;
-    max-width: 400px;
-    box-sizing: border-box;
-    transition: background-color 0.2s ease-in-out;
+    max-width: 450px;
+    padding: 3rem 2rem;
+    border: 2px dashed var(--border-color);
+    border-radius: 10px;
+    background-color: var(--bg-color);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.file-upload-drop-area:hover {
+    border-color: var(--text-secondary);
+}
+
+.file-upload-drop-area.dragover {
+    background-color: rgba(37, 99, 235, 0.05);
+    border-color: var(--accent-color);
 }
 
 .file-upload-drop-area p {
     margin: 0;
-    color: #555;
-    font-size: 0.9em;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
 }
 
-.file-upload-drop-area.dragover {
-    background-color: #e9f5ff; /* Jaśniejszy kolor akcentu podczas przeciągania */
-    border-color: #0056b3;
+.file-upload-drop-area svg {
+    width: 2.5rem;
+    height: 2.5rem;
+    stroke: var(--text-secondary);
+    transition: all 0.2s ease;
 }
 
-.file-upload-info {
-    margin-top: 15px;
-    font-size: 0.9em;
-    padding: 8px;
-    border-radius: 4px;
-}
-
-.file-upload-info.success {
-    color: #155724;
-    background-color: #d4edda;
-    border: 1px solid #c3e6cb;
-}
-
-.file-upload-info.error {
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-}
-
-/* Przykładowe style dla ciemnego motywu (do aktywacji przez klasę na body lub media query) */
-body.dark-theme .file-upload-container {
-    background-color: #2c2c2c;
-    border-color: #555;
-}
-
-body.dark-theme .file-upload-label {
-    /* Style przycisku dla ciemnego motywu */
-}
-
-body.dark-theme .file-upload-or {
-    color: #aaa;
-}
-
-body.dark-theme .file-upload-drop-area {
-    background-color: #333;
-    border-color: #007bff; /* Można dostosować kolor akcentu dla ciemnego tła */
-}
-
-body.dark-theme .file-upload-drop-area p {
-    color: #ccc;
-}
-
-body.dark-theme .file-upload-drop-area.dragover {
-    background-color: #444;
-    border-color: #3399ff;
-}
-
-body.dark-theme .file-upload-info.success {
-    color: #d4edda;
-    background-color: #155724;
-    border: 1px solid #2b6e3c;
-}
-
-body.dark-theme .file-upload-info.error {
-    color: #f8d7da;
-    background-color: #721c24;
-    border: 1px solid #8c2a34;
+.file-upload-drop-area:hover svg,
+.file-upload-drop-area.dragover svg {
+    stroke: var(--accent-color);
 }
 
 .btn-upload {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background-color 0.3s;
+    background-color: var(--accent-color);
+    color: #ffffff;
+    border: none;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-upload:hover {
-  background-color: #218838;
+    background-color: var(--accent-hover);
 }
 
 .file-info {
-  margin-top: 0.5rem;
-  color: #6c757d;
-  font-size: 0.9rem;
+    margin-top: 1rem;
+    color: var(--success-color);
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
 }
 
 .error-message {
-  color: #dc3545;
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
+    color: var(--error-color);
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
 }
 
+/* Toast Notification Component styling */
 .toast-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 .toast {
-  padding: 1rem 1.5rem;
-  border-radius: 4px;
-  color: white;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  animation: slideIn 0.3s ease-out;
-  max-width: 300px;
+    padding: 0.875rem 1.25rem;
+    border-radius: 8px;
+    color: #ffffff;
+    box-shadow: var(--shadow-md);
+    animation: slideIn 0.2s ease-out forwards;
+    max-width: 320px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-left: 4px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
 }
 
 .toast-success {
-  background-color: #28a745;
+    background-color: rgba(16, 185, 129, 0.95); /* success with alpha */
 }
 
 .toast-error {
-  background-color: #dc3545;
+    background-color: rgba(239, 68, 68, 0.95);
 }
 
 .toast-info {
-  background-color: #17a2b8;
+    background-color: rgba(37, 99, 235, 0.95);
 }
 
 .toast-warning {
-  background-color: #ffc107;
-  color: #212529;
+    background-color: rgba(245, 158, 11, 0.95);
+    color: #ffffff;
 }
 
 .fade-out {
-  animation: fadeOut 0.3s ease-out forwards;
+    animation: fadeOut 0.2s ease-in forwards;
 }
 
 @keyframes slideIn {
-  from { transform: translateX(100%); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
 }
 
 @keyframes fadeOut {
-  to { opacity: 0; transform: translateY(20px); }
+    to { opacity: 0; transform: translateY(10px); }
 }
 
-/* Ulepszone zakładki */
-.tabs {
-    display: flex;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid #e0e0e0;
-    gap: 0.5rem;
+/* Comparison Table formatting */
+#comparison-table-container {
+    margin-top: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.tab-btn {
-    position: relative;
-    padding: 0.75rem 1.5rem;
-    background-color: transparent;
-    border: none;
-    border-radius: 4px 4px 0 0;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #6c757d;
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-.tab-btn:hover {
-    background-color: #f8f9fa;
+.comparison-table th, 
+.comparison-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.875rem;
 }
 
-.tab-btn.active {
-    color: #007bff;
-    background-color: #f0f8ff;
+.comparison-table th {
+    background-color: var(--bg-color);
+    color: var(--text-secondary);
     font-weight: 600;
 }
 
-.tab-btn.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background-color: #007bff;
+.comparison-table td {
+    color: var(--text-primary);
+    font-family: var(--font-mono);
 }
 
-.tab-btn:focus-visible {
-    outline: 2px solid #007bff;
-    outline-offset: 2px;
+.comparison-table tbody tr:hover {
+    background-color: rgba(37, 99, 235, 0.02);
 }
 
+.comparison-table .delta-pos {
+    color: var(--success-color);
+    font-weight: 500;
+}
+
+.comparison-table .delta-neg {
+    color: var(--error-color);
+    font-weight: 500;
+}
+
+/* Tab components decoration */
 .tab-icon {
-    width: 1em;
-    height: 1em;
-    fill: currentColor;
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
-/* Animacje przejść */
-.tab-pane {
-    animation: fadeIn 0.3s ease-out;
+.info-container h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-} 
+#lut-info p {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+#lut-info p:last-child {
+    border-bottom: none;
+}
+
+#lut-info strong {
+    color: var(--text-secondary);
+    font-weight: 600;
+    display: inline-block;
+    width: 150px;
+}
+
+/* Floating Chat Toggle Button */
+.chat-toggle-btn {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background-color: var(--accent-color);
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 99;
+}
+
+.chat-toggle-btn:hover {
+    transform: scale(1.05);
+    background-color: var(--accent-hover);
+}
+
+.chat-toggle-btn svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+/* Sliding Chat Sidebar */
+.chat-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 400px;
+    height: 100vh;
+    background-color: var(--card-bg);
+    border-left: 1px solid var(--border-color);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+}
+
+.chat-panel.active {
+    transform: translateX(0);
+}
+
+/* Chat Header */
+.chat-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-header-title {
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+}
+
+.chat-header-title svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    stroke: var(--accent-color);
+}
+
+.chat-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.chat-close-btn:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-color);
+}
+
+.chat-close-btn svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* Chat Messages */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    scroll-behavior: smooth;
+}
+
+.chat-message {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+}
+
+.chat-message.user {
+    align-self: flex-end;
+}
+
+.chat-message.bot {
+    align-self: flex-start;
+}
+
+.message-bubble {
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.chat-message.user .message-bubble {
+    background-color: var(--accent-color);
+    color: #ffffff;
+    border-bottom-right-radius: 2px;
+}
+
+.chat-message.bot .message-bubble {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    border-bottom-left-radius: 2px;
+    border: 1px solid var(--border-color);
+}
+
+/* Markdown styling inside bubble */
+.chat-message.bot .message-bubble p {
+    margin-bottom: 0.5rem;
+}
+.chat-message.bot .message-bubble p:last-child {
+    margin-bottom: 0;
+}
+.chat-message.bot .message-bubble ul,
+.chat-message.bot .message-bubble ol {
+    margin-left: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+.chat-message.bot .message-bubble li {
+    margin-bottom: 0.25rem;
+}
+.chat-message.bot .message-bubble code {
+    font-family: var(--font-mono);
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 0.125rem 0.25rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+body.dark-theme .chat-message.bot .message-bubble code {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Collapsible Thoughts Box */
+.thoughts-box {
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: var(--bg-color);
+    width: 100%;
+}
+
+.thoughts-header {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    background: transparent;
+    border: none;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    transition: background-color 0.2s ease;
+}
+
+.thoughts-header:hover {
+    background-color: rgba(37, 99, 235, 0.04);
+}
+
+.thoughts-header svg.chevron {
+    width: 0.875rem;
+    height: 0.875rem;
+    transition: transform 0.2s ease;
+}
+
+.thoughts-header.expanded svg.chevron {
+    transform: rotate(90deg);
+}
+
+.thoughts-header svg.brain {
+    width: 0.875rem;
+    height: 0.875rem;
+    stroke: var(--accent-color);
+}
+
+.thoughts-content {
+    display: none;
+    padding: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border-color);
+    max-height: 150px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+body.dark-theme .thoughts-content {
+    background-color: rgba(255, 255, 255, 0.01);
+}
+
+.thoughts-box.expanded .thoughts-content {
+    display: block;
+}
+
+/* Loading state */
+.message-loader {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 0.25rem;
+    margin-left: 0.5rem;
+}
+
+.message-loader svg {
+    width: 0.75rem;
+    height: 0.75rem;
+    animation: spin 1s linear infinite;
+}
+
+/* Chat Footer & Input Form */
+.chat-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--bg-color);
+}
+
+.chat-suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    margin-bottom: 0.75rem;
+}
+
+.chat-suggestion-btn {
+    text-align: left;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--accent-color);
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.chat-suggestion-btn:hover {
+    background-color: var(--accent-color);
+    color: #ffffff;
+    border-color: var(--accent-color);
+}
+
+.chat-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+    position: relative;
+}
+
+.chat-form textarea {
+    flex: 1;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    padding: 0.625rem 2.5rem 0.625rem 0.875rem;
+    border-radius: 10px;
+    outline: none;
+    resize: none;
+    max-height: 120px;
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.2s ease;
+}
+
+.chat-form textarea:focus {
+    border-color: var(--accent-color);
+}
+
+.chat-form button {
+    position: absolute;
+    right: 0.5rem;
+    bottom: 0.4rem;
+    background-color: var(--accent-color);
+    border: none;
+    color: #ffffff;
+    width: 1.875rem;
+    height: 1.875rem;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.chat-form button:hover {
+    background-color: var(--accent-hover);
+}
+
+.chat-form button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.chat-form button svg {
+    width: 0.875rem;
+    height: 0.875rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+    .chat-panel {
+        width: 100%;
+    }
+}

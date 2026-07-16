@@ -59,3 +59,16 @@ No project agents yet. Run `ijfw team` to set them up.
 
 <!-- IJFW-DISCIPLINE-START -->
 <!-- IJFW-DISCIPLINE-END -->
+
+## Learned User Preferences
+- Respond in Polish in chat; keep code, comments, commits, and documentation in English
+- Prefer real production `.cube` LUT files only; never invent mock, demo, or artificial LUT data for analysis or tests
+- Do not copy vendor Swiniec `.cube` files into the repository; point tests and tools at external paths via `SWINIEC_LUT_DIR`
+- For highlight false-color bands: yellow = warn, orange = high, red = white clipping
+- When implementing an attached plan, do not edit the plan file; complete existing todos without recreating them
+
+## Learned Workspace Facts
+- PixelPasta is a Flask app under `pixelpasta/`; run from repo root with `python3 -m pixelpasta.app` (running `app.py` directly breaks imports)
+- Swiniec Exposure Assist / false-color scale docs live in `docs/swiniec_false_color/`; primary viewing look is `Swiniec_LUT_0`
+- False-color and exposure-assist thresholds are display-referred Rec.709 Y% after the viewing LUT, not camera-log percentages
+- Approved Swiniec planowe LUT set for analysis/tests: `Swiniec_LUT_-1.cube`, `Swiniec_LUT_0.cube`, `Swiniec_LUT_1.cube`, `Swiniec_LUT_red.cube`

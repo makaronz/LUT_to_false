@@ -1,0 +1,890 @@
+{
+  "method": {
+    "input": "Sony S-Log3 / S-Gamut3.Cine neutral axis",
+    "middle_gray_linear": 0.18,
+    "output": "Rec.709 luma Y as IRE (display-referred after LUT, no second OETF decode)",
+    "engine": "lut_analyzer_package.exposure_assist.analyze_exposure_assist",
+    "lut_dir_env": "SWINIEC_LUT_DIR",
+    "zone_semantics": {
+      "green": "-1 EV target band from interpolated \u00b10.25 EV around -1 EV",
+      "salmon": "face exposure range +0.5\u2026+1 EV (not chromatic skin detection)",
+      "yellow": "WARN from +2 EV",
+      "orange": "HIGH from +3 EV",
+      "red": "WHITE CLIPPING only (99 IRE or measured signal ceiling, whichever is lower)"
+    }
+  },
+  "luts": {
+    "Swiniec_LUT_-1.cube": {
+      "source": {
+        "file_name": "Swiniec_LUT_-1.cube",
+        "sha256": "fcfc1e65dd09df257d0b2f43c1b379c3ac7f85b4d7015825687ba4eb9c1a33c2",
+        "lut_size": 33,
+        "domain_min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "domain_max": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "anchor_points": [
+        {
+          "ev": -1.25,
+          "scene_linear": 0.07568068,
+          "slog3_input": 0.32214546,
+          "lut_rgb": [
+            0.2502743,
+            0.28800783,
+            0.27685809
+          ],
+          "rec709_y_ire": 27.91806674
+        },
+        {
+          "ev": -1.0,
+          "scene_linear": 0.09,
+          "slog3_input": 0.33930199,
+          "lut_rgb": [
+            0.29019272,
+            0.33047259,
+            0.31468976
+          ],
+          "rec709_y_ire": 32.07695686
+        },
+        {
+          "ev": -0.75,
+          "scene_linear": 0.10702864,
+          "slog3_input": 0.35675888,
+          "lut_rgb": [
+            0.33369362,
+            0.37597364,
+            0.35297474
+          ],
+          "rec709_y_ire": 36.53243895
+        },
+        {
+          "ev": 0.0,
+          "scene_linear": 0.18,
+          "slog3_input": 0.41055718,
+          "lut_rgb": [
+            0.47071868,
+            0.52084845,
+            0.46493492
+          ],
+          "rec709_y_ire": 50.61539063
+        },
+        {
+          "ev": 0.5,
+          "scene_linear": 0.25455844,
+          "slog3_input": 0.44730727,
+          "lut_rgb": [
+            0.55977798,
+            0.61805815,
+            0.5361985
+          ],
+          "rec709_y_ire": 59.97575143
+        },
+        {
+          "ev": 1.0,
+          "scene_linear": 0.36,
+          "slog3_input": 0.48454612,
+          "lut_rgb": [
+            0.64521575,
+            0.70449048,
+            0.60581177
+          ],
+          "rec709_y_ire": 68.47640718
+        },
+        {
+          "ev": 2.0,
+          "scene_linear": 0.72,
+          "slog3_input": 0.5599852,
+          "lut_rgb": [
+            0.79027784,
+            0.83434337,
+            0.72939372
+          ],
+          "rec709_y_ire": 81.73976761
+        },
+        {
+          "ev": 3.0,
+          "scene_linear": 1.44,
+          "slog3_input": 0.63617172,
+          "lut_rgb": [
+            0.89147717,
+            0.91356832,
+            0.82286888
+          ],
+          "rec709_y_ire": 90.23232402
+        }
+      ],
+      "grid_statistics": {
+        "entry_count": 35937,
+        "channel_minimum": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "channel_maximum": [
+          1.0,
+          1.0,
+          0.98732001
+        ],
+        "luma_ire": {
+          "minimum": 2.0287502,
+          "maximum": 99.77228137,
+          "mean": 73.33093968,
+          "standard_deviation": 27.20602072
+        },
+        "zero_rate": 0.0477224,
+        "saturation_rate": 0.14513361
+      },
+      "smallhd_zones": [
+        {
+          "semantic": "deep_shadow",
+          "label": "DEEP SHADOW",
+          "minimum_ire": 0.0,
+          "maximum_ire": 27.91806674,
+          "color": "#312E81"
+        },
+        {
+          "semantic": "minus_one_ev",
+          "label": "-1 EV TARGET",
+          "minimum_ire": 27.91806674,
+          "maximum_ire": 36.53243895,
+          "color": "#22C55E"
+        },
+        {
+          "semantic": "mid_range",
+          "label": "MID RANGE",
+          "minimum_ire": 36.53243895,
+          "maximum_ire": 59.97575143,
+          "color": "#0891B2"
+        },
+        {
+          "semantic": "face_exposure",
+          "label": "FACE EXPOSURE",
+          "minimum_ire": 59.97575143,
+          "maximum_ire": 68.47640718,
+          "color": "#FA8072"
+        },
+        {
+          "semantic": "bright_safe",
+          "label": "BRIGHT SAFE",
+          "minimum_ire": 68.47640718,
+          "maximum_ire": 81.73976761,
+          "color": "#D4A017"
+        },
+        {
+          "semantic": "highlight_warn",
+          "label": "WARN",
+          "minimum_ire": 81.73976761,
+          "maximum_ire": 90.23232402,
+          "color": "#FACC15"
+        },
+        {
+          "semantic": "highlight_high",
+          "label": "HIGH",
+          "minimum_ire": 90.23232402,
+          "maximum_ire": 99.0,
+          "color": "#F97316"
+        },
+        {
+          "semantic": "white_clipping",
+          "label": "WHITE CLIPPING",
+          "minimum_ire": 99.0,
+          "maximum_ire": 100.0,
+          "color": "#DC2626"
+        }
+      ],
+      "clipping": {
+        "signal_ceiling_ire": 99.77228137,
+        "threshold_ire": 99.0,
+        "standard_threshold_ire": 99.0,
+        "uses_measured_ceiling": false
+      },
+      "limitations": [
+        "Measurements describe display-referred Rec.709 luma after the LUT and do not replace a pre-LUT sensor clipping check.",
+        "EV mapping follows the neutral RGB axis and does not identify skin or any other chromatic subject.",
+        "LUT outputs are treated as display RGB and are not decoded through another display transfer function.",
+        "Inputs outside the declared LUT domain are clipped by the existing tetrahedral interpolator."
+      ],
+      "confidence": {
+        "level": "high",
+        "score": 1.0,
+        "checks": {
+          "lut_size_33": true,
+          "domain_zero_to_one": true,
+          "neutral_axis_monotonic": true
+        }
+      },
+      "neutral_axis_summary": {
+        "monotonic": true,
+        "violation_count": 0,
+        "minimum_step_ire": 0.0,
+        "sample_count": 65,
+        "ev_range": [
+          -8.0,
+          8.0
+        ],
+        "step_ev": 0.25
+      }
+    },
+    "Swiniec_LUT_0.cube": {
+      "source": {
+        "file_name": "Swiniec_LUT_0.cube",
+        "sha256": "c1f029a1ef5c7bd865c6ce32c349a67d8ca44c9023362f0bbf54fecde6e0929f",
+        "lut_size": 33,
+        "domain_min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "domain_max": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "anchor_points": [
+        {
+          "ev": -1.25,
+          "scene_linear": 0.07568068,
+          "slog3_input": 0.32214546,
+          "lut_rgb": [
+            0.24628109,
+            0.28274027,
+            0.27196571
+          ],
+          "rec709_y_ire": 27.42111212
+        },
+        {
+          "ev": -1.0,
+          "scene_linear": 0.09,
+          "slog3_input": 0.33930199,
+          "lut_rgb": [
+            0.28463209,
+            0.32357115,
+            0.30831507
+          ],
+          "rec709_y_ire": 31.41912129
+        },
+        {
+          "ev": -0.75,
+          "scene_linear": 0.10702864,
+          "slog3_input": 0.35675888,
+          "lut_rgb": [
+            0.32644364,
+            0.36732152,
+            0.34509096
+          ],
+          "rec709_y_ire": 35.70258372
+        },
+        {
+          "ev": 0.0,
+          "scene_linear": 0.18,
+          "slog3_input": 0.41055718,
+          "lut_rgb": [
+            0.45818177,
+            0.50665665,
+            0.45259151
+          ],
+          "rec709_y_ire": 49.24473847
+        },
+        {
+          "ev": 0.5,
+          "scene_linear": 0.25455844,
+          "slog3_input": 0.44730727,
+          "lut_rgb": [
+            0.54381627,
+            0.60017538,
+            0.52102602
+          ],
+          "rec709_y_ire": 58.24788493
+        },
+        {
+          "ev": 1.0,
+          "scene_linear": 0.36,
+          "slog3_input": 0.48454612,
+          "lut_rgb": [
+            0.62600607,
+            0.68333519,
+            0.58790863
+          ],
+          "rec709_y_ire": 66.42572169
+        },
+        {
+          "ev": 2.0,
+          "scene_linear": 0.72,
+          "slog3_input": 0.5599852,
+          "lut_rgb": [
+            0.76562887,
+            0.80825239,
+            0.70675415
+          ],
+          "rec709_y_ire": 79.18624605
+        },
+        {
+          "ev": 3.0,
+          "scene_linear": 1.44,
+          "slog3_input": 0.63617172,
+          "lut_rgb": [
+            0.86309141,
+            0.88446283,
+            0.79672819
+          ],
+          "rec709_y_ire": 87.35848276
+        }
+      ],
+      "grid_statistics": {
+        "entry_count": 35937,
+        "channel_minimum": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "channel_maximum": [
+          0.99737501,
+          0.99412501,
+          0.955688
+        ],
+        "luma_ire": {
+          "minimum": 2.55528898,
+          "maximum": 97.57809635,
+          "mean": 71.32267036,
+          "standard_deviation": 26.34063623
+        },
+        "zero_rate": 0.04254668,
+        "saturation_rate": 0.0
+      },
+      "smallhd_zones": [
+        {
+          "semantic": "deep_shadow",
+          "label": "DEEP SHADOW",
+          "minimum_ire": 0.0,
+          "maximum_ire": 27.42111212,
+          "color": "#312E81"
+        },
+        {
+          "semantic": "minus_one_ev",
+          "label": "-1 EV TARGET",
+          "minimum_ire": 27.42111212,
+          "maximum_ire": 35.70258372,
+          "color": "#22C55E"
+        },
+        {
+          "semantic": "mid_range",
+          "label": "MID RANGE",
+          "minimum_ire": 35.70258372,
+          "maximum_ire": 58.24788493,
+          "color": "#0891B2"
+        },
+        {
+          "semantic": "face_exposure",
+          "label": "FACE EXPOSURE",
+          "minimum_ire": 58.24788493,
+          "maximum_ire": 66.42572169,
+          "color": "#FA8072"
+        },
+        {
+          "semantic": "bright_safe",
+          "label": "BRIGHT SAFE",
+          "minimum_ire": 66.42572169,
+          "maximum_ire": 79.18624605,
+          "color": "#D4A017"
+        },
+        {
+          "semantic": "highlight_warn",
+          "label": "WARN",
+          "minimum_ire": 79.18624605,
+          "maximum_ire": 87.35848276,
+          "color": "#FACC15"
+        },
+        {
+          "semantic": "highlight_high",
+          "label": "HIGH",
+          "minimum_ire": 87.35848276,
+          "maximum_ire": 97.57809635,
+          "color": "#F97316"
+        },
+        {
+          "semantic": "white_clipping",
+          "label": "WHITE CLIPPING",
+          "minimum_ire": 97.57809635,
+          "maximum_ire": 100.0,
+          "color": "#DC2626"
+        }
+      ],
+      "clipping": {
+        "signal_ceiling_ire": 97.57809635,
+        "threshold_ire": 97.57809635,
+        "standard_threshold_ire": 99.0,
+        "uses_measured_ceiling": true
+      },
+      "limitations": [
+        "Measurements describe display-referred Rec.709 luma after the LUT and do not replace a pre-LUT sensor clipping check.",
+        "EV mapping follows the neutral RGB axis and does not identify skin or any other chromatic subject.",
+        "LUT outputs are treated as display RGB and are not decoded through another display transfer function.",
+        "Inputs outside the declared LUT domain are clipped by the existing tetrahedral interpolator."
+      ],
+      "confidence": {
+        "level": "high",
+        "score": 1.0,
+        "checks": {
+          "lut_size_33": true,
+          "domain_zero_to_one": true,
+          "neutral_axis_monotonic": true
+        }
+      },
+      "neutral_axis_summary": {
+        "monotonic": true,
+        "violation_count": 0,
+        "minimum_step_ire": 0.0,
+        "sample_count": 65,
+        "ev_range": [
+          -8.0,
+          8.0
+        ],
+        "step_ev": 0.25
+      }
+    },
+    "Swiniec_LUT_1.cube": {
+      "source": {
+        "file_name": "Swiniec_LUT_1.cube",
+        "sha256": "82ad34dfc03989c3f2201d40304a69b6566f567bbfb3a66340eced84301cdcb2",
+        "lut_size": 33,
+        "domain_min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "domain_max": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "anchor_points": [
+        {
+          "ev": -1.25,
+          "scene_linear": 0.07568068,
+          "slog3_input": 0.32214546,
+          "lut_rgb": [
+            0.29663026,
+            0.3339321,
+            0.32281199
+          ],
+          "rec709_y_ire": 32.51988589
+        },
+        {
+          "ev": -1.0,
+          "scene_linear": 0.09,
+          "slog3_input": 0.33930199,
+          "lut_rgb": [
+            0.33849987,
+            0.37899417,
+            0.36304829
+          ],
+          "rec709_y_ire": 36.92337875
+        },
+        {
+          "ev": -0.75,
+          "scene_linear": 0.10702864,
+          "slog3_input": 0.35675888,
+          "lut_rgb": [
+            0.38291958,
+            0.42576599,
+            0.40240091
+          ],
+          "rec709_y_ire": 41.49698853
+        },
+        {
+          "ev": 0.0,
+          "scene_linear": 0.18,
+          "slog3_input": 0.41055718,
+          "lut_rgb": [
+            0.51857871,
+            0.56959105,
+            0.51269186
+          ],
+          "rec709_y_ire": 55.4637701
+        },
+        {
+          "ev": 0.5,
+          "scene_linear": 0.25455844,
+          "slog3_input": 0.44730727,
+          "lut_rgb": [
+            0.60213017,
+            0.6611222,
+            0.57816529
+          ],
+          "rec709_y_ire": 64.25910088
+        },
+        {
+          "ev": 1.0,
+          "scene_linear": 0.36,
+          "slog3_input": 0.48454612,
+          "lut_rgb": [
+            0.67953795,
+            0.7382862,
+            0.63996881
+          ],
+          "rec709_y_ire": 71.86978051
+        },
+        {
+          "ev": 2.0,
+          "scene_linear": 0.72,
+          "slog3_input": 0.5599852,
+          "lut_rgb": [
+            0.80473959,
+            0.8462007,
+            0.74631166
+          ],
+          "rec709_y_ire": 83.01740839
+        },
+        {
+          "ev": 3.0,
+          "scene_linear": 1.44,
+          "slog3_input": 0.63617172,
+          "lut_rgb": [
+            0.88781285,
+            0.9081291,
+            0.82416785
+          ],
+          "rec709_y_ire": 89.77478606
+        }
+      ],
+      "grid_statistics": {
+        "entry_count": 35937,
+        "channel_minimum": [
+          0.0108797,
+          0.0227054,
+          0.00823987
+        ],
+        "channel_maximum": [
+          1.0,
+          1.0,
+          0.98030102
+        ],
+        "luma_ire": {
+          "minimum": 2.21608877,
+          "maximum": 98.01664631,
+          "mean": 74.44217935,
+          "standard_deviation": 25.43120307
+        },
+        "zero_rate": 0.0,
+        "saturation_rate": 0.08034431
+      },
+      "smallhd_zones": [
+        {
+          "semantic": "deep_shadow",
+          "label": "DEEP SHADOW",
+          "minimum_ire": 0.0,
+          "maximum_ire": 32.51988589,
+          "color": "#312E81"
+        },
+        {
+          "semantic": "minus_one_ev",
+          "label": "-1 EV TARGET",
+          "minimum_ire": 32.51988589,
+          "maximum_ire": 41.49698853,
+          "color": "#22C55E"
+        },
+        {
+          "semantic": "mid_range",
+          "label": "MID RANGE",
+          "minimum_ire": 41.49698853,
+          "maximum_ire": 64.25910088,
+          "color": "#0891B2"
+        },
+        {
+          "semantic": "face_exposure",
+          "label": "FACE EXPOSURE",
+          "minimum_ire": 64.25910088,
+          "maximum_ire": 71.86978051,
+          "color": "#FA8072"
+        },
+        {
+          "semantic": "bright_safe",
+          "label": "BRIGHT SAFE",
+          "minimum_ire": 71.86978051,
+          "maximum_ire": 83.01740839,
+          "color": "#D4A017"
+        },
+        {
+          "semantic": "highlight_warn",
+          "label": "WARN",
+          "minimum_ire": 83.01740839,
+          "maximum_ire": 89.77478606,
+          "color": "#FACC15"
+        },
+        {
+          "semantic": "highlight_high",
+          "label": "HIGH",
+          "minimum_ire": 89.77478606,
+          "maximum_ire": 98.01664631,
+          "color": "#F97316"
+        },
+        {
+          "semantic": "white_clipping",
+          "label": "WHITE CLIPPING",
+          "minimum_ire": 98.01664631,
+          "maximum_ire": 100.0,
+          "color": "#DC2626"
+        }
+      ],
+      "clipping": {
+        "signal_ceiling_ire": 98.01664631,
+        "threshold_ire": 98.01664631,
+        "standard_threshold_ire": 99.0,
+        "uses_measured_ceiling": true
+      },
+      "limitations": [
+        "Measurements describe display-referred Rec.709 luma after the LUT and do not replace a pre-LUT sensor clipping check.",
+        "EV mapping follows the neutral RGB axis and does not identify skin or any other chromatic subject.",
+        "LUT outputs are treated as display RGB and are not decoded through another display transfer function.",
+        "Inputs outside the declared LUT domain are clipped by the existing tetrahedral interpolator."
+      ],
+      "confidence": {
+        "level": "high",
+        "score": 1.0,
+        "checks": {
+          "lut_size_33": true,
+          "domain_zero_to_one": true,
+          "neutral_axis_monotonic": true
+        }
+      },
+      "neutral_axis_summary": {
+        "monotonic": true,
+        "violation_count": 0,
+        "minimum_step_ire": 0.0,
+        "sample_count": 65,
+        "ev_range": [
+          -8.0,
+          8.0
+        ],
+        "step_ev": 0.25
+      }
+    },
+    "Swiniec_LUT_red.cube": {
+      "source": {
+        "file_name": "Swiniec_LUT_red.cube",
+        "sha256": "d5da1bab519c3f498ee863c47f188fe148526d2f3dc361a14e491da174d36e64",
+        "lut_size": 33,
+        "domain_min": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "domain_max": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "anchor_points": [
+        {
+          "ev": -1.25,
+          "scene_linear": 0.07568068,
+          "slog3_input": 0.32214546,
+          "lut_rgb": [
+            0.27520749,
+            0.23736855,
+            0.26366621
+          ],
+          "rec709_y_ire": 24.73118026
+        },
+        {
+          "ev": -1.0,
+          "scene_linear": 0.09,
+          "slog3_input": 0.33930199,
+          "lut_rgb": [
+            0.3117325,
+            0.27620599,
+            0.29849917
+          ],
+          "rec709_y_ire": 28.53684912
+        },
+        {
+          "ev": -0.75,
+          "scene_linear": 0.10702864,
+          "slog3_input": 0.35675888,
+          "lut_rgb": [
+            0.35152081,
+            0.31878471,
+            0.33406934
+          ],
+          "rec709_y_ire": 32.68479572
+        },
+        {
+          "ev": 0.0,
+          "scene_linear": 0.18,
+          "slog3_input": 0.41055718,
+          "lut_rgb": [
+            0.47661906,
+            0.45786086,
+            0.43955308
+          ],
+          "rec709_y_ire": 46.05270308
+        },
+        {
+          "ev": 0.5,
+          "scene_linear": 0.25455844,
+          "slog3_input": 0.44730727,
+          "lut_rgb": [
+            0.55767787,
+            0.55425179,
+            0.50710064
+          ],
+          "rec709_y_ire": 55.15758607
+        },
+        {
+          "ev": 1.0,
+          "scene_linear": 0.36,
+          "slog3_input": 0.48454612,
+          "lut_rgb": [
+            0.63568544,
+            0.64164633,
+            0.57354152
+          ],
+          "rec709_y_ire": 63.54618753
+        },
+        {
+          "ev": 2.0,
+          "scene_linear": 0.72,
+          "slog3_input": 0.5599852,
+          "lut_rgb": [
+            0.76918417,
+            0.77570182,
+            0.69324487
+          ],
+          "rec709_y_ire": 76.83627772
+        },
+        {
+          "ev": 3.0,
+          "scene_linear": 1.44,
+          "slog3_input": 0.63617172,
+          "lut_rgb": [
+            0.86329293,
+            0.85905695,
+            0.78566647
+          ],
+          "rec709_y_ire": 85.46587266
+        }
+      ],
+      "grid_statistics": {
+        "entry_count": 35937,
+        "channel_minimum": [
+          0.0137026,
+          0.0,
+          0.0
+        ],
+        "channel_maximum": [
+          1.0,
+          0.977539,
+          0.95666403
+        ],
+        "luma_ire": {
+          "minimum": 2.6969143,
+          "maximum": 96.37104656,
+          "mean": 69.22741386,
+          "standard_deviation": 26.51747125
+        },
+        "zero_rate": 0.00372875,
+        "saturation_rate": 0.02746473
+      },
+      "smallhd_zones": [
+        {
+          "semantic": "deep_shadow",
+          "label": "DEEP SHADOW",
+          "minimum_ire": 0.0,
+          "maximum_ire": 24.73118026,
+          "color": "#312E81"
+        },
+        {
+          "semantic": "minus_one_ev",
+          "label": "-1 EV TARGET",
+          "minimum_ire": 24.73118026,
+          "maximum_ire": 32.68479572,
+          "color": "#22C55E"
+        },
+        {
+          "semantic": "mid_range",
+          "label": "MID RANGE",
+          "minimum_ire": 32.68479572,
+          "maximum_ire": 55.15758607,
+          "color": "#0891B2"
+        },
+        {
+          "semantic": "face_exposure",
+          "label": "FACE EXPOSURE",
+          "minimum_ire": 55.15758607,
+          "maximum_ire": 63.54618753,
+          "color": "#FA8072"
+        },
+        {
+          "semantic": "bright_safe",
+          "label": "BRIGHT SAFE",
+          "minimum_ire": 63.54618753,
+          "maximum_ire": 76.83627772,
+          "color": "#D4A017"
+        },
+        {
+          "semantic": "highlight_warn",
+          "label": "WARN",
+          "minimum_ire": 76.83627772,
+          "maximum_ire": 85.46587266,
+          "color": "#FACC15"
+        },
+        {
+          "semantic": "highlight_high",
+          "label": "HIGH",
+          "minimum_ire": 85.46587266,
+          "maximum_ire": 96.37104656,
+          "color": "#F97316"
+        },
+        {
+          "semantic": "white_clipping",
+          "label": "WHITE CLIPPING",
+          "minimum_ire": 96.37104656,
+          "maximum_ire": 100.0,
+          "color": "#DC2626"
+        }
+      ],
+      "clipping": {
+        "signal_ceiling_ire": 96.37104656,
+        "threshold_ire": 96.37104656,
+        "standard_threshold_ire": 99.0,
+        "uses_measured_ceiling": true
+      },
+      "limitations": [
+        "Measurements describe display-referred Rec.709 luma after the LUT and do not replace a pre-LUT sensor clipping check.",
+        "EV mapping follows the neutral RGB axis and does not identify skin or any other chromatic subject.",
+        "LUT outputs are treated as display RGB and are not decoded through another display transfer function.",
+        "Inputs outside the declared LUT domain are clipped by the existing tetrahedral interpolator."
+      ],
+      "confidence": {
+        "level": "high",
+        "score": 1.0,
+        "checks": {
+          "lut_size_33": true,
+          "domain_zero_to_one": true,
+          "neutral_axis_monotonic": true
+        }
+      },
+      "neutral_axis_summary": {
+        "monotonic": true,
+        "violation_count": 0,
+        "minimum_step_ire": 0.0,
+        "sample_count": 65,
+        "ev_range": [
+          -8.0,
+          8.0
+        ],
+        "step_ev": 0.25
+      }
+    }
+  }
+}

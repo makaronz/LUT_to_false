@@ -506,3 +506,775 @@ def generate_comparison_report(lut_data1: dict, lut_data2: dict, plot_path: str,
     doc.build(content)
     
     print(f"Generated comparison report at {output_pdf_path}")
+
+
+# =========================================
+# Exposure Assist reporting (post-LUT look aid)
+# =========================================
+
+import csv
+import json
+from pathlib import Path
+
+EXPOSURE_ASSIST_CHART_DPI = 150
+EXPOSURE_ASSIST_FIGURE_BG = "#FFFFFF"
+EXPOSURE_ASSIST_TEXT_COLOR = "#111827"
+SMALLHD_WORKFLOW_PAGES = (
+    {
+        "title": "SENSOR SAFETY (pre-Look)",
+        "subtitle": "Measure the camera signal before the viewing LUT.",
+        "bullets": (
+            "Apply SmallHD false color to the clean feed / sensor path.",
+            "Protect highlight headroom before any look compresses the signal.",
+            "Treat this page as the clipping authority for the capture.",
+        ),
+    },
+    {
+        "title": "LOOK EXPOSURE (post-Look)",
+        "subtitle": "Measure Rec.709 Y / IRE after the Swiniec display look.",
+        "bullets": (
+            "Use the per-LUT MAP zones from this report — never a shared scale.",
+            "Green = -1 EV target; salmon = face exposure (+0.5 to +1 EV).",
+            "Yellow = WARN, orange = HIGH, red = WHITE CLIPPING only.",
+        ),
+    },
+)
+
+
+def exposure_assist_csv_rows(request):
+    """Build CSV rows from an Exposure Assist analysis contract."""
+    analysis = _validated_exposure_analysis(request)
+    rows = [
+        [
+            "section",
+            "key",
+            "ev",
+            "minimum_ire",
+            "maximum_ire",
+            "rec709_y_ire",
+            "color",
+            "label",
+        ]
+    ]
+
+    for point in analysis["anchor_points"]:
+        rows.append(
+            [
+                "anchor",
+                f"ev_{point['ev']}",
+                point["ev"],
+                "",
+                "",
+                point["rec709_y_ire"],
+                "",
+                "",
+            ]
+        )
+
+    for zone in analysis["smallhd_zones"]:
+        rows.append(
+            [
+                "zone",
+                zone["semantic"],
+                "",
+                zone["minimum_ire"],
+                zone["maximum_ire"],
+                "",
+                zone["color"],
+                zone["label"],
+            ]
+        )
+
+    clipping = analysis["clipping"]
+    rows.append(
+        [
+            "clipping",
+            "signal_ceiling_ire",
+            "",
+            "",
+            "",
+            clipping["signal_ceiling_ire"],
+            "",
+            "Signal ceiling",
+        ]
+    )
+    rows.append(
+        [
+            "clipping",
+            "threshold_ire",
+            "",
+            "",
+            "",
+            clipping["threshold_ire"],
+            "#DC2626",
+            "WHITE CLIPPING threshold",
+        ]
+    )
+    return rows
+
+
+def false_color_bar_segments(request):
+    """Return ordered false-color bar segments for charts and SVG."""
+    if not isinstance(request, dict):
+        raise TypeError("false_color_bar_segments request must be an object")
+    zones = request.get("zones")
+    if not isinstance(zones, list) or not zones:
+        raise ValueError("zones must be a non-empty list")
+
+    return [
+        {
+            "semantic": zone["semantic"],
+            "label": zone["label"],
+            "color": zone["color"],
+            "minimum_ire": zone["minimum_ire"],
+            "maximum_ire": zone["maximum_ire"],
+        }
+        for zone in zones
+    ]
+
+
+def generate_exposure_assist_report(request):
+    """
+    Write per-LUT Exposure Assist charts, JSON, CSV, and multi-page PDF.
+
+    request:
+        analysis: contract from analyze_exposure_assist
+        output_dir: directory path
+        basename: optional file stem (default: source file stem)
+    """
+    analysis = _validated_exposure_analysis(request)
+    output_dir = Path(request["output_dir"]).expanduser().resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    source_name = analysis["source"]["file_name"]
+    basename = request.get("basename") or Path(source_name).stem
+    basename = str(basename).strip() or "exposure_assist"
+
+    artifacts = {}
+    artifacts["json"] = str(_write_exposure_json(analysis, output_dir / f"{basename}.json"))
+    artifacts["csv"] = str(_write_exposure_csv(analysis, output_dir / f"{basename}.csv"))
+
+    chart_specs = (
+        ("ev_ire", _plot_exposure_ev_ire),
+        ("rgb_neutral", _plot_exposure_rgb_neutral),
+        ("clipping", _plot_exposure_clipping),
+        ("false_color_bar", _plot_exposure_false_color_bar),
+        ("dashboard", _plot_exposure_dashboard),
+    )
+    for key, plot_fn in chart_specs:
+        png_path = output_dir / f"{basename}_{key}.png"
+        svg_path = output_dir / f"{basename}_{key}.svg"
+        plot_fn({"analysis": analysis, "png_path": png_path, "svg_path": svg_path})
+        artifacts[f"{key}_png"] = str(png_path)
+        artifacts[f"{key}_svg"] = str(svg_path)
+
+    workflow = generate_smallhd_workflow_diagram(
+        {
+            "output_dir": str(output_dir),
+            "basename": f"{basename}_smallhd_workflow",
+        }
+    )
+    artifacts["workflow_png"] = workflow["artifacts"]["workflow_png"]
+    artifacts["workflow_svg"] = workflow["artifacts"]["workflow_svg"]
+
+    pdf_path = output_dir / f"{basename}_exposure_assist.pdf"
+    _write_exposure_assist_pdf(
+        {
+            "analysis": analysis,
+            "artifacts": artifacts,
+            "output_pdf_path": pdf_path,
+        }
+    )
+    artifacts["pdf"] = str(pdf_path)
+
+    return {
+        "output_dir": str(output_dir),
+        "basename": basename,
+        "artifacts": artifacts,
+    }
+
+
+def generate_smallhd_workflow_diagram(request):
+    """Write the shared two-page SmallHD SENSOR SAFETY / LOOK EXPOSURE diagram."""
+    if not isinstance(request, dict):
+        raise TypeError("Workflow diagram request must be an object")
+    output_dir = Path(request["output_dir"]).expanduser().resolve()
+    output_dir.mkdir(parents=True, exist_ok=True)
+    basename = str(request.get("basename") or "smallhd_workflow").strip()
+
+    png_path = output_dir / f"{basename}.png"
+    svg_path = output_dir / f"{basename}.svg"
+    _plot_smallhd_workflow({"png_path": png_path, "svg_path": svg_path})
+    return {
+        "output_dir": str(output_dir),
+        "artifacts": {
+            "workflow_png": str(png_path),
+            "workflow_svg": str(svg_path),
+        },
+    }
+
+
+def _validated_exposure_analysis(request):
+    if not isinstance(request, dict):
+        raise TypeError("Exposure Assist report request must be an object")
+    analysis = request.get("analysis")
+    if not isinstance(analysis, dict):
+        raise ValueError("analysis must be an Exposure Assist contract object")
+    required = (
+        "source",
+        "anchor_points",
+        "neutral_axis",
+        "smallhd_zones",
+        "clipping",
+        "limitations",
+        "confidence",
+    )
+    for key in required:
+        if key not in analysis:
+            raise ValueError(f"analysis is missing required key: {key}")
+    return analysis
+
+
+def _write_exposure_json(analysis, path):
+    with path.open("w", encoding="utf-8") as handle:
+        json.dump(analysis, handle, indent=2, sort_keys=True)
+    return path
+
+
+def _write_exposure_csv(analysis, path):
+    rows = exposure_assist_csv_rows({"analysis": analysis})
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle)
+        writer.writerows(rows)
+    return path
+
+
+def _save_figure_png_svg(fig, png_path, svg_path):
+    png_path = Path(png_path)
+    svg_path = Path(svg_path)
+    png_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(
+        png_path,
+        dpi=EXPOSURE_ASSIST_CHART_DPI,
+        bbox_inches="tight",
+        facecolor=EXPOSURE_ASSIST_FIGURE_BG,
+    )
+    fig.savefig(
+        svg_path,
+        format="svg",
+        bbox_inches="tight",
+        facecolor=EXPOSURE_ASSIST_FIGURE_BG,
+    )
+    plt.close(fig)
+
+
+def _anchor_lookup(analysis):
+    return {point["ev"]: point for point in analysis["anchor_points"]}
+
+
+def _plot_exposure_ev_ire(request):
+    analysis = request["analysis"]
+    samples = analysis["neutral_axis"]["samples"]
+    evs = [sample["ev"] for sample in samples]
+    ires = [sample["rec709_y_ire"] for sample in samples]
+    anchors = _anchor_lookup(analysis)
+
+    fig, ax = plt.subplots(figsize=(10, 5.5))
+    fig.patch.set_facecolor(EXPOSURE_ASSIST_FIGURE_BG)
+    ax.plot(evs, ires, color="#0F766E", linewidth=2.0, label="Neutral axis Rec.709 Y")
+    for ev, point in anchors.items():
+        ax.scatter([ev], [point["rec709_y_ire"]], color="#111827", zorder=5)
+        ax.annotate(
+            f"{ev:+g} EV\n{point['rec709_y_ire']:.1f} IRE",
+            (ev, point["rec709_y_ire"]),
+            textcoords="offset points",
+            xytext=(0, 8),
+            ha="center",
+            fontsize=7,
+            color=EXPOSURE_ASSIST_TEXT_COLOR,
+        )
+    ax.axhline(
+        analysis["clipping"]["threshold_ire"],
+        color="#DC2626",
+        linestyle="--",
+        linewidth=1.2,
+        label="WHITE CLIPPING threshold",
+    )
+    ax.set_title(
+        f"EV → Rec.709 Y / IRE — {analysis['source']['file_name']}",
+        color=EXPOSURE_ASSIST_TEXT_COLOR,
+    )
+    ax.set_xlabel("Scene EV relative to 18% gray")
+    ax.set_ylabel("Display-referred Rec.709 Y (IRE)")
+    ax.set_ylim(0, 105)
+    ax.grid(True, linestyle=":", alpha=0.5)
+    ax.legend(loc="lower right")
+    _save_figure_png_svg(fig, request["png_path"], request["svg_path"])
+
+
+def _plot_exposure_rgb_neutral(request):
+    analysis = request["analysis"]
+    samples = analysis["neutral_axis"]["samples"]
+    evs = [sample["ev"] for sample in samples]
+    red = [sample["lut_rgb"][0] for sample in samples]
+    green = [sample["lut_rgb"][1] for sample in samples]
+    blue = [sample["lut_rgb"][2] for sample in samples]
+
+    fig, ax = plt.subplots(figsize=(10, 5.5))
+    fig.patch.set_facecolor(EXPOSURE_ASSIST_FIGURE_BG)
+    ax.plot(evs, red, color="#DC2626", label="R", linewidth=1.8)
+    ax.plot(evs, green, color="#16A34A", label="G", linewidth=1.8)
+    ax.plot(evs, blue, color="#2563EB", label="B", linewidth=1.8)
+    ax.set_title(
+        f"Neutral-axis RGB response — {analysis['source']['file_name']}",
+        color=EXPOSURE_ASSIST_TEXT_COLOR,
+    )
+    ax.set_xlabel("Scene EV relative to 18% gray")
+    ax.set_ylabel("LUT output (display RGB)")
+    ax.set_ylim(0, 1.05)
+    ax.grid(True, linestyle=":", alpha=0.5)
+    ax.legend(loc="lower right")
+    _save_figure_png_svg(fig, request["png_path"], request["svg_path"])
+
+
+def _plot_exposure_clipping(request):
+    analysis = request["analysis"]
+    ceiling = analysis["clipping"]["signal_ceiling_ire"]
+    threshold = analysis["clipping"]["threshold_ire"]
+    standard = analysis["clipping"]["standard_threshold_ire"]
+    labels = ["Signal ceiling", "Clipping threshold", "99 IRE standard"]
+    values = [ceiling, threshold, standard]
+    colors = ["#7C3AED", "#DC2626", "#9CA3AF"]
+
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    fig.patch.set_facecolor(EXPOSURE_ASSIST_FIGURE_BG)
+    bars = ax.barh(labels, values, color=colors)
+    for bar, value in zip(bars, values):
+        ax.text(
+            value + 0.5,
+            bar.get_y() + bar.get_height() / 2,
+            f"{value:.2f} IRE",
+            va="center",
+            fontsize=9,
+            color=EXPOSURE_ASSIST_TEXT_COLOR,
+        )
+    ax.set_xlim(0, 110)
+    ax.set_xlabel("IRE")
+    ax.set_title(
+        f"Clipping / ceiling — {analysis['source']['file_name']}",
+        color=EXPOSURE_ASSIST_TEXT_COLOR,
+    )
+    ax.grid(True, axis="x", linestyle=":", alpha=0.5)
+    _save_figure_png_svg(fig, request["png_path"], request["svg_path"])
+
+
+def _plot_exposure_false_color_bar(request):
+    analysis = request["analysis"]
+    segments = false_color_bar_segments({"zones": analysis["smallhd_zones"]})
+    fig, ax = plt.subplots(figsize=(11, 3.2))
+    fig.patch.set_facecolor(EXPOSURE_ASSIST_FIGURE_BG)
+
+    for segment in segments:
+        width = max(segment["maximum_ire"] - segment["minimum_ire"], 0.05)
+        ax.barh(
+            0,
+            width,
+            left=segment["minimum_ire"],
+            height=0.65,
+            color=segment["color"],
+            edgecolor="#111827",
+            linewidth=0.4,
+        )
+        mid = segment["minimum_ire"] + width / 2.0
+        ax.text(
+            mid,
+            0.12,
+            f"{segment['label']}\n{segment['minimum_ire']:.1f}–{segment['maximum_ire']:.1f}",
+            ha="center",
+            va="bottom",
+            fontsize=6.5,
+            color="#111827",
+            rotation=0,
+        )
+
+    ax.set_xlim(0, 100)
+    ax.set_ylim(-0.6, 1.1)
+    ax.set_yticks([])
+    ax.set_xlabel("Display-referred Rec.709 Y (IRE)")
+    ax.set_title(
+        f"False-color MAP — {analysis['source']['file_name']}",
+        color=EXPOSURE_ASSIST_TEXT_COLOR,
+    )
+    ax.grid(True, axis="x", linestyle=":", alpha=0.4)
+    _save_figure_png_svg(fig, request["png_path"], request["svg_path"])
+
+
+def _plot_exposure_dashboard(request):
+    analysis = request["analysis"]
+    anchors = _anchor_lookup(analysis)
+    zones = analysis["smallhd_zones"]
+    confidence = analysis["confidence"]
+
+    fig = plt.figure(figsize=(12, 7.5))
+    fig.patch.set_facecolor(EXPOSURE_ASSIST_FIGURE_BG)
+    gs = fig.add_gridspec(2, 2, height_ratios=[1.1, 1.0], hspace=0.35, wspace=0.28)
+
+    ax_curve = fig.add_subplot(gs[0, :])
+    samples = analysis["neutral_axis"]["samples"]
+    ax_curve.plot(
+        [s["ev"] for s in samples],
+        [s["rec709_y_ire"] for s in samples],
+        color="#0F766E",
+        linewidth=2.0,
+    )
+    for ev in (-1.0, 0.0, 0.5, 1.0, 2.0, 3.0):
+        if ev in anchors:
+            ax_curve.scatter(
+                [ev],
+                [anchors[ev]["rec709_y_ire"]],
+                color="#111827",
+                zorder=5,
+            )
+    ax_curve.axhline(
+        analysis["clipping"]["threshold_ire"],
+        color="#DC2626",
+        linestyle="--",
+        linewidth=1.0,
+    )
+    ax_curve.set_title("Exposure Assist dashboard", fontsize=14, fontweight="bold")
+    ax_curve.set_xlabel("EV")
+    ax_curve.set_ylabel("IRE")
+    ax_curve.set_ylim(0, 105)
+    ax_curve.grid(True, linestyle=":", alpha=0.45)
+
+    ax_targets = fig.add_subplot(gs[1, 0])
+    ax_targets.axis("off")
+    target_lines = [
+        f"Source: {analysis['source']['file_name']}",
+        f"Confidence: {confidence['level']} ({confidence['score']})",
+        "",
+        "Key targets (Rec.709 Y IRE):",
+        f"  -1 EV: {anchors[-1.0]['rec709_y_ire']:.2f}",
+        f"  0 EV:  {anchors[0.0]['rec709_y_ire']:.2f}",
+        f"  +0.5 EV (face low): {anchors[0.5]['rec709_y_ire']:.2f}",
+        f"  +1 EV (face high):  {anchors[1.0]['rec709_y_ire']:.2f}",
+        f"  WARN (+2 EV): {anchors[2.0]['rec709_y_ire']:.2f}",
+        f"  HIGH (+3 EV): {anchors[3.0]['rec709_y_ire']:.2f}",
+        f"  WHITE CLIPPING ≥ {analysis['clipping']['threshold_ire']:.2f}",
+    ]
+    ax_targets.text(
+        0.02,
+        0.98,
+        "\n".join(target_lines),
+        va="top",
+        ha="left",
+        family="monospace",
+        fontsize=9,
+        transform=ax_targets.transAxes,
+        color=EXPOSURE_ASSIST_TEXT_COLOR,
+    )
+
+    ax_legend = fig.add_subplot(gs[1, 1])
+    ax_legend.axis("off")
+    legend_y = 0.95
+    ax_legend.text(
+        0.02,
+        legend_y,
+        "SmallHD MAP zones (this LUT only)",
+        va="top",
+        fontsize=10,
+        fontweight="bold",
+        transform=ax_legend.transAxes,
+    )
+    legend_y -= 0.08
+    for zone in zones:
+        ax_legend.add_patch(
+            plt.Rectangle(
+                (0.02, legend_y - 0.04),
+                0.06,
+                0.045,
+                transform=ax_legend.transAxes,
+                color=zone["color"],
+                clip_on=False,
+            )
+        )
+        ax_legend.text(
+            0.11,
+            legend_y - 0.015,
+            (
+                f"{zone['label']}: "
+                f"{zone['minimum_ire']:.1f}–{zone['maximum_ire']:.1f} IRE"
+            ),
+            va="top",
+            fontsize=8,
+            transform=ax_legend.transAxes,
+            color=EXPOSURE_ASSIST_TEXT_COLOR,
+        )
+        legend_y -= 0.095
+
+    _save_figure_png_svg(fig, request["png_path"], request["svg_path"])
+
+
+def _plot_smallhd_workflow(request):
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5.5))
+    fig.patch.set_facecolor(EXPOSURE_ASSIST_FIGURE_BG)
+    page_colors = ("#1E3A5F", "#0F766E")
+
+    for ax, page, color in zip(axes, SMALLHD_WORKFLOW_PAGES, page_colors):
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1)
+        ax.axis("off")
+        ax.add_patch(
+            plt.Rectangle(
+                (0.03, 0.08),
+                0.94,
+                0.84,
+                fill=True,
+                facecolor="#F8FAFC",
+                edgecolor=color,
+                linewidth=2.5,
+            )
+        )
+        ax.text(
+            0.5,
+            0.82,
+            page["title"],
+            ha="center",
+            va="top",
+            fontsize=13,
+            fontweight="bold",
+            color=color,
+        )
+        ax.text(
+            0.5,
+            0.68,
+            page["subtitle"],
+            ha="center",
+            va="top",
+            fontsize=9,
+            color=EXPOSURE_ASSIST_TEXT_COLOR,
+            wrap=True,
+        )
+        bullet_y = 0.52
+        for bullet in page["bullets"]:
+            ax.text(
+                0.1,
+                bullet_y,
+                f"• {bullet}",
+                ha="left",
+                va="top",
+                fontsize=8.5,
+                color=EXPOSURE_ASSIST_TEXT_COLOR,
+            )
+            bullet_y -= 0.14
+
+    fig.suptitle(
+        "SmallHD two-page workflow",
+        fontsize=14,
+        fontweight="bold",
+        color=EXPOSURE_ASSIST_TEXT_COLOR,
+    )
+    _save_figure_png_svg(fig, request["png_path"], request["svg_path"])
+
+
+def _write_exposure_assist_pdf(request):
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.lib.units import inch
+    from reportlab.platypus import (
+        Image,
+        PageBreak,
+        Paragraph,
+        SimpleDocTemplate,
+        Spacer,
+        Table,
+        TableStyle,
+    )
+
+    analysis = request["analysis"]
+    artifacts = request["artifacts"]
+    output_pdf_path = Path(request["output_pdf_path"])
+    output_pdf_path.parent.mkdir(parents=True, exist_ok=True)
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        "ExposureTitle",
+        parent=styles["Heading1"],
+        fontSize=16,
+        spaceAfter=10,
+    )
+    heading_style = ParagraphStyle(
+        "ExposureHeading",
+        parent=styles["Heading2"],
+        fontSize=12,
+        spaceBefore=8,
+        spaceAfter=6,
+    )
+    body_style = styles["Normal"]
+
+    doc = SimpleDocTemplate(str(output_pdf_path), pagesize=letter)
+    story = []
+    source = analysis["source"]
+    anchors = _anchor_lookup(analysis)
+
+    story.append(Paragraph("Exposure Assist Report", title_style))
+    story.append(
+        Paragraph(
+            (
+                f"LUT: {source['file_name']} &nbsp;|&nbsp; "
+                f"Size: {source['lut_size']}³ &nbsp;|&nbsp; "
+                f"SHA-256: {source['sha256'][:16]}…"
+            ),
+            body_style,
+        )
+    )
+    story.append(
+        Paragraph(
+            (
+                "Input assumed as Sony S-Log3 / S-Gamut3.Cine neutral axis. "
+                "Outputs are display-referred Rec.709 Y / IRE after the look LUT."
+            ),
+            body_style,
+        )
+    )
+    story.append(Spacer(1, 0.15 * inch))
+
+    story.append(Paragraph("1. Targets", heading_style))
+    target_table = Table(
+        [
+            ["EV", "Rec.709 Y (IRE)", "Role"],
+            ["-1.0", f"{anchors[-1.0]['rec709_y_ire']:.3f}", "-1 EV target (green zone)"],
+            ["0.0", f"{anchors[0.0]['rec709_y_ire']:.3f}", "Middle gray"],
+            ["+0.5", f"{anchors[0.5]['rec709_y_ire']:.3f}", "Face exposure low"],
+            ["+1.0", f"{anchors[1.0]['rec709_y_ire']:.3f}", "Face exposure high"],
+            ["+2.0", f"{anchors[2.0]['rec709_y_ire']:.3f}", "WARN"],
+            ["+3.0", f"{anchors[3.0]['rec709_y_ire']:.3f}", "HIGH"],
+        ],
+        colWidths=[1.0 * inch, 1.6 * inch, 3.6 * inch],
+    )
+    target_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.Color(0.9, 0.9, 0.92)),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("FONTSIZE", (0, 0), (-1, -1), 9),
+            ]
+        )
+    )
+    story.append(target_table)
+    story.append(PageBreak())
+
+    story.append(Paragraph("2. SmallHD MAP", heading_style))
+    zone_rows = [["Zone", "Min IRE", "Max IRE", "Color", "Semantic"]]
+    for zone in analysis["smallhd_zones"]:
+        zone_rows.append(
+            [
+                zone["label"],
+                f"{zone['minimum_ire']:.3f}",
+                f"{zone['maximum_ire']:.3f}",
+                zone["color"],
+                zone["semantic"],
+            ]
+        )
+    zone_table = Table(
+        zone_rows,
+        colWidths=[1.7 * inch, 0.9 * inch, 0.9 * inch, 0.9 * inch, 1.8 * inch],
+    )
+    zone_table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, 0), colors.Color(0.9, 0.9, 0.92)),
+                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("FONTSIZE", (0, 0), (-1, -1), 8),
+            ]
+        )
+    )
+    story.append(zone_table)
+    story.append(Spacer(1, 0.15 * inch))
+    if Path(artifacts["false_color_bar_png"]).is_file():
+        story.append(
+            Image(artifacts["false_color_bar_png"], width=6.5 * inch, height=1.9 * inch)
+        )
+    if Path(artifacts["workflow_png"]).is_file():
+        story.append(Spacer(1, 0.1 * inch))
+        story.append(Paragraph("SmallHD two-page workflow", heading_style))
+        story.append(
+            Image(artifacts["workflow_png"], width=6.5 * inch, height=3.0 * inch)
+        )
+    story.append(PageBreak())
+
+    story.append(Paragraph("3. Curves", heading_style))
+    if Path(artifacts["ev_ire_png"]).is_file():
+        story.append(Image(artifacts["ev_ire_png"], width=6.5 * inch, height=3.5 * inch))
+    if Path(artifacts["rgb_neutral_png"]).is_file():
+        story.append(Spacer(1, 0.1 * inch))
+        story.append(
+            Image(artifacts["rgb_neutral_png"], width=6.5 * inch, height=3.5 * inch)
+        )
+    story.append(PageBreak())
+
+    story.append(Paragraph("4. Limits", heading_style))
+    clipping = analysis["clipping"]
+    story.append(
+        Paragraph(
+            (
+                f"Signal ceiling: {clipping['signal_ceiling_ire']:.3f} IRE. "
+                f"WHITE CLIPPING threshold: {clipping['threshold_ire']:.3f} IRE. "
+                f"Uses measured ceiling: {clipping['uses_measured_ceiling']}."
+            ),
+            body_style,
+        )
+    )
+    if Path(artifacts["clipping_png"]).is_file():
+        story.append(Spacer(1, 0.1 * inch))
+        story.append(
+            Image(artifacts["clipping_png"], width=6.0 * inch, height=3.2 * inch)
+        )
+    if Path(artifacts["dashboard_png"]).is_file():
+        story.append(Spacer(1, 0.1 * inch))
+        story.append(
+            Image(artifacts["dashboard_png"], width=6.5 * inch, height=4.0 * inch)
+        )
+    story.append(PageBreak())
+
+    story.append(Paragraph("5. Method / review notes", heading_style))
+    story.append(
+        Paragraph(
+            (
+                "Method: scene EV → linear (18% × 2^EV) → official S-Log3 → "
+                "tetrahedral 3D LUT → Rec.709 luma weights → IRE (×100). "
+                "Display look RGB is not re-decoded as camera log."
+            ),
+            body_style,
+        )
+    )
+    story.append(Spacer(1, 0.1 * inch))
+    story.append(Paragraph("Limitations:", heading_style))
+    for limitation in analysis["limitations"]:
+        story.append(Paragraph(f"• {limitation}", body_style))
+    story.append(Spacer(1, 0.1 * inch))
+    confidence = analysis["confidence"]
+    story.append(
+        Paragraph(
+            (
+                f"Confidence: {confidence['level']} "
+                f"(score {confidence['score']}). "
+                f"Checks: {confidence['checks']}."
+            ),
+            body_style,
+        )
+    )
+    story.append(
+        Paragraph(
+            (
+                "Independent review note: post-LUT MAP is a look exposure aid. "
+                "Sensor clipping authority remains on the pre-Look page."
+            ),
+            body_style,
+        )
+    )
+
+    doc.build(story)

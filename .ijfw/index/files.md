@@ -1,10 +1,10 @@
 <!-- ijfw schema:1 codebase-index -->
 # Codebase index
 
-Generated: 2026-07-15T06:05:31Z
+Generated: 2026-07-15T20:58:33Z
 Root: .
 
-Files: 348
+Files: 350
 
 ## By file
 
@@ -259,6 +259,7 @@ Files: 348
 - `./.cursor/todo.md` (47 lines, .md) -- - [x] Clone the GitHub repository
 - `./.cursor/validation-results.md` (107 lines, .md) -- This document contains the results of validation and regression testing for all implemented fixes in the site2data repos
 - `./.hive-mind/README.md` (43 lines, .md) -- This directory contains the Claude Flow Hive Mind system configuration and data.
+- `./AGENTS.md` (61 lines, .md) -- ijfw_version: 1.3.2
 - `./CLAUDE.md` (369 lines, .md) -- 1. ALL operations MUST be concurrent/parallel in a single message
 - `./DIT_DOCS/DCCM.md` (3629 lines, .md) -- 1. **Introduction & Theoretical Foundations**  
 - `./DIT_DOCS/DCCM_combined.md` (2809 lines, .md) -- This document provides a comprehensive guide to color management in digital cinema production. It covers the theoretical
@@ -273,6 +274,7 @@ Files: 348
 - `./curves.py` (385 lines, .py) -- curves.py — Verified digital-cinema colour-management reference.
 - `./deploy.sh` (31 lines, .sh) -- echo \"Updating repository...\"
 - `./docs/API.md` (37 lines, .md) -- > **Uwaga:** wcześniejsza wersja tego pliku opisywała rozbudowane REST API
+- `./docs/swiniec_false_color/FALSE_COLOR_SCALE.md` (71 lines, .md) -- Źródło: `LUTy_planowe` (Swiniec_LUT_-1 / 0 / 1 / red), 3D 33³, Resolve.
 - `./gemini_analyzer.py` (95 lines, .py) -- import google.generativeai as genai
 - `./lut_analyzer.py` (106 lines, .py) -- import numpy as np
 - `./lut_analyzer_package/__init__.py` (33 lines, .py) -- LUT Analyzer Package - Narzędzia do analizy i porównywania plików LUT (Look-Up Table).
@@ -358,7 +360,7 @@ Files: 348
 - `./test_analyzer.py` (26 lines, .py) -- from gemini_analyzer import GeminiAnalyzer
 
 ## By language
-- .md: 307
+- .md: 309
 - .py: 30
 - .sh: 6
 - .js: 5

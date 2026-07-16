@@ -4,14 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PixelPasta - Analiza plików LUT</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
 </head>
-<body>
+<body class="dark-theme">
     <header>
-        <div class="container">
-            <h1>PixelPasta</h1>
-            <p>Narzędzie do analizy plików LUT w formacie .CUBE</p>
+        <div class="container header-content">
+            <div>
+                <h1>Pixel<span>Pasta</span></h1>
+                <p>Narzędzie do analizy plików LUT w formacie .CUBE</p>
+            </div>
+            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Przełącz motyw" title="Przełącz motyw jasny/ciemny">
+                <!-- Moon Icon (shown in light theme) / Sun Icon (shown in dark theme) -->
+                <svg id="theme-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <!-- Sun icon drawing by default -->
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 2v2"></path>
+                    <path d="M12 20v2"></path>
+                    <path d="m4.93 4.93 1.41 1.41"></path>
+                    <path d="m17.66 17.66 1.41 1.41"></path>
+                    <path d="M2 12h2"></path>
+                    <path d="M20 12h2"></path>
+                    <path d="m6.34 17.66-1.41 1.41"></path>
+                    <path d="m19.07 4.93-1.41 1.41"></path>
+                </svg>
+            </button>
         </div>
     </header>
 
@@ -21,16 +45,16 @@
             <div id="file-upload-component-container"></div>
             
             <div class="form-group">
-                <label for="color-space">Wybierz przestrzeń barwną kamery:</label>
+                <label for="color-space">Przestrzeń barwna kamery:</label>
                 <select id="color-space" name="color-space" required>
                     <option value="">-- Wybierz przestrzeń --</option>
-                    <option value="S-Gamut3">S-Gamut3/S-Log3</option>
-                    <option value="S-Gamut3.Cine">S-Gamut3.Cine/S-Log3</option>
-                    <option value="LogC">ARRI LogC</option>
-                    <option value="LogC4">ARRI LogC4</option>
+                    <option value="S-Gamut3">Sony S-Gamut3 / S-Log3</option>
+                    <option value="S-Gamut3.Cine">Sony S-Gamut3.Cine / S-Log3</option>
+                    <option value="LogC">ARRI LogC3 (AWG3)</option>
+                    <option value="LogC4">ARRI LogC4 (AWG4)</option>
                 </select>
             </div>
-            <button type="button" id="analyze-button" class="btn btn-primary" style="display: none;">Analizuj</button>
+            <button type="button" id="analyze-button" class="btn btn-primary" style="display: none; width: 100%;">Analizuj LUT</button>
         </section>
 
         <section class="results-section" id="results" style="display: none;">
@@ -46,7 +70,9 @@
                     tabindex="0"
                     data-tab="curve-tab">
                     <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M3 3v18h18V3H3zm16 16H5V5h14v14zM9 9v6h2V9H9zm4 3v3h2v-3h-2z"/>
+                        <!-- Curve/Line Chart icon -->
+                        <path d="M3 3v18h18"></path>
+                        <path d="m18.7 8-5.1 5.2-2.8-2.7L7 14.3"></path>
                     </svg>
                     Krzywa tonalna
                 </button>
@@ -59,7 +85,11 @@
                     tabindex="-1"
                     data-tab="table-tab">
                     <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M3 5v14h18V5H3zm16 2v2H5V7h14zM5 11v2h14v-2H5zm0 4v2h14v-2H5z"/>
+                        <!-- Table/Grid icon -->
+                        <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+                        <path d="M3 9h18"></path>
+                        <path d="M3 15h18"></path>
+                        <path d="M12 9v12"></path>
                     </svg>
                     Tabela porównawcza
                 </button>
@@ -72,7 +102,10 @@
                     tabindex="-1"
                     data-tab="info-tab">
                     <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                        <!-- Info icon -->
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
                     </svg>
                     Informacje o LUT
                 </button>
@@ -87,7 +120,7 @@
                 
                 <div id="table-tab" class="tab-pane" role="tabpanel" aria-labelledby="table-tab-btn" hidden>
                     <div class="table-container">
-                        <table id="comparison-table">
+                        <table id="comparison-table" style="display: none;">
                             <thead>
                                 <tr>
                                     <th>Ekspozycja (%)</th>
@@ -117,15 +150,67 @@
         </section>
     </main>
 
+    <!-- Floating Chat Toggle Button -->
+    <button id="chat-toggle-btn" class="chat-toggle-btn" aria-label="Otwórz czat asystenta" title="Czat asystenta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+    </button>
+
+    <!-- Sliding Chat Sidebar -->
+    <div id="chat-panel" class="chat-panel">
+        <div class="chat-header">
+            <div class="chat-header-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4"></path>
+                    <path d="M12 8h.01"></path>
+                </svg>
+                Asystent PixelPasta
+            </div>
+            <button id="chat-close-btn" class="chat-close-btn" aria-label="Zamknij czat">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" x2="6" y1="6" y2="18"></line>
+                    <line x1="6" x2="18" y1="6" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        
+        <div id="chat-messages" class="chat-messages">
+            <div class="chat-message bot">
+                <div class="message-bubble">
+                    Cześć! Jestem asystentem PixelPasta. Prześlij plik LUT i wybierz przestrzeń barwną, a pomogę Ci go przeanalizować lub odpowiedzieć na pytania techniczne.
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-footer">
+            <div id="chat-suggestions" class="chat-suggestions">
+                <!-- Smart suggestions will appear here -->
+            </div>
+            <form id="chat-form" class="chat-form">
+                <textarea id="chat-input" placeholder="Zadaj pytanie o LUT..." rows="1" required></textarea>
+                <button type="submit" id="chat-send-btn" aria-label="Wyślij">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" x2="11" y1="2" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <footer>
         <div class="container">
-            <p>&copy; 2025 PixelPasta. Wszelkie prawa zastrzeżone.</p>
+            <p>&copy; 2026 PixelPasta. Wszystkie prawa zastrzeżone.</p>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ url_for('static', filename='js/components/FileUpload.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+    <script src="{{ url_for('static', filename='js/components/FileUpload.js') }}" type="module"></script>
     <script src="{{ url_for('static', filename='js/components/ComparisonTable.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}" type="module"></script>
 </body>
 </html>

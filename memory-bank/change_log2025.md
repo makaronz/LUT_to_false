@@ -3,48 +3,39 @@
 ## 📌 Task List
 - [x] ✅ Done: Integracja tabeli porównawczej na froncie (HTML, JS, CSS)
 - [x] ✅ Done: Implementacja podstawowego trybu ciemnego (Dark Mode)
+- [x] ✅ Done: Exposure Assist engine (`lut_analyzer_package/exposure_assist.py`) for four real Swiniec planowe LUTs
+- [x] ✅ Done: Exposure Assist tests (`tests/test_exposure_assist.py`) — real cubes via `SWINIEC_LUT_DIR`, SHA-256 gates
+- [x] ✅ Done: Regenerate English `docs/swiniec_false_color/` from engine (FALSE_COLOR_SCALE.md, analysis.json, false_color_preset.json); SENSOR SAFETY vs LOOK EXPOSURE; second-model audit
+- [ ] Exposure Assist visuals / PDF / ZIP exports (`reporting.py`)
+- [ ] Flask batch `exposure_assist` mode on port 8080 (`lutcomparetool_app.py` + templates/CSS)
+- [ ] End-to-end verify app exports + regression on existing flows
 - [ ] Rozbudowa dostępności (WCAG) dla kluczowych komponentów
-- [ ] Testy funkcjonalne i matematyczne
 - [ ] Prototypowanie jednej z koncepcji: LUT Morphing Gallery, Color Memory Palace lub Temporal LUT Analyzer
 
 ---
 
 ## 🔍 Analysis
-Integracja tabeli porównawczej wymagała modyfikacji `results.html` w celu usunięcia tabeli generowanej po stronie serwera i zastąpienia jej kontenerem dla komponentu `ComparisonTable.js`. Należało również zapewnić ładowanie i inicjalizację tego komponentu.
-
-Implementacja trybu ciemnego objęła dodanie przełącznika w `base.html` oraz odpowiednich stylów CSS w `static/css/style.css` do obsługi dwóch motywów (jasnego i ciemnego) z wykorzystaniem atrybutu `data-bs-theme` i `localStorage` do zapamiętywania wyboru użytkownika.
+Swiniec viewing LUTs are display looks (Rec.709-like output). False-color MAP values must be Rec.709 Y IRE **after** the LUT, computed on the neutral S-Log3 axis, with **independent** SmallHD tables per cube. A separate pre-Look SENSOR SAFETY page is required; post-LUT red is look clipping assist, not a sensor stop meter. Earlier Polish draft docs used rounded / single-LUT shared bands and must be replaced by engine output.
 
 ## 🛠️ Functions / Components
-**Zmodyfikowane pliki:**
-- `templates/results.html`: Usunięto tabelę generowaną przez serwer, dodano `div#comparison-table-container`, dodano ładowanie i inicjalizację `ComparisonTable.js`.
-- `templates/base.html`: Dodano blok `scripts` dla skryptów specyficznych dla strony, dodano przełącznik trybu ciemnego i logikę JavaScript do jego obsługi.
-- `static/css/style.css`: Dodano style dla przełącznika trybu ciemnego oraz style dla trybu ciemnego.
-
-**Kluczowe komponenty/logika:**
-- `pixelpasta/static/js/components/ComparisonTable.js`: Komponent JS do renderowania tabeli porównawczej po stronie klienta.
-- Przełącznik trybu ciemnego w `base.html` i powiązany z nim skrypt JS.
-- Style CSS dla trybu ciemnego w `static/css/style.css`.
+- `lut_analyzer_package/exposure_assist.py` — `analyze_exposure_assist({lut_path})` contract (anchors, zones, clipping, confidence, limitations).
+- `docs/swiniec_false_color/FALSE_COLOR_SCALE.md` — operator documentation (English).
+- `docs/swiniec_false_color/analysis.json` — full per-LUT contracts (samples summarized).
+- `docs/swiniec_false_color/false_color_preset.json` — four MAP tables + measurement page semantics.
+- LUT binaries remain external (`SWINIEC_LUT_DIR`); not committed.
 
 ## 🚀 Action Plan
-1. **Integracja tabeli porównawczej (ukończone):**
-    - Zmodyfikowano `results.html` w celu użycia `ComparisonTable.js`.
-    - Dodano ładowanie `ComparisonTable.js` w `results.html`.
-    - Dodano blok `scripts` w `base.html`.
-2. **Implementacja trybu ciemnego (ukończone):**
-    - Dodano przełącznik trybu ciemnego w `base.html`.
-    - Dodano logikę JS do obsługi przełącznika i zapamiętywania wyboru w `localStorage`.
-    - Dodano style CSS dla trybu ciemnego w `static/css/style.css`.
-3. **Następne kroki:**
-    - Rozbudowa dostępności (WCAG).
-    - Testy.
-    - Prototypowanie nowych funkcji.
+1. Engine + tests (done).
+2. Docs from engine + memory-bank sync (this entry).
+3. Finish reporting visuals and Flask integration (owned by parallel workstreams).
+4. Verify E2E on 8080; do not commit until user requests.
 
 ## ⚠️ Problems & Risks
-- Potencjalne konflikty stylów między Bootstrapem a niestandardowymi stylami trybu ciemnego (wydaje się być rozwiązane przez użycie `data-bs-theme`).
-- Konieczność dokładnego przetestowania działania tabeli porównawczej po zmianach.
-- Zapewnienie spójnego wyglądu wszystkich elementów interfejsu w obu trybach.
+- LUT_0 / LUT_1 / LUT_red grid luma ceilings sit below 99 IRE — custom MAP red bands differ from a naive 99–100 clip.
+- Confusion risk if MONITOR false color is left on the Look feed while operators expect sensor protection.
+- Parallel agents own `lutcomparetool_app.py` / `reporting.py` — docs must not invent export UI behaviour ahead of those merges.
 
 ## 💡 Recommendations
-- Regularne testowanie na różnych przeglądarkach i urządzeniach.
-- Rozważenie użycia biblioteki do zarządzania stanem, jeśli frontend stanie się bardziej złożony.
-- Stopniowe wprowadzanie ulepszeń dostępności, zaczynając od najważniejszych komponentów. 
+- Program SmallHD MAP values from `false_color_preset.json`, not from chat transcripts.
+- Keep regenerating docs whenever SHA-256 of any planowe cube changes.
+- Reject any treatment of `Swiniec_LUT_red` as RED-camera IRE tables; input stays S-Log3/S-Gamut3.Cine.

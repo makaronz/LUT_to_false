@@ -16,8 +16,13 @@ from lut_analyzer_package.reporting import (
     generate_pdf_report,
     compare_two_luts,
     plot_lut_vs_lut,
-    generate_comparison_report
+    generate_comparison_report,
+    generate_exposure_assist_report,
+    generate_smallhd_workflow_diagram,
+    exposure_assist_csv_rows,
+    false_color_bar_segments,
 )
+from lut_analyzer_package.exposure_assist import analyze_exposure_assist
 from lut_analyzer_package.transfer_functions import *
 from lut_analyzer_package.lut_interpolation import interpolate_1d_lut, interpolate_3d_lut
 from lut_analyzer_package.color_space import (

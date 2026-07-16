@@ -6,33 +6,44 @@
     <h2>Analysis Results: {{ lut_title }}</h2>
     
     <p>Analyzed LUT: <strong>{{ lut_title }}</strong></p>
-    <p>Input Color Space / Gamma Curve: <strong>{{ curve_name.upper() }}</strong></p>
-    <!-- Removed comparison logic for simplicity -->
+    <p>Input Color Space / Gamma Curve: <strong>{{ curve_name }}</strong></p>
 
-    <!-- Section for Exposure Comparison Table -->
     <div class="result-section">
         <h3>Exposure Comparison Table</h3>
         <div id="comparison-table-container"></div>
     </div>
 
-    <!-- Section for Tone Curve Chart -->
-    {% if png_file %}
+    {% if png_data_uri or png_file %}
         <div class="result-section">
             <h3>Tone Curve Chart</h3>
             <div class="result-image">
-                <img src="{{ url_for('serve_report', filename=png_file) }}" alt="LUT Tone Curve Chart" class="result-plot">
+                <img
+                    src="{% if png_data_uri %}{{ png_data_uri }}{% else %}{{ url_for('serve_report', filename=png_file) }}{% endif %}"
+                    alt="LUT Tone Curve Chart"
+                    class="result-plot"
+                >
             </div>
-            <p><a href="{{ url_for('serve_report', filename=png_file) }}" download class="btn btn-secondary">Download Chart</a></p>
+            <p>
+                {% if png_data_uri %}
+                    <a href="{{ png_data_uri }}" download="{{ png_file or 'tone_curve.png' }}" class="btn btn-secondary">Download Chart</a>
+                {% else %}
+                    <a href="{{ url_for('serve_report', filename=png_file) }}" download class="btn btn-secondary">Download Chart</a>
+                {% endif %}
+            </p>
         </div>
     {% else %}
         <p class="text-warning">Failed to generate tone curve chart.</p>
     {% endif %}
 
-    {% if pdf_file %}
+    {% if pdf_data_uri or pdf_file %}
         <div class="result-section">
             <h3>PDF Report</h3>
             <p>Download detailed report with analysis data in PDF format:</p>
-            <a href="{{ url_for('serve_report', filename=pdf_file) }}" download class="btn btn-primary">Download PDF Report</a>
+            {% if pdf_data_uri %}
+                <a href="{{ pdf_data_uri }}" download="{{ pdf_file or 'report.pdf' }}" class="btn btn-primary">Download PDF Report</a>
+            {% else %}
+                <a href="{{ url_for('serve_report', filename=pdf_file) }}" download class="btn btn-primary">Download PDF Report</a>
+            {% endif %}
         </div>
     {% else %}
          <p class="text-warning">Failed to generate PDF report.</p>
@@ -40,15 +51,17 @@
 
     <div class="nav-links">
         <a href="{{ url_for('index') }}" class="btn btn-link">Analyze Another File</a>
-        <!-- Removed other links for simplicity -->
     </div>
 {% endblock %}
 
 {% block scripts %}
+    <script>
+        window.LUT_COMPARE_TABLE_DATA = {{ (table_data or []) | tojson }};
+    </script>
     <script src="{{ url_for('static', filename='js/components/ComparisonTable.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            new ComparisonTable('comparison-table-container');
+            new ComparisonTable('comparison-table-container', window.LUT_COMPARE_TABLE_DATA);
         });
     </script>
 {% endblock %}

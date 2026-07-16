@@ -11,6 +11,7 @@ class Toast {
         container.className = 'toast-container';
         document.body.appendChild(container);
         return container;
+        
       })();
     
     toastContainer.appendChild(toast);
@@ -26,4 +27,6 @@ class Toast {
 Toast.success = (message) => Toast.show(message, 'success');
 Toast.error = (message) => Toast.show(message, 'error');
 Toast.info = (message) => Toast.show(message, 'info');
-Toast.warning = (message) => Toast.show(message, 'warning'); 
+Toast.warning = (message) => Toast.show(message, 'warning');
+
+export default Toast;

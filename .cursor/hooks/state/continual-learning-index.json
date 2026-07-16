@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "updatedAtMs": 1784150715174.098,
+  "transcripts": {
+    "/Users/arkadiuszfudali/.cursor/projects/Users-arkadiuszfudali-Git-LUT-to-false/agent-transcripts/6fc90e0e-b95c-42cf-9abc-4eaccfa1cf2e/6fc90e0e-b95c-42cf-9abc-4eaccfa1cf2e.jsonl": {
+      "mtimeMs": 1784150650291.6873,
+      "size": 87020
+    },
+    "/Users/arkadiuszfudali/.cursor/projects/Users-arkadiuszfudali-Git-LUT-to-false/agent-transcripts/2da583b9-b7bb-4c4d-821c-2cb4b87b86dd/2da583b9-b7bb-4c4d-821c-2cb4b87b86dd.jsonl": {
+      "mtimeMs": 1784148930238.839,
+      "size": 43266
+    },
+    "/Users/arkadiuszfudali/.cursor/projects/Users-arkadiuszfudali-Git-LUT-to-false/agent-transcripts/4a9c97bc-075c-4954-804a-d34a27c9134d/4a9c97bc-075c-4954-804a-d34a27c9134d.jsonl": {
+      "mtimeMs": 1784148326184.1118,
+      "size": 8733
+    },
+    "/Users/arkadiuszfudali/.cursor/projects/Users-arkadiuszfudali-Git-LUT-to-false/agent-transcripts/2da583b9-b7bb-4c4d-821c-2cb4b87b86dd/subagents/78e80313-1d79-4d37-85b7-979e09bf0b4a.jsonl": {
+      "mtimeMs": 1784095812304.3682,
+      "size": 4787
+    },
+    "/Users/arkadiuszfudali/.cursor/projects/Users-arkadiuszfudali-Git-LUT-to-false/agent-transcripts/2da583b9-b7bb-4c4d-821c-2cb4b87b86dd/subagents/e9fa4000-949d-477d-98f3-d8ccde3771e0.jsonl": {
+      "mtimeMs": 1784147909766.4011,
+      "size": 4852
+    },
+    "/Users/arkadiuszfudali/.cursor/projects/Users-arkadiuszfudali-Git-LUT-to-false/agent-transcripts/6fc90e0e-b95c-42cf-9abc-4eaccfa1cf2e/subagents/a373a958-cbaa-4329-acff-b2c2ed0cfba7.jsonl": {
+      "mtimeMs": 1784150659605.0586,
+      "size": 1382
+    },
+    "/Users/arkadiuszfudali/.cursor/projects/Users-arkadiuszfudali-Git-LUT-to-false/agent-transcripts/6fc90e0e-b95c-42cf-9abc-4eaccfa1cf2e/subagents/f9dd830e-af51-48d6-85a9-60c1ad33b8c3.jsonl": {
+      "mtimeMs": 1784149438503.933,
+      "size": 27905
+    },
+    "/Users/arkadiuszfudali/.cursor/projects/Users-arkadiuszfudali-Git-LUT-to-false/agent-transcripts/6fc90e0e-b95c-42cf-9abc-4eaccfa1cf2e/subagents/00342483-bf03-4f4f-9fc8-58e440de3029.jsonl": {
+      "mtimeMs": 1784149461846.816,
+      "size": 16533
+    },
+    "/Users/arkadiuszfudali/.cursor/projects/Users-arkadiuszfudali-Git-LUT-to-false/agent-transcripts/6fc90e0e-b95c-42cf-9abc-4eaccfa1cf2e/subagents/4f5739e8-6008-4144-a3de-df9e0518b5dc.jsonl": {
+      "mtimeMs": 1784150496337.4912,
+      "size": 2309
+    }
+  }
+}

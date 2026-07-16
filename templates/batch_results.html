@@ -4,7 +4,19 @@
 
 {% block content %}
     <h2>Batch Analysis Results</h2>
-    <p>Reference curve: <strong>{{ curve_name.upper() }}</strong></p>
+    {% if analysis_mode == 'exposure_assist' %}
+        <p class="batch-mode-label">
+            Mode: <strong>Exposure Assist</strong>
+            — {{ curve_name }}
+        </p>
+        <p class="batch-mode-note">
+            Each card below is an independent per-LUT SmallHD MAP.
+            Yellow = WARN, orange = HIGH, red = WHITE CLIPPING only.
+            Green = −1 EV; salmon = face exposure (+0.5…+1 EV).
+        </p>
+    {% else %}
+        <p>Reference curve: <strong>{{ curve_name.upper() }}</strong></p>
+    {% endif %}
     
     <div class="batch-summary">
         <p>Successfully processed: <strong>{{ successful_files|length }}</strong> files</p>
@@ -21,24 +33,126 @@
     
     {% if successful_files %}
         <h3>Successful Results</h3>
-        <div class="batch-results">
+        <div class="batch-results {% if analysis_mode == 'exposure_assist' %}batch-results-exposure{% endif %}">
             {% for file in successful_files %}
-                <div class="result-card">
-                    <h4>{{ file.title }}</h4>
-                    <div class="thumbnail">
-                        <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.png) }}" target="_blank">
-                            <img src="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.png) }}" 
-                                 alt="Analysis of {{ file.filename }}" 
-                                 class="result-thumbnail">
-                        </a>
+                {% if file.mode == 'exposure_assist' %}
+                    <article class="result-card exposure-assist-card" aria-label="Exposure Assist for {{ file.title }}">
+                        <h4>{{ file.title }}</h4>
+                        <p class="confidence-line">
+                            Confidence:
+                            <strong>{{ file.confidence.level }}</strong>
+                            ({{ '%.2f'|format(file.confidence.score) }})
+                        </p>
+
+                        <div class="thumbnail">
+                            <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.png) }}" target="_blank">
+                                <img src="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.png) }}"
+                                     alt="Exposure Assist dashboard for {{ file.filename }}"
+                                     class="result-thumbnail">
+                            </a>
+                        </div>
+
+                        {% if file.false_color_bar %}
+                            <div class="false-color-preview">
+                                <img src="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.false_color_bar) }}"
+                                     alt="False-color MAP for {{ file.filename }}"
+                                     class="false-color-bar-image">
+                            </div>
+                        {% endif %}
+
+                        <div class="anchor-grid" role="list">
+                            <div class="anchor-chip" role="listitem">
+                                <span class="anchor-label">−1 EV</span>
+                                <span class="anchor-value">{{ '%.2f'|format(file.anchors.minus_one_ev) }} IRE</span>
+                            </div>
+                            <div class="anchor-chip" role="listitem">
+                                <span class="anchor-label">0 EV</span>
+                                <span class="anchor-value">{{ '%.2f'|format(file.anchors.zero_ev) }} IRE</span>
+                            </div>
+                            <div class="anchor-chip" role="listitem">
+                                <span class="anchor-label">Face +0.5 EV</span>
+                                <span class="anchor-value">{{ '%.2f'|format(file.anchors.plus_half_ev) }} IRE</span>
+                            </div>
+                            <div class="anchor-chip" role="listitem">
+                                <span class="anchor-label">Face +1 EV</span>
+                                <span class="anchor-value">{{ '%.2f'|format(file.anchors.plus_one_ev) }} IRE</span>
+                            </div>
+                            <div class="anchor-chip warn" role="listitem">
+                                <span class="anchor-label">WARN +2 EV</span>
+                                <span class="anchor-value">{{ '%.2f'|format(file.anchors.warn_ev) }} IRE</span>
+                            </div>
+                            <div class="anchor-chip high" role="listitem">
+                                <span class="anchor-label">HIGH +3 EV</span>
+                                <span class="anchor-value">{{ '%.2f'|format(file.anchors.high_ev) }} IRE</span>
+                            </div>
+                            <div class="anchor-chip clip" role="listitem">
+                                <span class="anchor-label">WHITE CLIPPING</span>
+                                <span class="anchor-value">≥ {{ '%.2f'|format(file.clipping.threshold_ire) }} IRE</span>
+                            </div>
+                        </div>
+
+                        <table class="zone-table">
+                            <caption class="visually-hidden">SmallHD MAP zones for {{ file.title }}</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Zone</th>
+                                    <th scope="col">Min IRE</th>
+                                    <th scope="col">Max IRE</th>
+                                    <th scope="col">Color</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for zone in file.zones %}
+                                    <tr>
+                                        <td>
+                                            <span class="zone-swatch" style="background-color: {{ zone.color }};" aria-hidden="true"></span>
+                                            {{ zone.label }}
+                                        </td>
+                                        <td>{{ '%.2f'|format(zone.minimum_ire) }}</td>
+                                        <td>{{ '%.2f'|format(zone.maximum_ire) }}</td>
+                                        <td><code>{{ zone.color }}</code> <span class="visually-hidden">({{ zone.semantic }})</span></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <div class="result-links">
+                            <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.pdf) }}"
+                               download class="btn btn-link">PDF</a>
+                            <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.png) }}"
+                               download class="btn btn-link">Dashboard PNG</a>
+                            <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.json) }}"
+                               download class="btn btn-link">JSON</a>
+                            <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.csv) }}"
+                               download class="btn btn-link">CSV</a>
+                            {% if file.ev_ire %}
+                                <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.ev_ire) }}"
+                                   download class="btn btn-link">EV→IRE</a>
+                            {% endif %}
+                            {% if file.workflow %}
+                                <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.workflow) }}"
+                                   download class="btn btn-link">SmallHD workflow</a>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% else %}
+                    <div class="result-card">
+                        <h4>{{ file.title }}</h4>
+                        <div class="thumbnail">
+                            <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.png) }}" target="_blank">
+                                <img src="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.png) }}" 
+                                     alt="Analysis of {{ file.filename }}" 
+                                     class="result-thumbnail">
+                            </a>
+                        </div>
+                        <div class="result-links">
+                            <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.pdf) }}" 
+                               download class="btn btn-link">Download PDF</a>
+                            <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.png) }}" 
+                               download class="btn btn-link">Download PNG</a>
+                        </div>
                     </div>
-                    <div class="result-links">
-                        <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.pdf) }}" 
-                           download class="btn btn-link">Download PDF</a>
-                        <a href="{{ url_for('serve_batch_file', batch_id=batch_id, filename=file.png) }}" 
-                           download class="btn btn-link">Download PNG</a>
-                    </div>
-                </div>
+                {% endif %}
             {% endfor %}
         </div>
     {% endif %}
@@ -67,4 +181,4 @@
         <a href="{{ url_for('batch_page') }}" class="btn btn-link">Process Another Batch</a>
         <a href="{{ url_for('index') }}" class="btn btn-link">Back to Single Analysis</a>
     </div>
-{% endblock %} 
+{% endblock %}

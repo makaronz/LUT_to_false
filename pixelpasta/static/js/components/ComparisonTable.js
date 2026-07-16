@@ -1,54 +1,48 @@
 class ComparisonTable {
-    constructor(targetElementId) {
+    constructor(targetElementId, data, logLabel) {
         this.targetElement = document.getElementById(targetElementId);
-        this.data = [];
-        this.init();
-    }
-
-    async init() {
-        await this.fetchData();
+        this.data = data || [];
+        this.logLabel = logLabel || 'Camera Log (%)';
         this.render();
-    }
-
-    async fetchData() {
-        try {
-            const response = await fetch('/table-data');
-            if (!response.ok) throw new Error('Błąd pobierania danych');
-            this.data = await response.json();
-        } catch (err) {
-            this.data = [];
-            this.targetElement.innerHTML = '<p class="text-danger">Nie udało się pobrać danych do tabeli porównawczej.</p>';
-        }
     }
 
     render() {
         if (!this.data.length) {
-            this.targetElement.innerHTML = '<p class="text-warning">Brak danych do porównania.</p>';
+            this.targetElement.innerHTML = '<p class="error-message">Brak danych do wyświetlenia w tabeli.</p>';
             return;
         }
+
         let html = `<table class="comparison-table">
             <thead>
                 <tr>
-                    <th>Input</th>
-                    <th>Reference Curve</th>
-                    <th>LUT Output</th>
-                    <th>Delta</th>
+                    <th>Ekspozycja (%)</th>
+                    <th>${this.logLabel}</th>
+                    <th>Rec.709 (%)</th>
+                    <th>Twój LUT (%)</th>
+                    <th>Delta (%)</th>
                 </tr>
             </thead>
             <tbody>`;
+
         for (const row of this.data) {
-            const deltaClass = row.delta > 0.01 ? 'delta-pos' : row.delta < -0.01 ? 'delta-neg' : '';
+            const delta = row.lut - row.rec709;
+            const deltaClass = delta > 0.5 ? 'delta-pos' : delta < -0.5 ? 'delta-neg' : '';
+            const deltaSign = delta > 0 ? '+' : '';
+
             html += `<tr>
-                <td>${row.input.toFixed(5)}</td>
-                <td>${row.curve.toFixed(5)}</td>
-                <td>${row.lut.toFixed(5)}</td>
-                <td class="${deltaClass}">${row.delta.toFixed(5)}</td>
+                <td>${row.exposure}%</td>
+                <td>${row.log.toFixed(2)}%</td>
+                <td>${row.rec709.toFixed(2)}%</td>
+                <td>${row.lut.toFixed(2)}%</td>
+                <td class="${deltaClass}">${deltaSign}${delta.toFixed(2)}%</td>
             </tr>`;
         }
+
         html += '</tbody></table>';
         this.targetElement.innerHTML = html;
     }
 }
 
-// Eksport do globalnego scope, by można było użyć w app.js
-window.ComparisonTable = ComparisonTable; 
+// Export to global scope
+window.ComparisonTable = ComparisonTable;
+export default ComparisonTable;
