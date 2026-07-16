@@ -290,6 +290,73 @@ def batch_page():
         default_mode="curve_compare",
     )
 
+
+def _load_false_color_preset():
+    """Load Swiniec false-color preset shipped under static/ for UI + Vercel."""
+    preset_path = Path(app.root_path) / 'static' / 'swiniec_false_color' / 'false_color_preset.json'
+    with open(preset_path, encoding='utf-8') as handle:
+        return json.load(handle)
+
+
+def _prepare_false_color_lut_entries(preset):
+    """Attach bar widths and sorted anchors for the false-color page."""
+    short_labels = {
+        'deep_shadow': 'DEEP',
+        'minus_one_ev': '−1 EV',
+        'mid_range': 'MID',
+        'face_exposure': 'FACE',
+        'bright_safe': 'SAFE',
+        'highlight_warn': 'WARN',
+        'highlight_high': 'HIGH',
+        'white_clipping': 'CLIP',
+    }
+    preferred_order = (
+        'Swiniec_LUT_-1',
+        'Swiniec_LUT_0',
+        'Swiniec_LUT_1',
+        'Swiniec_LUT_red',
+    )
+    per_lut = preset.get('per_lut') or {}
+    ordered_keys = [key for key in preferred_order if key in per_lut]
+    ordered_keys.extend(key for key in per_lut if key not in ordered_keys)
+
+    entries = []
+    for lut_key in ordered_keys:
+        lut = dict(per_lut[lut_key])
+        zones = []
+        for zone in lut.get('smallhd_map_zones') or []:
+            z = dict(zone)
+            span = max(0.0, float(z['maximum_ire']) - float(z['minimum_ire']))
+            z['width_pct'] = max(span, 0.01)
+            z['short_label'] = short_labels.get(z.get('semantic'), z.get('label', '')[:6])
+            zones.append(z)
+        lut['smallhd_map_zones'] = zones
+        anchors = lut.get('anchor_ire_by_ev') or {}
+        lut['anchor_ire_by_ev_sorted'] = sorted(
+            ((str(ev), float(ire)) for ev, ire in anchors.items()),
+            key=lambda item: float(item[0]),
+        )
+        entries.append((lut_key, lut))
+    return entries
+
+
+@app.route('/false-color')
+@app.route('/exposure-assist')
+def false_color_page():
+    """Dedicated Swiniec false-color / Exposure Assist scales page."""
+    preset = _load_false_color_preset()
+    strip_path = Path(app.root_path) / 'static' / 'swiniec_false_color' / 'false_color_strip.png'
+    return render_template(
+        'false_color.html',
+        preset=preset,
+        lut_entries=_prepare_false_color_lut_entries(preset),
+        strip_url=(
+            url_for('static', filename='swiniec_false_color/false_color_strip.png')
+            if strip_path.is_file()
+            else None
+        ),
+    )
+
 @app.route('/compare')
 def compare_page():
     """Displays the page for comparing two LUTs."""

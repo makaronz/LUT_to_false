@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}False Color Scales - Swiniec Exposure Assist - PixelPasta{% endblock %}
+
+{% block content %}
+<section class="false-color-page">
+    <h2>Swiniec False Color / Exposure Assist</h2>
+    <p class="lead-copy">
+        Display-referred Rec.709 Y (IRE) after each viewing LUT — not camera-log percentages.
+        Assumed input: <strong>{{ preset.input_assumed }}</strong>.
+        Signal: <strong>{{ preset.signal }}</strong>.
+    </p>
+
+    <div class="fc-pages-grid">
+        <article class="fc-page-card">
+            <h3>SENSOR SAFETY</h3>
+            <p><strong>Measure:</strong> {{ preset.measurement_pages.SENSOR_SAFETY.measure }}</p>
+            <p>{{ preset.measurement_pages.SENSOR_SAFETY.purpose }}</p>
+            <p class="muted">{{ preset.measurement_pages.SENSOR_SAFETY.note }}</p>
+        </article>
+        <article class="fc-page-card">
+            <h3>LOOK EXPOSURE</h3>
+            <p><strong>Measure:</strong> {{ preset.measurement_pages.LOOK_EXPOSURE.measure }}</p>
+            <p>{{ preset.measurement_pages.LOOK_EXPOSURE.purpose }}</p>
+            <p class="muted">Use one SmallHD MAP per LUT below — swap MAP when you swap the Look.</p>
+        </article>
+    </div>
+
+    <div class="fc-policy">
+        <h3>Highlight palette</h3>
+        <ul class="fc-policy-list">
+            <li><span class="swatch" style="background:{{ preset.highlight_policy.WARN.color }}"></span> Yellow = WARN</li>
+            <li><span class="swatch" style="background:{{ preset.highlight_policy.HIGH.color }}"></span> Orange = HIGH</li>
+            <li><span class="swatch" style="background:{{ preset.highlight_policy.WHITE_CLIPPING.color }}"></span> Red = WHITE CLIPPING only</li>
+        </ul>
+    </div>
+
+    {% if strip_url %}
+    <div class="fc-strip-block">
+        <h3>Reference strip</h3>
+        <img src="{{ strip_url }}" alt="Swiniec false color strip reference" class="false-color-bar-image fc-strip-image">
+    </div>
+    {% endif %}
+
+    <div class="fc-lut-scales">
+        {% for lut_key, lut in lut_entries %}
+        <article class="fc-lut-card" id="{{ lut_key }}">
+            <header class="fc-lut-header">
+                <h3>{{ lut_key }}</h3>
+                <p class="muted">{{ lut.file_name }} · confidence {{ lut.confidence.level }} ({{ '%.0f'|format(lut.confidence.score * 100) }}%)</p>
+            </header>
+
+            <div class="fc-ire-bar" role="img" aria-label="False color IRE map for {{ lut_key }}">
+                {% for zone in lut.smallhd_map_zones %}
+                <div
+                    class="fc-zone"
+                    style="flex: {{ zone.width_pct }}; background: {{ zone.color }};"
+                    title="{{ zone.label }}: {{ '%.1f'|format(zone.minimum_ire) }}–{{ '%.1f'|format(zone.maximum_ire) }} IRE"
+                >
+                    <span class="fc-zone-label">{{ zone.short_label }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="fc-ire-axis">
+                <span>0%</span>
+                <span>25%</span>
+                <span>50%</span>
+                <span>75%</span>
+                <span>100% IRE</span>
+            </div>
+
+            <div class="anchor-grid">
+                {% for ev, ire in lut.anchor_ire_by_ev_sorted %}
+                <div class="anchor-chip {% if ev in ['2.0', '2'] %}warn{% elif ev in ['3.0', '3'] %}high{% endif %}">
+                    <strong>{{ ev }} EV</strong>
+                    <span>{{ '%.1f'|format(ire) }} IRE</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <table class="fc-zone-table">
+                <thead>
+                    <tr>
+                        <th>Zone</th>
+                        <th>Color</th>
+                        <th>Min IRE</th>
+                        <th>Max IRE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for zone in lut.smallhd_map_zones %}
+                    <tr>
+                        <td>{{ zone.label }}</td>
+                        <td><span class="swatch" style="background:{{ zone.color }}"></span> {{ zone.color }}</td>
+                        <td>{{ '%.2f'|format(zone.minimum_ire) }}</td>
+                        <td>{{ '%.2f'|format(zone.maximum_ire) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <p class="muted clipping-note">
+                Clipping threshold: {{ '%.1f'|format(lut.clipping.threshold_ire) }} IRE
+                (signal ceiling {{ '%.2f'|format(lut.clipping.signal_ceiling_ire) }}).
+            </p>
+        </article>
+        {% endfor %}
+    </div>
+
+    <div class="fc-downloads nav-links">
+        <a class="btn btn-secondary" href="{{ url_for('static', filename='swiniec_false_color/false_color_preset.json') }}" download>Download SmallHD preset JSON</a>
+        <a class="btn btn-secondary" href="{{ url_for('static', filename='swiniec_false_color/analysis.json') }}" download>Download analysis.json</a>
+        <a class="btn btn-link" href="{{ url_for('batch_page') }}">Generate per-LUT charts (Batch → Exposure Assist)</a>
+        <a class="btn btn-link" href="{{ url_for('index') }}">Analyze a LUT</a>
+    </div>
+</section>
+{% endblock %}
