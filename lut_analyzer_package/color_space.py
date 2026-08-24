@@ -25,7 +25,10 @@ from typing import List, Union, Optional
 #   ARRI AWG3       R(0.6840,0.3130)  G(0.2210,0.8480)  B(0.0861,-0.1020)
 #   ARRI AWG4       R(0.7347,0.2653)  G(0.1424,0.8576)  B(0.0991,-0.0308)
 #   RED Wide Gamut  R(0.780308,0.304253) G(0.121595,1.493994) B(0.095612,-0.084589)
-#   Biała D65       (0.3127, 0.3290)
+#   V-Gamut         R(0.730, 0.280)   G(0.165, 0.840)   B(0.100, -0.030)
+#   Canon Cinema    R(0.740, 0.270)   G(0.170, 1.140)   B(0.080, -0.100)
+#   ACES AP1        R(0.713, 0.293)   G(0.165, 0.830)   B(0.128, 0.044)
+#   White D65       (0.3127, 0.3290)
 MATRIX_MAP = {
     # Sony S-Gamut3 -> Rec.709
     "sgamut3_to_rec709": np.array([
@@ -60,6 +63,27 @@ MATRIX_MAP = {
         [ 1.98197602, -0.90043184, -0.08154418],
         [-0.17814318,  1.50046836, -0.32232518],
         [-0.10179597, -0.53526346,  1.63705943]
+    ], dtype=np.float64),
+
+    # Panasonic V-Gamut -> Rec.709 (NPM from Panasonic V-Log/V-Gamut primaries)
+    "v_gamut_to_rec709": np.array([
+        [ 1.80657588, -0.69569727, -0.11087861],
+        [-0.17009034,  1.30595522, -0.13586487],
+        [-0.02520578, -0.15446833,  1.17967411]
+    ], dtype=np.float64),
+
+    # Canon Cinema Gamut -> Rec.709 (NPM from Canon Cinema Gamut primaries)
+    "canon_cinema_gamut_to_rec709": np.array([
+        [ 1.92386130, -0.79876066, -0.12510063],
+        [-0.20431085,  1.49589851, -0.29158766],
+        [-0.02368502, -0.42012701,  1.44381203]
+    ], dtype=np.float64),
+
+    # ACES AP1 -> Rec.709 (NPM from published AP1 primaries)
+    "aces_ap1_to_rec709": np.array([
+        [ 1.69219146, -0.60573315, -0.08645831],
+        [-0.12864920,  1.13801671, -0.00936750],
+        [-0.02401392, -0.12610224,  1.15011616]
     ], dtype=np.float64),
 }
 
@@ -181,6 +205,22 @@ def red_wide_gamut_rgb_to_rec709(rgb_rwg: np.ndarray) -> np.ndarray:
         RGB values in Rec.709 color space (Nx3)
     """
     return precise_transform(rgb_rwg, "red_wide_gamut_rgb", "rec709")
+
+
+def v_gamut_to_rec709(rgb_vgamut: np.ndarray) -> np.ndarray:
+    """Convert Panasonic V-Gamut primaries to Rec.709 (D65)."""
+    return precise_transform(rgb_vgamut, "v_gamut", "rec709")
+
+
+def canon_cinema_gamut_to_rec709(rgb_cinema: np.ndarray) -> np.ndarray:
+    """Convert Canon Cinema Gamut primaries to Rec.709 (D65)."""
+    return precise_transform(rgb_cinema, "canon_cinema_gamut", "rec709")
+
+
+def aces_ap1_to_rec709(rgb_ap1: np.ndarray) -> np.ndarray:
+    """Convert ACES AP1 primaries to Rec.709 (D65)."""
+    return precise_transform(rgb_ap1, "aces_ap1", "rec709")
+
 
 def transform_with_curve(rgb_values: np.ndarray, 
                         source_space: str, 

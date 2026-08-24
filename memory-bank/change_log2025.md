@@ -6,8 +6,9 @@
 - [x] ✅ Done: Exposure Assist engine (`lut_analyzer_package/exposure_assist.py`) for four real Swiniec planowe LUTs
 - [x] ✅ Done: Exposure Assist tests (`tests/test_exposure_assist.py`) — real cubes via `SWINIEC_LUT_DIR`, SHA-256 gates
 - [x] ✅ Done: Regenerate English `docs/swiniec_false_color/` from engine (FALSE_COLOR_SCALE.md, analysis.json, false_color_preset.json); SENSOR SAFETY vs LOOK EXPOSURE; second-model audit
-- [ ] Exposure Assist visuals / PDF / ZIP exports (`reporting.py`)
-- [ ] Flask batch `exposure_assist` mode on port 8080 (`lutcomparetool_app.py` + templates/CSS)
+- [x] ✅ Done: Exposure Assist visuals / PDF / ZIP exports (`reporting.py`)
+- [x] ✅ Done: Flask batch `exposure_assist` mode on port 8080 (`lutcomparetool_app.py` + templates/CSS)
+- [x] ✅ Done: Universal Exposure Assist — encoding catalog, any LUT, import-time colorspace/gamut, debrand Swiniec product naming
 - [ ] End-to-end verify app exports + regression on existing flows
 - [ ] Rozbudowa dostępności (WCAG) dla kluczowych komponentów
 - [ ] Prototypowanie jednej z koncepcji: LUT Morphing Gallery, Color Memory Palace lub Temporal LUT Analyzer

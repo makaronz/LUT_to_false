@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}False Color Scales - Swiniec Exposure Assist - PixelPasta{% endblock %}
+{% block title %}False Color Scales - Exposure Assist - PixelPasta{% endblock %}
 
 {% block content %}
 <section class="false-color-page">
-    <h2>Swiniec False Color / Exposure Assist</h2>
+    <h2>Exposure Assist / False Color</h2>
     <p class="lead-copy">
         Display-referred Rec.709 Y (IRE) after each viewing LUT — not camera-log percentages.
-        Assumed input: <strong>{{ preset.input_assumed }}</strong>.
+        Input encoding: <strong>{{ preset.input_assumed }}</strong>.
         Signal: <strong>{{ preset.signal }}</strong>.
     </p>
 
@@ -22,7 +22,7 @@
             <h3>LOOK EXPOSURE</h3>
             <p><strong>Measure:</strong> {{ preset.measurement_pages.LOOK_EXPOSURE.measure }}</p>
             <p>{{ preset.measurement_pages.LOOK_EXPOSURE.purpose }}</p>
-            <p class="muted">Use one SmallHD MAP per LUT below — swap MAP when you swap the Look.</p>
+            <p class="muted">Use one SmallHD MAP per LUT — swap MAP when you swap the Look.</p>
         </article>
     </div>
 
@@ -35,10 +35,12 @@
         </ul>
     </div>
 
-    {% if strip_url %}
-    <div class="fc-strip-block">
-        <h3>Reference strip</h3>
-        <img src="{{ strip_url }}" alt="Swiniec false color strip reference" class="false-color-bar-image fc-strip-image">
+    {% if not has_scales %}
+    <div class="alert alert-warning">
+        No Exposure Assist scales yet. Analyze one or more .cube files in
+        <a href="{{ url_for('index') }}">single</a> or
+        <a href="{{ url_for('batch_page') }}">batch</a> mode with
+        <strong>Exposure Assist</strong> selected — scales for those LUTs appear here.
     </div>
     {% endif %}
 
@@ -47,7 +49,16 @@
         <article class="fc-lut-card" id="{{ lut_key }}">
             <header class="fc-lut-header">
                 <h3>{{ lut_key }}</h3>
-                <p class="muted">{{ lut.file_name }} · confidence {{ lut.confidence.level }} ({{ '%.0f'|format(lut.confidence.score * 100) }}%)</p>
+                <p class="muted">
+                    {{ lut.file_name }}
+                    {% if lut.input_encoding %}
+                    · {{ lut.input_encoding.description }}
+                    {% endif %}
+                    {% if lut.confidence %}
+                    · confidence {{ lut.confidence.level }}
+                    ({{ '%.0f'|format((lut.confidence.score or 0) * 100) }}%)
+                    {% endif %}
+                </p>
             </header>
 
             <div class="fc-ire-bar" role="img" aria-label="False color IRE map for {{ lut_key }}">
@@ -99,18 +110,18 @@
                 </tbody>
             </table>
 
+            {% if lut.clipping %}
             <p class="muted clipping-note">
                 Clipping threshold: {{ '%.1f'|format(lut.clipping.threshold_ire) }} IRE
                 (signal ceiling {{ '%.2f'|format(lut.clipping.signal_ceiling_ire) }}).
             </p>
+            {% endif %}
         </article>
         {% endfor %}
     </div>
 
     <div class="fc-downloads nav-links">
-        <a class="btn btn-secondary" href="{{ url_for('static', filename='swiniec_false_color/false_color_preset.json') }}" download>Download SmallHD preset JSON</a>
-        <a class="btn btn-secondary" href="{{ url_for('static', filename='swiniec_false_color/analysis.json') }}" download>Download analysis.json</a>
-        <a class="btn btn-link" href="{{ url_for('batch_page') }}">Generate per-LUT charts (Batch → Exposure Assist)</a>
+        <a class="btn btn-secondary" href="{{ url_for('batch_page') }}">Batch Exposure Assist</a>
         <a class="btn btn-link" href="{{ url_for('index') }}">Analyze a LUT</a>
     </div>
 </section>

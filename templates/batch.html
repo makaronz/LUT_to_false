@@ -29,18 +29,25 @@
                 </label>
             {% endfor %}
             <small class="form-text">
-                Exposure Assist measures display-referred Rec.709 Y / IRE after each LUT independently
-                (S-Log3 / S-Gamut3.Cine input). It does not replace a pre-Look sensor clipping check.
+                Exposure Assist measures display-referred Rec.709 Y / IRE after each LUT independently.
+                It does not replace a pre-Look sensor clipping check.
             </small>
         </fieldset>
 
         <div class="form-group" id="curve_select_group">
-            <label for="curve_select">Select a reference curve (curve compare mode):</label>
+            <label for="curve_select">LUT input color space / gamut:</label>
             <select name="curve_select" id="curve_select">
-                {% for curve in curves %}
-                    <option value="{{ curve }}" {% if curve == 'slog3_cine' %}selected{% elif curve == 'slog3' and 'slog3_cine' not in curves %}selected{% endif %}>{{ curve.upper() }}</option>
+                {% for group in encoding_groups %}
+                <optgroup label="{{ group.name }}">
+                    {% for option in group.options %}
+                    <option value="{{ option.value }}" {% if option.value == default_encoding %}selected{% endif %}>{{ option.label }}</option>
+                    {% endfor %}
+                </optgroup>
                 {% endfor %}
             </select>
+            <small class="form-text">
+                Applied to every uploaded LUT in this batch. Used by both curve compare and Exposure Assist.
+            </small>
         </div>
 
         <button type="submit" class="btn btn-primary">Analyze Batch</button>
@@ -51,22 +58,4 @@
         <a href="{{ url_for('index') }}" class="btn btn-link">Back to Single Analysis</a>
         <a href="{{ url_for('compare_page') }}" class="btn btn-link">Compare Two LUTs</a>
     </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-(function () {
-  var radios = document.querySelectorAll('input[name="analysis_mode"]');
-  var curveGroup = document.getElementById('curve_select_group');
-  function syncCurveVisibility() {
-    var selected = document.querySelector('input[name="analysis_mode"]:checked');
-    if (!selected || !curveGroup) return;
-    curveGroup.style.display = selected.value === 'exposure_assist' ? 'none' : '';
-  }
-  radios.forEach(function (radio) {
-    radio.addEventListener('change', syncCurveVisibility);
-  });
-  syncCurveVisibility();
-})();
-</script>
 {% endblock %}

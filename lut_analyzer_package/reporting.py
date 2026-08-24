@@ -531,7 +531,7 @@ SMALLHD_WORKFLOW_PAGES = (
     },
     {
         "title": "LOOK EXPOSURE (post-Look)",
-        "subtitle": "Measure Rec.709 Y / IRE after the Swiniec display look.",
+        "subtitle": "Measure Rec.709 Y / IRE after the viewing LUT.",
         "bullets": (
             "Use the per-LUT MAP zones from this report — never a shared scale.",
             "Green = -1 EV target; salmon = face exposure (+0.5 to +1 EV).",
@@ -722,6 +722,7 @@ def _validated_exposure_analysis(request):
         raise ValueError("analysis must be an Exposure Assist contract object")
     required = (
         "source",
+        "input_encoding",
         "anchor_points",
         "neutral_axis",
         "smallhd_zones",
@@ -1129,11 +1130,14 @@ def _write_exposure_assist_pdf(request):
             body_style,
         )
     )
+    encoding = analysis.get("input_encoding") or {}
+    encoding_label = encoding.get("description") or "user-selected encoding"
     story.append(
         Paragraph(
             (
-                "Input assumed as Sony S-Log3 / S-Gamut3.Cine neutral axis. "
-                "Outputs are display-referred Rec.709 Y / IRE after the look LUT."
+                f"Input encoding: {encoding_label} (neutral RGB axis). "
+                "Gamut is recorded for reporting; grayscale Y follows the transfer curve. "
+                "Outputs are display-referred Rec.709 Y / IRE after the viewing LUT."
             ),
             body_style,
         )
@@ -1244,7 +1248,7 @@ def _write_exposure_assist_pdf(request):
     story.append(
         Paragraph(
             (
-                "Method: scene EV → linear (18% × 2^EV) → official S-Log3 → "
+                "Method: scene EV → linear (18% × 2^EV) → selected camera log curve → "
                 "tetrahedral 3D LUT → Rec.709 luma weights → IRE (×100). "
                 "Display look RGB is not re-decoded as camera log."
             ),

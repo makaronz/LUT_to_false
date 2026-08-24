@@ -4,41 +4,46 @@
 
 {% block content %}
     <h2>Analyze LUT File</h2>
-    <p>Upload your .cube LUT file and select the input color space/gamma curve it was designed for to generate an analysis report.</p>
-    <!-- Feature links removed for initial simplicity based on UI plan -->
+    <p>Upload your .cube LUT file and select the input color space / gamut it was designed for.</p>
     <form method="post" action="{{ url_for('analyze_lut_route') }}" enctype="multipart/form-data" class="upload-form">
         <div class="form-group">
             <label for="lut_file">Select a .cube file:</label>
             <input type="file" id="lut_file" name="lut_file" accept=".cube" required>
         </div>
 
+        <fieldset class="form-group analysis-mode-group">
+            <legend>Analysis mode</legend>
+            {% for mode in analysis_modes %}
+                <label class="analysis-mode-option" for="mode_{{ mode.value }}">
+                    <input
+                        type="radio"
+                        id="mode_{{ mode.value }}"
+                        name="analysis_mode"
+                        value="{{ mode.value }}"
+                        {% if mode.value == default_mode %}checked{% endif %}
+                    >
+                    <span>{{ mode.label }}</span>
+                </label>
+            {% endfor %}
+            <small class="form-text">
+                Exposure Assist builds a per-LUT SmallHD MAP from display-referred Rec.709 Y / IRE after the look.
+                It does not replace a pre-Look sensor clipping check.
+            </small>
+        </fieldset>
+
         <div class="form-group">
-            <label for="curve_select">Select Input Color Space / Gamma Curve:</label>
+            <label for="curve_select">LUT input color space / gamut:</label>
             <select name="curve_select" id="curve_select" class="form-control">
-                <optgroup label="Sony Curves">
-                    <option value="slog3">S-Log3 (S-Gamut3)</option>
-                    <option value="slog3_cine">S-Log3 (S-Gamut3.cine)</option>
-                    <option value="slog2">S-Log2</option>
+                {% for group in encoding_groups %}
+                <optgroup label="{{ group.name }}">
+                    {% for option in group.options %}
+                    <option value="{{ option.value }}" {% if option.value == default_encoding %}selected{% endif %}>{{ option.label }}</option>
+                    {% endfor %}
                 </optgroup>
-                <optgroup label="ARRI Curves">
-                    <option value="logc4">LogC4 (Newer ARRI Standard)</option>
-                    <option value="logc3">LogC3 (Legacy ARRI Standard)</option>
-                </optgroup>
-                <optgroup label="RED Curves">
-                    <option value="log3g10">RED Log3G10</option>
-                    <option value="redgamma3">REDgamma3</option>
-                    <option value="redgamma4">REDgamma4</option>
-                    <option value="redlogfilm">REDlogFilm (Legacy)</option>
-                </optgroup>
-                <optgroup label="Other Curves">
-                    <option value="vlog">V-Log</option>
-                    <option value="canonlog2">Canon Log2</option>
-                    <option value="rec709">Rec.709</option>
-                </optgroup>
+                {% endfor %}
             </select>
             <small class="form-text text-muted">
-                Note: S-Log3 has different implementations for S-Gamut3 and S-Gamut3.cine color spaces.
-                LogC3 and LogC4 are different standards with different mathematical values.
+                Choose the camera log + gamut pair the LUT expects. Invalid combinations are not offered.
             </small>
         </div>
 
