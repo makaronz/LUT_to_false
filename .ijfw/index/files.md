@@ -1,10 +1,10 @@
 <!-- ijfw schema:1 codebase-index -->
 # Codebase index
 
-Generated: 2026-07-15T20:58:33Z
+Generated: 2026-07-16T13:51:47Z
 Root: .
 
-Files: 350
+Files: 356
 
 ## By file
 
@@ -259,7 +259,8 @@ Files: 350
 - `./.cursor/todo.md` (47 lines, .md) -- - [x] Clone the GitHub repository
 - `./.cursor/validation-results.md` (107 lines, .md) -- This document contains the results of validation and regression testing for all implemented fixes in the site2data repos
 - `./.hive-mind/README.md` (43 lines, .md) -- This directory contains the Claude Flow Hive Mind system configuration and data.
-- `./AGENTS.md` (61 lines, .md) -- ijfw_version: 1.3.2
+- `./.pytest_cache/README.md` (8 lines, .md) -- This directory contains data from the pytest's cache plugin,
+- `./AGENTS.md` (74 lines, .md) -- ijfw_version: 1.3.2
 - `./CLAUDE.md` (369 lines, .md) -- 1. ALL operations MUST be concurrent/parallel in a single message
 - `./DIT_DOCS/DCCM.md` (3629 lines, .md) -- 1. **Introduction & Theoretical Foundations**  
 - `./DIT_DOCS/DCCM_combined.md` (2809 lines, .md) -- This document provides a comprehensive guide to color management in digital cinema production. It covers the theoretical
@@ -273,33 +274,34 @@ Files: 350
 - `./cube_analyzer.py` (476 lines, .py) -- CUBE LUT Analyzer
 - `./curves.py` (385 lines, .py) -- curves.py — Verified digital-cinema colour-management reference.
 - `./deploy.sh` (31 lines, .sh) -- echo \"Updating repository...\"
-- `./docs/API.md` (37 lines, .md) -- > **Uwaga:** wcześniejsza wersja tego pliku opisywała rozbudowane REST API
-- `./docs/swiniec_false_color/FALSE_COLOR_SCALE.md` (71 lines, .md) -- Źródło: `LUTy_planowe` (Swiniec_LUT_-1 / 0 / 1 / red), 3D 33³, Resolve.
+- `./docs/API.md` (59 lines, .md) -- > Earlier drafts of this file described a JWT REST API that **never existed in
+- `./docs/swiniec_false_color/FALSE_COLOR_SCALE.md` (208 lines, .md) -- Deterministic documentation generated from `lut_analyzer_package.exposure_assist.analyze_exposure_assist` on the four pl
 - `./gemini_analyzer.py` (95 lines, .py) -- import google.generativeai as genai
 - `./lut_analyzer.py` (106 lines, .py) -- import numpy as np
-- `./lut_analyzer_package/__init__.py` (33 lines, .py) -- LUT Analyzer Package - Narzędzia do analizy i porównywania plików LUT (Look-Up Table).
+- `./lut_analyzer_package/__init__.py` (38 lines, .py) -- LUT Analyzer Package - Narzędzia do analizy i porównywania plików LUT (Look-Up Table).
 - `./lut_analyzer_package/color_space.py` (219 lines, .py) -- Moduł zawierający funkcje do transformacji przestrzeni kolorów.
+- `./lut_analyzer_package/exposure_assist.py` (276 lines, .py) -- import hashlib
 - `./lut_analyzer_package/lut_interpolation.py` (227 lines, .py) -- Moduł odpowiedzialny za interpolację wartości przy użyciu LUT 1D i 3D.
 - `./lut_analyzer_package/lut_parsing.py` (204 lines, .py) -- Moduł odpowiedzialny za wczytywanie i parsowanie plików LUT, np. w formacie .cube.
-- `./lut_analyzer_package/reporting.py` (508 lines, .py) -- Moduł odpowiedzialny za generowanie raportów, wykresów i analiz porównawczych LUT.
+- `./lut_analyzer_package/reporting.py` (1280 lines, .py) -- Moduł odpowiedzialny za generowanie raportów, wykresów i analiz porównawczych LUT.
 - `./lut_analyzer_package/transfer_functions.py` (670 lines, .py) -- Moduł zawierający implementacje różnych funkcji transferu
 - `./lut_tools/__init__.py` (4 lines, .py) -- from .lut_parser import LUTParser
 - `./lut_tools/analyzers.py` (570 lines, .py) -- import numpy as np
 - `./lut_tools/lut_parser.py` (167 lines, .py) -- import numpy as np
 - `./lut_tools/transfer_functions.py` (253 lines, .py) -- import numpy as np
 - `./lut_tools/visualizers.py` (358 lines, .py) -- import numpy as np
-- `./lutcomparetool_app.py` (629 lines, .py) -- import os
-- `./memory-bank/activeContext.md` (18 lines, .md) -- - Backend Flask obsługuje upload, analizę i porównanie LUT (.cube) względem referencyjnych krzywych (Sony, ARRI, RED
-- `./memory-bank/change_log2025.md` (50 lines, .md) -- - [x] ✅ Done: Integracja tabeli porównawczej na froncie (HTML, JS, CSS)
+- `./lutcomparetool_app.py` (869 lines, .py) -- import os
+- `./memory-bank/activeContext.md` (23 lines, .md) -- - **Swiniec Exposure Assist**: deterministic EV→S-Log3→LUT→Rec.709 Y IRE analysis for four planowe LUTs (`-1`, `0`
+- `./memory-bank/change_log2025.md` (41 lines, .md) -- - [x] ✅ Done: Integracja tabeli porównawczej na froncie (HTML, JS, CSS)
 - `./memory-bank/productContext.md` (26 lines, .md) -- Branża filmowa wymaga precyzyjnych narzędzi do analizy i kontroli LUT, które są kluczowe dla spójności obrazu na p
-- `./memory-bank/progress.md` (20 lines, .md) -- - Upload i analiza LUT (.cube) względem referencyjnych krzywych (Sony, ARRI, RED, Canon)
+- `./memory-bank/progress.md` (24 lines, .md) -- - Flask LUT upload / analyze / compare against reference curves (Sony, ARRI, RED, Canon).
 - `./memory-bank/projectbrief.md` (20 lines, .md) -- PixelPasta to zaawansowane narzędzie webowe do analizy, porównywania i raportowania plików LUT (.cube) wykorzystywany
 - `./memory-bank/systemPatterns.md` (23 lines, .md) -- - Backend: Python (Flask), modularny, REST API, generowanie raportów, obsługa plików
 - `./memory-bank/techContext.md` (23 lines, .md) -- - Backend: Python 3.10+, Flask
 - `./memory/agents/README.md` (31 lines, .md) -- This directory stores agent-specific memory data, configurations, and persistent state information for individual Claude
 - `./memory/sessions/README.md` (32 lines, .md) -- This directory stores session-based memory data, conversation history, and contextual information for development sessio
 - `./pixelpasta/__init__.py` (1 lines, .py) -- <empty>
-- `./pixelpasta/app.py` (198 lines, .py) -- import os
+- `./pixelpasta/app.py` (296 lines, .py) -- import os
 - `./pixelpasta/lut_processor/__init__.py` (1 lines, .py) -- <empty>
 - `./pixelpasta/lut_processor/color_analysis.py` (342 lines, .py) -- import numpy as np
 - `./pixelpasta/lut_processor/cube_parser.py` (137 lines, .py) -- import numpy as np
@@ -347,20 +349,24 @@ Files: 350
 - `./pixelpasta/not_mergrd/9.2_Standardized_Color_Spaces.md` (66 lines, .md) -- Standardized color spaces are crucial for ensuring consistent color reproduction across different devices and workflows.
 - `./pixelpasta/not_mergrd/9.3_Display_Scene_Referred.md` (53 lines, .md) -- The terms \"display-referred\" and \"scene-referred\" describe two fundamentally different approaches to representing an
 - `./pixelpasta/not_mergrd/9.4_Streaming_DCP.md` (68 lines, .md) -- This section covers the color management and technical requirements for delivering content to streaming platforms and fo
-- `./pixelpasta/static/js/app.js` (253 lines, .js) -- import Toast from './components/Toast.js';
-- `./pixelpasta/static/js/components/ComparisonTable.js` (54 lines, .js) -- class ComparisonTable {
-- `./pixelpasta/static/js/components/FileUpload.js` (74 lines, .js) -- class FileUpload {
-- `./pixelpasta/static/js/components/Toast.js` (29 lines, .js) -- class Toast {
+- `./pixelpasta/static/js/app.js` (619 lines, .js) -- import Toast from './components/Toast.js';
+- `./pixelpasta/static/js/components/ComparisonTable.js` (48 lines, .js) -- class ComparisonTable {
+- `./pixelpasta/static/js/components/FileUpload.js` (150 lines, .js) -- class FileUpload {
+- `./pixelpasta/static/js/components/Toast.js` (32 lines, .js) -- class Toast {
 - `./pixelpasta/tests/test_color_analysis.py` (112 lines, .py) -- import unittest
 - `./pixelpasta/tests/test_cube_parser.py` (185 lines, .py) -- import unittest
 - `./pixelpasta/tests/test_lut_analysis.py` (171 lines, .py) -- import numpy as np
 - `./pixelpasta_ui_project_plan.md` (92 lines, .md) --     1.  Wczytywanie pliku LUT w formacie .CUBE (obsługa 1D i 3D).
 - `./setup.py` (19 lines, .py) -- from setuptools import setup, find_packages
+- `./static/js/components/ComparisonTable.js` (55 lines, .js) -- class ComparisonTable {
 - `./system_prompt.md` (235 lines, .md) -- Provide comprehensive, reliable, and up-to-date technical support for DITs, cinematographers, and camera assistants in t
 - `./test_analyzer.py` (26 lines, .py) -- from gemini_analyzer import GeminiAnalyzer
+- `./tests/test_exposure_assist.py` (208 lines, .py) -- import hashlib
+- `./tests/test_exposure_assist_reporting.py` (130 lines, .py) -- import csv
+- `./wsgi.py` (2 lines, .py) -- from lutcomparetool_app import app  # noqa: F401
 
 ## By language
-- .md: 309
-- .py: 30
+- .md: 310
+- .py: 34
 - .sh: 6
-- .js: 5
+- .js: 6
