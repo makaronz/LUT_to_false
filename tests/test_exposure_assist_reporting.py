@@ -1,4 +1,4 @@
-"""Unit tests for Exposure Assist report helpers (pure logic, no mocks)."""
+"""Unit tests for Exposure Assist report helpers (pure logic + optional real LUT)."""
 
 import csv
 import importlib
@@ -9,9 +9,9 @@ from pathlib import Path
 import pytest
 
 from lut_analyzer_package.exposure_assist import analyze_exposure_assist
+from lut_analyzer_package.encoding_catalog import DEFAULT_ENCODING
 
 
-EXPECTED_LUT_0 = "Swiniec_LUT_0.cube"
 EXPECTED_ARTIFACT_KEYS = {
     "json",
     "csv",
@@ -31,21 +31,30 @@ EXPECTED_ARTIFACT_KEYS = {
 }
 
 
+def _lut_dir():
+    return os.environ.get("EXPOSURE_ASSIST_LUT_DIR") or os.environ.get(
+        "SWINIEC_LUT_DIR"
+    )
+
+
 @pytest.fixture(scope="module")
-def lut_0_path():
-    directory_value = os.environ.get("SWINIEC_LUT_DIR")
+def sample_lut_path():
+    directory_value = _lut_dir()
     if not directory_value:
-        pytest.skip("SWINIEC_LUT_DIR must point to approved production LUT files")
-
-    lut_path = Path(directory_value).expanduser().resolve() / EXPECTED_LUT_0
-    if not lut_path.is_file():
-        pytest.skip(f"Missing production LUT: {lut_path}")
-    return lut_path
+        pytest.skip(
+            "EXPOSURE_ASSIST_LUT_DIR (or SWINIEC_LUT_DIR) must point to real .cube files"
+        )
+    paths = sorted(Path(directory_value).expanduser().resolve().glob("*.cube"))
+    if not paths:
+        pytest.skip("No .cube files found for reporting tests")
+    return paths[0]
 
 
 @pytest.fixture(scope="module")
-def analysis(lut_0_path):
-    return analyze_exposure_assist({"lut_path": str(lut_0_path)})
+def analysis(sample_lut_path):
+    return analyze_exposure_assist(
+        {"lut_path": str(sample_lut_path), "encoding": DEFAULT_ENCODING}
+    )
 
 
 def _reporting():
@@ -96,7 +105,7 @@ def test_generate_exposure_assist_report_writes_expected_artifacts(
         {
             "analysis": analysis,
             "output_dir": str(tmp_path),
-            "basename": "Swiniec_LUT_0",
+            "basename": Path(analysis["source"]["file_name"]).stem,
         }
     )
 
@@ -110,6 +119,7 @@ def test_generate_exposure_assist_report_writes_expected_artifacts(
     with Path(artifacts["json"]).open(encoding="utf-8") as handle:
         loaded = json.load(handle)
     assert loaded["source"]["file_name"] == analysis["source"]["file_name"]
+    assert loaded["input_encoding"]["key"] == analysis["input_encoding"]["key"]
     assert len(loaded["smallhd_zones"]) == len(analysis["smallhd_zones"])
 
     with Path(artifacts["csv"]).open(newline="", encoding="utf-8") as handle:

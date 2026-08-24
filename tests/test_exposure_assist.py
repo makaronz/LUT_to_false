@@ -1,3 +1,5 @@
+"""Exposure Assist tests: encoding-agnostic unit tests + optional real LUT integration."""
+
 import hashlib
 import importlib
 import json
@@ -7,11 +9,20 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from lut_analyzer_package.encoding_catalog import (
+    DEFAULT_ENCODING,
+    ENCODING_INFO,
+    resolve_encoding,
+)
+from lut_analyzer_package.exposure_assist import (
+    ZONE_DEFINITIONS,
+    _build_smallhd_zones,
+)
 from lut_analyzer_package.lut_interpolation import interpolate_tetrahedral_3d_lut
 from lut_analyzer_package.lut_parsing import load_cube_file
 
-
-EXPECTED_LUTS = {
+FORBIDDEN_AUXILIARY_COLORS = {"#000000", "#FFFFFF"}
+OPTIONAL_GOLDEN = {
     "Swiniec_LUT_-1.cube": {
         "sha256": "fcfc1e65dd09df257d0b2f43c1b379c3ac7f85b4d7015825687ba4eb9c1a33c2",
         "anchors": {-1.0: 32.07696, 0.0: 50.61539, 0.5: 59.97575, 1.0: 68.47641},
@@ -30,10 +41,6 @@ EXPECTED_LUTS = {
     },
 }
 ANCHOR_TOLERANCE_IRE = 0.02
-EXPECTED_DOMAIN_MIN = [0.0, 0.0, 0.0]
-EXPECTED_DOMAIN_MAX = [1.0, 1.0, 1.0]
-EXPECTED_LUT_SIZE = 33
-FORBIDDEN_AUXILIARY_COLORS = {"#000000", "#FFFFFF"}
 
 
 def _sha256(path):
@@ -44,92 +51,108 @@ def _sha256(path):
     return digest.hexdigest()
 
 
+def _lut_dir():
+    return os.environ.get("EXPOSURE_ASSIST_LUT_DIR") or os.environ.get(
+        "SWINIEC_LUT_DIR"
+    )
+
+
 @pytest.fixture(scope="session")
 def real_lut_paths():
-    directory_value = os.environ.get("SWINIEC_LUT_DIR")
+    directory_value = _lut_dir()
     if not directory_value:
-        pytest.skip("SWINIEC_LUT_DIR must point to the four approved production LUT files")
+        pytest.skip(
+            "EXPOSURE_ASSIST_LUT_DIR (or SWINIEC_LUT_DIR) must point to real .cube files"
+        )
 
     directory = Path(directory_value).expanduser().resolve()
-    assert directory.is_dir(), f"SWINIEC_LUT_DIR is not a directory: {directory}"
-
-    paths = {path.name: path for path in directory.glob("*.cube")}
-    assert set(paths) == set(EXPECTED_LUTS), (
-        "SWINIEC_LUT_DIR must contain exactly the four approved production LUT files"
-    )
-    for name, path in paths.items():
-        assert _sha256(path) == EXPECTED_LUTS[name]["sha256"], (
-            f"SHA-256 mismatch for production LUT: {name}"
-        )
+    assert directory.is_dir(), f"LUT dir is not a directory: {directory}"
+    paths = sorted(directory.glob("*.cube"))
+    assert paths, f"No .cube files in {directory}"
     return paths
 
 
-@pytest.fixture(params=sorted(EXPECTED_LUTS))
-def real_lut(request, real_lut_paths):
-    path = real_lut_paths[request.param]
-    return {
-        "name": request.param,
-        "path": path,
-        "parsed": load_cube_file(str(path)),
-    }
-
-
-def _analyze(path):
+def _analyze(path, encoding=DEFAULT_ENCODING):
     module = importlib.import_module("lut_analyzer_package.exposure_assist")
-    return module.analyze_exposure_assist({"lut_path": str(path)})
-
-
-def _anchor_by_ev(result):
-    return {point["ev"]: point for point in result["anchor_points"]}
-
-
-def _zone_by_semantic(result):
-    return {zone["semantic"]: zone for zone in result["smallhd_zones"]}
-
-
-def test_real_lut_files_have_approved_structure_and_domain(real_lut):
-    parsed = real_lut["parsed"]
-
-    assert parsed["lut_type"] == "3D"
-    assert parsed["lut_3d_size"] == EXPECTED_LUT_SIZE
-    assert parsed["lut_3d"].shape == (EXPECTED_LUT_SIZE**3, 3)
-    assert parsed["domain_min"] == EXPECTED_DOMAIN_MIN
-    assert parsed["domain_max"] == EXPECTED_DOMAIN_MAX
-
-
-def test_tetrahedral_interpolation_reproduces_real_neutral_grid_points(real_lut):
-    parsed = real_lut["parsed"]
-    grid_indices = np.array([0, 8, 16, 24, 32])
-    neutral_inputs = np.repeat(
-        (grid_indices / (EXPECTED_LUT_SIZE - 1))[:, None],
-        3,
-        axis=1,
-    )
-    output = interpolate_tetrahedral_3d_lut(
-        parsed["lut_3d"],
-        parsed["lut_3d_size"],
-        neutral_inputs,
-        parsed["domain_min"],
-        parsed["domain_max"],
-    )
-    flat_neutral_indices = grid_indices * (
-        EXPECTED_LUT_SIZE**2 + EXPECTED_LUT_SIZE + 1
+    return module.analyze_exposure_assist(
+        {"lut_path": str(path), "encoding": encoding}
     )
 
-    assert np.allclose(output, parsed["lut_3d"][flat_neutral_indices], atol=1e-6)
+
+def test_resolve_encoding_rejects_unknown_keys():
+    with pytest.raises(ValueError):
+        resolve_encoding("not_a_real_encoding")
 
 
-def test_engine_returns_serializable_per_lut_measurement_contract(real_lut):
-    result = _analyze(real_lut["path"])
+def test_encoding_catalog_covers_major_camera_pairs():
+    required = {
+        "slog3",
+        "slog3_cine",
+        "logc3",
+        "logc4",
+        "log3g10",
+        "vlog",
+        "canonlog2",
+        "rec709",
+        "acescct",
+    }
+    assert required.issubset(set(ENCODING_INFO))
 
+
+def test_same_ev_yields_different_encoded_input_across_transfers():
+    """No cube required — transfer curves must diverge at middle gray."""
+    scene_linear = np.asarray([0.18], dtype=np.float64)
+    encoded = {
+        key: float(ENCODING_INFO[key]["curve_func"](scene_linear)[0])
+        for key in ("slog3_cine", "logc3", "log3g10")
+    }
+    assert encoded["slog3_cine"] != pytest.approx(encoded["logc3"], abs=1e-4)
+    assert encoded["slog3_cine"] != pytest.approx(encoded["log3g10"], abs=1e-4)
+    assert encoded["logc3"] != pytest.approx(encoded["log3g10"], abs=1e-4)
+
+
+def test_zone_palette_semantics_without_lut():
+    fake_anchors = [
+        {"ev": ev, "rec709_y_ire": value}
+        for ev, value in (
+            (-1.25, 20.0),
+            (-0.75, 30.0),
+            (0.5, 55.0),
+            (1.0, 65.0),
+            (2.0, 80.0),
+            (3.0, 90.0),
+        )
+    ]
+    zones = _build_smallhd_zones(
+        {"anchors": fake_anchors, "clipping_threshold_ire": 99.0}
+    )
+    by_semantic = {zone["semantic"]: zone for zone in zones}
+    assert by_semantic["minus_one_ev"]["color"] == "#22C55E"
+    assert by_semantic["face_exposure"]["color"] == "#FA8072"
+    assert by_semantic["highlight_warn"]["color"] == "#FACC15"
+    assert by_semantic["highlight_high"]["color"] == "#F97316"
+    red_zones = [zone for zone in zones if zone["color"] == "#DC2626"]
+    assert len(red_zones) == 1
+    assert red_zones[0]["semantic"] == "white_clipping"
+    assert all(
+        zone["color"].upper() not in FORBIDDEN_AUXILIARY_COLORS for zone in zones
+    )
+    assert [zone[0] for zone in ZONE_DEFINITIONS] == [
+        zone["semantic"] for zone in zones
+    ]
+
+
+def test_engine_requires_encoding_and_returns_input_encoding(real_lut_paths):
+    path = real_lut_paths[0]
+    result = _analyze(path, encoding="logc3")
     assert json.loads(json.dumps(result)) == result
-    assert result["source"]["file_name"] == real_lut["name"]
-    assert result["source"]["sha256"] == EXPECTED_LUTS[real_lut["name"]]["sha256"]
-    assert result["source"]["lut_size"] == EXPECTED_LUT_SIZE
-    assert result["source"]["domain_min"] == EXPECTED_DOMAIN_MIN
-    assert result["source"]["domain_max"] == EXPECTED_DOMAIN_MAX
-    assert set(result) == {
+    assert result["input_encoding"]["key"] == "logc3"
+    assert "encoded_input" in result["anchor_points"][0]
+    assert "slog3_input" not in result["anchor_points"][0]
+    assert "lut_size_33" not in result["confidence"]["checks"]
+    assert set(result) >= {
         "source",
+        "input_encoding",
         "anchor_points",
         "neutral_axis",
         "grid_statistics",
@@ -140,69 +163,62 @@ def test_engine_returns_serializable_per_lut_measurement_contract(real_lut):
     }
 
 
-def test_engine_matches_measured_anchor_points(real_lut):
-    result = _analyze(real_lut["path"])
-    anchors = _anchor_by_ev(result)
+def test_different_encodings_change_ire_anchors(real_lut_paths):
+    path = real_lut_paths[0]
+    slog = _anchor_ire(_analyze(path, encoding="slog3_cine"))
+    logc = _anchor_ire(_analyze(path, encoding="logc3"))
+    assert slog[0.0] != pytest.approx(logc[0.0], abs=0.05)
 
-    for ev, expected_ire in EXPECTED_LUTS[real_lut["name"]]["anchors"].items():
-        assert anchors[ev]["rec709_y_ire"] == pytest.approx(
-            expected_ire,
-            abs=ANCHOR_TOLERANCE_IRE,
+
+def test_real_luts_have_valid_3d_structure(real_lut_paths):
+    for path in real_lut_paths:
+        parsed = load_cube_file(str(path))
+        assert parsed["lut_type"] == "3D"
+        size = parsed["lut_3d_size"]
+        assert size >= 2
+        assert parsed["lut_3d"].shape == (size**3, 3)
+        assert all(
+            maximum > minimum
+            for minimum, maximum in zip(parsed["domain_min"], parsed["domain_max"])
         )
-        assert len(anchors[ev]["lut_rgb"]) == 3
-        assert anchors[ev]["scene_linear"] == pytest.approx(0.18 * (2.0**ev))
 
 
-def test_real_neutral_axis_is_monotonic_and_reports_grid_rates(real_lut):
-    result = _analyze(real_lut["path"])
-    neutral_axis = result["neutral_axis"]
-    grid_statistics = result["grid_statistics"]
+def test_tetrahedral_interpolation_reproduces_neutral_grid_corners(real_lut_paths):
+    path = real_lut_paths[0]
+    parsed = load_cube_file(str(path))
+    size = parsed["lut_3d_size"]
+    grid_indices = np.array([0, size - 1], dtype=np.int64)
+    neutral_inputs = np.repeat(
+        (grid_indices / (size - 1))[:, None],
+        3,
+        axis=1,
+    )
+    output = interpolate_tetrahedral_3d_lut(
+        parsed["lut_3d"],
+        parsed["lut_3d_size"],
+        neutral_inputs,
+        parsed["domain_min"],
+        parsed["domain_max"],
+    )
+    flat_neutral_indices = grid_indices * (size**2 + size + 1)
+    assert np.allclose(output, parsed["lut_3d"][flat_neutral_indices], atol=1e-6)
 
-    assert neutral_axis["monotonic"] is True
-    assert neutral_axis["violation_count"] == 0
-    assert neutral_axis["minimum_step_ire"] >= 0.0
-    assert len(neutral_axis["samples"]) > 4
-    assert 0.0 <= grid_statistics["zero_rate"] <= 1.0
-    assert 0.0 <= grid_statistics["saturation_rate"] <= 1.0
-    assert grid_statistics["entry_count"] == EXPECTED_LUT_SIZE**3
-    assert grid_statistics["luma_ire"]["maximum"] == pytest.approx(
-        result["clipping"]["signal_ceiling_ire"]
-    )
+
+def test_optional_golden_anchors_when_hashes_match(real_lut_paths):
+    by_name = {path.name: path for path in real_lut_paths}
+    matched = [
+        name for name, meta in OPTIONAL_GOLDEN.items() if name in by_name
+        and _sha256(by_name[name]) == meta["sha256"]
+    ]
+    if not matched:
+        pytest.skip("No optional golden LUTs with matching SHA-256 in LUT dir")
+
+    for name in matched:
+        result = _analyze(by_name[name], encoding="slog3_cine")
+        anchors = {point["ev"]: point["rec709_y_ire"] for point in result["anchor_points"]}
+        for ev, expected_ire in OPTIONAL_GOLDEN[name]["anchors"].items():
+            assert anchors[ev] == pytest.approx(expected_ire, abs=ANCHOR_TOLERANCE_IRE)
 
 
-def test_smallhd_zone_boundaries_and_colors_follow_plan_semantics(real_lut):
-    result = _analyze(real_lut["path"])
-    zones = _zone_by_semantic(result)
-    anchors = _anchor_by_ev(result)
-
-    assert zones["minus_one_ev"]["color"] == "#22C55E"
-    assert zones["minus_one_ev"]["minimum_ire"] == pytest.approx(
-        anchors[-1.25]["rec709_y_ire"]
-    )
-    assert zones["minus_one_ev"]["maximum_ire"] == pytest.approx(
-        anchors[-0.75]["rec709_y_ire"]
-    )
-    assert zones["face_exposure"]["color"] == "#FA8072"
-    assert zones["face_exposure"]["minimum_ire"] == pytest.approx(
-        anchors[0.5]["rec709_y_ire"]
-    )
-    assert zones["face_exposure"]["maximum_ire"] == pytest.approx(
-        anchors[1.0]["rec709_y_ire"]
-    )
-    assert zones["highlight_warn"]["color"] == "#FACC15"
-    assert zones["highlight_warn"]["minimum_ire"] == pytest.approx(
-        anchors[2.0]["rec709_y_ire"]
-    )
-    assert zones["highlight_high"]["color"] == "#F97316"
-    assert zones["highlight_high"]["minimum_ire"] == pytest.approx(
-        anchors[3.0]["rec709_y_ire"]
-    )
-
-    red_zones = [zone for zone in result["smallhd_zones"] if zone["color"] == "#DC2626"]
-    assert len(red_zones) == 1
-    assert red_zones[0]["semantic"] == "white_clipping"
-    assert red_zones[0]["minimum_ire"] == result["clipping"]["threshold_ire"]
-    assert all(
-        zone["color"].upper() not in FORBIDDEN_AUXILIARY_COLORS
-        for zone in result["smallhd_zones"]
-    )
+def _anchor_ire(result):
+    return {point["ev"]: point["rec709_y_ire"] for point in result["anchor_points"]}

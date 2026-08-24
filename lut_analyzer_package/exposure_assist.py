@@ -5,7 +5,11 @@ from pathlib import Path
 
 import numpy as np
 
-from curves import linear_to_slog3
+from lut_analyzer_package.encoding_catalog import (
+    DEFAULT_ENCODING,
+    encoding_contract,
+    resolve_encoding,
+)
 from lut_analyzer_package.lut_interpolation import (
     interpolate_tetrahedral_3d_lut,
 )
@@ -18,7 +22,6 @@ ANCHOR_EVS = (-1.25, -1.0, -0.75, 0.0, 0.5, 1.0, 2.0, 3.0)
 NEUTRAL_AXIS_MIN_EV = -8.0
 NEUTRAL_AXIS_MAX_EV = 8.0
 NEUTRAL_AXIS_STEP_EV = 0.25
-EXPECTED_LUT_SIZE = 33
 EXPECTED_DOMAIN_MIN = [0.0, 0.0, 0.0]
 EXPECTED_DOMAIN_MAX = [1.0, 1.0, 1.0]
 LEGAL_WHITE_IRE = 100.0
@@ -43,22 +46,31 @@ LIMITATIONS = (
     "EV mapping follows the neutral RGB axis and does not identify skin or any other chromatic subject.",
     "LUT outputs are treated as display RGB and are not decoded through another display transfer function.",
     "Inputs outside the declared LUT domain are clipped by the existing tetrahedral interpolator.",
+    "Neutral-axis EV depends on the selected transfer curve; gamut is recorded for reporting and does not change grayscale Y.",
+    "Input encoding is user-selected at import time and is never inferred from the LUT filename.",
 )
 
 
 def analyze_exposure_assist(request):
     """Analyze one 3D LUT and return a JSON-serializable measurement contract."""
     lut_path = _validated_lut_path(request)
+    encoding_key, encoding_info = resolve_encoding(
+        request.get("encoding", DEFAULT_ENCODING)
+    )
     parsed = load_cube_file(str(lut_path))
     _validate_3d_lut(parsed)
 
+    measure_request = {
+        "parsed": parsed,
+        "curve_func": encoding_info["curve_func"],
+    }
     anchors = _measure_ev_points(
         {
-            "parsed": parsed,
+            **measure_request,
             "ev_values": np.asarray(ANCHOR_EVS, dtype=np.float64),
         }
     )
-    neutral_axis = _measure_neutral_axis({"parsed": parsed})
+    neutral_axis = _measure_neutral_axis(measure_request)
     grid_statistics = _measure_grid({"lut_data": parsed["lut_3d"]})
     signal_ceiling_ire = grid_statistics["luma_ire"]["maximum"]
     clipping_threshold_ire = _round_number(
@@ -73,6 +85,7 @@ def analyze_exposure_assist(request):
             "domain_min": [float(value) for value in parsed["domain_min"]],
             "domain_max": [float(value) for value in parsed["domain_max"]],
         },
+        "input_encoding": encoding_contract(encoding_key),
         "anchor_points": anchors,
         "neutral_axis": neutral_axis,
         "grid_statistics": grid_statistics,
@@ -128,10 +141,11 @@ def _validate_3d_lut(parsed):
 
 def _measure_ev_points(request):
     parsed = request["parsed"]
+    curve_func = request["curve_func"]
     ev_values = np.asarray(request["ev_values"], dtype=np.float64)
     scene_linear = MIDDLE_GRAY_LINEAR * np.power(2.0, ev_values)
-    slog3_values = np.asarray(linear_to_slog3(scene_linear), dtype=np.float64)
-    neutral_inputs = np.repeat(slog3_values[:, None], 3, axis=1)
+    encoded_values = np.asarray(curve_func(scene_linear), dtype=np.float64)
+    neutral_inputs = np.repeat(encoded_values[:, None], 3, axis=1)
     lut_rgb = interpolate_tetrahedral_3d_lut(
         parsed["lut_3d"],
         parsed["lut_3d_size"],
@@ -145,14 +159,14 @@ def _measure_ev_points(request):
         {
             "ev": float(ev),
             "scene_linear": _round_number(linear),
-            "slog3_input": _round_number(slog3),
+            "encoded_input": _round_number(encoded),
             "lut_rgb": [_round_number(channel) for channel in rgb],
             "rec709_y_ire": _round_number(ire),
         }
-        for ev, linear, slog3, rgb, ire in zip(
+        for ev, linear, encoded, rgb, ire in zip(
             ev_values,
             scene_linear,
-            slog3_values,
+            encoded_values,
             lut_rgb,
             luma_ire,
         )
@@ -169,6 +183,7 @@ def _measure_neutral_axis(request):
     samples = _measure_ev_points(
         {
             "parsed": request["parsed"],
+            "curve_func": request["curve_func"],
             "ev_values": ev_values,
         }
     )
@@ -246,11 +261,14 @@ def _build_smallhd_zones(request):
 
 def _measure_confidence(request):
     parsed = request["parsed"]
+    domain_min = [float(value) for value in parsed["domain_min"]]
+    domain_max = [float(value) for value in parsed["domain_max"]]
     checks = {
-        "lut_size_33": parsed["lut_3d_size"] == EXPECTED_LUT_SIZE,
+        "domain_sane": all(
+            maximum > minimum for minimum, maximum in zip(domain_min, domain_max)
+        ),
         "domain_zero_to_one": (
-            parsed["domain_min"] == EXPECTED_DOMAIN_MIN
-            and parsed["domain_max"] == EXPECTED_DOMAIN_MAX
+            domain_min == EXPECTED_DOMAIN_MIN and domain_max == EXPECTED_DOMAIN_MAX
         ),
         "neutral_axis_monotonic": request["neutral_axis"]["monotonic"],
     }

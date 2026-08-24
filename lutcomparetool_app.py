@@ -37,12 +37,22 @@ try:
                                                 generate_exposure_assist_report,
                                                 generate_smallhd_workflow_diagram)
     from lut_analyzer_package.exposure_assist import analyze_exposure_assist
+    from lut_analyzer_package.encoding_catalog import (
+        DEFAULT_ENCODING,
+        ENCODING_ALIASES,
+        ENCODING_INFO,
+        encoding_options_for_ui,
+        resolve_encoding,
+    )
     from lut_analyzer_package.transfer_functions import * # Import all transfer functions
     from lut_analyzer_package.color_space import (s_gamut3_to_rec709,
                                                  s_gamut3_cine_to_rec709,
                                                  arri_wide_gamut4_to_rec709,
                                                  arri_wide_gamut3_to_rec709,
-                                                 red_wide_gamut_rgb_to_rec709)
+                                                 red_wide_gamut_rgb_to_rec709,
+                                                 v_gamut_to_rec709,
+                                                 canon_cinema_gamut_to_rec709,
+                                                 aces_ap1_to_rec709)
 except ImportError as e:
     print(f"Error importing lut_analyzer_package: {e}", file=sys.stderr)
     print("Ensure the package is in the Python path or installed.", file=sys.stderr)
@@ -155,128 +165,18 @@ def _render_analysis_results(
     }
     return render_template('results.html', **context)
 
-# Mapping of curve names to appropriate functions and color spaces
-CURVE_INFO = {
-    # Sony Curves
-    "slog3": {
-        "curve_func": linear_to_slog3,
-        "inverse_func": slog3_to_linear,
-        "color_space": "sgamut3",
-        "color_transform": s_gamut3_to_rec709,
-        "description": "Sony S-Log3 (S-Gamut3)"
-    },
-    "slog3_cine": {
-        "curve_func": linear_to_slog3_cine,
-        "inverse_func": slog3_cine_to_linear,
-        "color_space": "sgamut3_cine",
-        "color_transform": s_gamut3_cine_to_rec709,
-        "description": "Sony S-Log3 (S-Gamut3.cine)"
-    },
-    "slog2": {
-        "curve_func": linear_to_slog2,
-        "inverse_func": slog2_to_linear,
-        "color_space": "sgamut3",  # Simplified - often used with S-Gamut3
-        "color_transform": s_gamut3_to_rec709,
-        "description": "Sony S-Log2"
-    },
-    
-    # ARRI Curves
-    "logc4": {
-        "curve_func": linear_to_logc4,
-        "inverse_func": logc4_to_linear,
-        "color_space": "arri_wide_gamut4",
-        "color_transform": arri_wide_gamut4_to_rec709,
-        "description": "ARRI LogC4 (Wide Gamut 4)"
-    },
-    "logc3": {
-        "curve_func": linear_to_logc3,
-        "inverse_func": logc3_to_linear,
-        "color_space": "arri_wide_gamut3",
-        "color_transform": arri_wide_gamut3_to_rec709,
-        "description": "ARRI LogC3 (Wide Gamut 3)"
-    },
-    
-    # RED Curves
-    "log3g10": {
-        "curve_func": linear_to_log3g10,
-        "inverse_func": log3g10_to_linear,
-        "color_space": "red_wide_gamut_rgb",
-        "color_transform": red_wide_gamut_rgb_to_rec709,
-        "description": "RED Log3G10"
-    },
-    "redgamma3": {
-        "curve_func": linear_to_redgamma3,
-        "inverse_func": redgamma3_to_linear,
-        "color_space": "red_wide_gamut_rgb",
-        "color_transform": red_wide_gamut_rgb_to_rec709,
-        "description": "RED Gamma 3"
-    },
-    "redgamma4": {
-        "curve_func": linear_to_redgamma4,
-        "inverse_func": redgamma4_to_linear,
-        "color_space": "red_wide_gamut_rgb",
-        "color_transform": red_wide_gamut_rgb_to_rec709,
-        "description": "RED Gamma 4"
-    },
-    "redlogfilm": {
-        "curve_func": linear_to_redlogfilm,
-        "inverse_func": redlogfilm_to_linear,
-        "color_space": "red_wide_gamut_rgb",
-        "color_transform": red_wide_gamut_rgb_to_rec709,
-        "description": "RED Log Film"
-    },
-    "red_ipp2_odt_approx": {
-        "curve_func": linear_to_red_ipp2_odt_approx,
-        "inverse_func": red_ipp2_odt_approx_to_linear,
-        "color_space": "red_wide_gamut_rgb",
-        "color_transform": red_wide_gamut_rgb_to_rec709,
-        "description": "RED IPP2 ODT Approximation"
-    },
-    
-    # Other Curves
-    "vlog": {
-        "curve_func": linear_to_vlog,
-        "inverse_func": vlog_to_linear,
-        "color_space": "v_gamut",
-        "description": "Panasonic V-Log"
-    },
-    "canonlog2": {
-        "curve_func": linear_to_canonlog2,
-        "inverse_func": canonlog2_to_linear,
-        "color_space": "canon_cinema_gamut",
-        "description": "Canon Log 2"
-    },
-    "rec709": {
-        "curve_func": linear_to_rec709,
-        "inverse_func": rec709_to_linear,
-        "color_space": "rec709",
-        "description": "Rec.709"
-    }
-}
-
-# Aliasy dla zachowania kompatybilności
-CURVE_ALIASES = {
-    "gamma22": "redgamma4",
-    "gamma24": "redgamma3",
-    "clog2": "canonlog2",
-    "redipp2odt": "red_ipp2_odt_approx"
-}
+# Shared encoding catalog (valid transfer + gamut pairs)
+CURVE_INFO = ENCODING_INFO
+CURVE_ALIASES = ENCODING_ALIASES
 
 # --- Routes ---
 @app.route('/')
 def index():
     """Displays the main page with the form."""
-    # Pass the list of available curves to the template
-    available_curves = sorted(list(CURVE_INFO.keys()) + list(CURVE_ALIASES.keys()))
-    return render_template('index.html', curves=available_curves)
-
-@app.route('/batch')
-def batch_page():
-    """Displays the batch analysis page."""
-    available_curves = sorted(CURVE_INFO.keys())
     return render_template(
-        'batch.html',
-        curves=available_curves,
+        'index.html',
+        encoding_groups=encoding_options_for_ui(),
+        default_encoding=DEFAULT_ENCODING,
         analysis_modes=(
             {
                 "value": "curve_compare",
@@ -284,77 +184,130 @@ def batch_page():
             },
             {
                 "value": "exposure_assist",
-                "label": "Exposure Assist (S-Log3 / S-Gamut3.Cine → Rec.709 Y)",
+                "label": "Exposure Assist (per-LUT Rec.709 Y / IRE after look)",
+            },
+        ),
+        default_mode="curve_compare",
+    )
+
+@app.route('/batch')
+def batch_page():
+    """Displays the batch analysis page."""
+    return render_template(
+        'batch.html',
+        encoding_groups=encoding_options_for_ui(),
+        default_encoding=DEFAULT_ENCODING,
+        analysis_modes=(
+            {
+                "value": "curve_compare",
+                "label": "Curve compare (LUT vs reference transfer)",
+            },
+            {
+                "value": "exposure_assist",
+                "label": "Exposure Assist (per-LUT Rec.709 Y / IRE after look)",
             },
         ),
         default_mode="curve_compare",
     )
 
 
-def _load_false_color_preset():
-    """Load Swiniec false-color preset shipped under static/ for UI + Vercel."""
-    preset_path = Path(app.root_path) / 'static' / 'swiniec_false_color' / 'false_color_preset.json'
-    with open(preset_path, encoding='utf-8') as handle:
-        return json.load(handle)
+FALSE_COLOR_SHORT_LABELS = {
+    'deep_shadow': 'DEEP',
+    'minus_one_ev': '−1 EV',
+    'mid_range': 'MID',
+    'face_exposure': 'FACE',
+    'bright_safe': 'SAFE',
+    'highlight_warn': 'WARN',
+    'highlight_high': 'HIGH',
+    'white_clipping': 'CLIP',
+}
 
 
-def _prepare_false_color_lut_entries(preset):
-    """Attach bar widths and sorted anchors for the false-color page."""
-    short_labels = {
-        'deep_shadow': 'DEEP',
-        'minus_one_ev': '−1 EV',
-        'mid_range': 'MID',
-        'face_exposure': 'FACE',
-        'bright_safe': 'SAFE',
-        'highlight_warn': 'WARN',
-        'highlight_high': 'HIGH',
-        'white_clipping': 'CLIP',
-    }
-    preferred_order = (
-        'Swiniec_LUT_-1',
-        'Swiniec_LUT_0',
-        'Swiniec_LUT_1',
-        'Swiniec_LUT_red',
-    )
-    per_lut = preset.get('per_lut') or {}
-    ordered_keys = [key for key in preferred_order if key in per_lut]
-    ordered_keys.extend(key for key in per_lut if key not in ordered_keys)
-
-    entries = []
-    for lut_key in ordered_keys:
-        lut = dict(per_lut[lut_key])
-        zones = []
-        for zone in lut.get('smallhd_map_zones') or []:
-            z = dict(zone)
-            span = max(0.0, float(z['maximum_ire']) - float(z['minimum_ire']))
-            z['width_pct'] = max(span, 0.01)
-            z['short_label'] = short_labels.get(z.get('semantic'), z.get('label', '')[:6])
-            zones.append(z)
-        lut['smallhd_map_zones'] = zones
-        anchors = lut.get('anchor_ire_by_ev') or {}
-        lut['anchor_ire_by_ev_sorted'] = sorted(
-            ((str(ev), float(ire)) for ev, ire in anchors.items()),
-            key=lambda item: float(item[0]),
+def _analysis_to_false_color_entry(analysis):
+    """Build one false-color card from an Exposure Assist contract."""
+    zones = []
+    for zone in analysis.get('smallhd_zones') or []:
+        z = dict(zone)
+        span = max(0.0, float(z['maximum_ire']) - float(z['minimum_ire']))
+        z['width_pct'] = max(span, 0.01)
+        z['short_label'] = FALSE_COLOR_SHORT_LABELS.get(
+            z.get('semantic'), (z.get('label') or '')[:6]
         )
-        entries.append((lut_key, lut))
-    return entries
+        zones.append(z)
+
+    anchors = {
+        str(point['ev']): float(point['rec709_y_ire'])
+        for point in analysis.get('anchor_points') or []
+    }
+    return {
+        'file_name': analysis['source']['file_name'],
+        'confidence': analysis.get('confidence') or {},
+        'clipping': analysis.get('clipping') or {},
+        'smallhd_map_zones': zones,
+        'anchor_ire_by_ev_sorted': sorted(
+            anchors.items(),
+            key=lambda item: float(item[0]),
+        ),
+        'input_encoding': analysis.get('input_encoding') or {},
+    }
+
+
+def _store_exposure_assist_session(analyses):
+    """Persist last Exposure Assist runs for the /false-color page."""
+    entries = []
+    for analysis in analyses:
+        key = Path(analysis['source']['file_name']).stem
+        entries.append((key, _analysis_to_false_color_entry(analysis)))
+    session['exposure_assist_scales'] = entries
+    if analyses:
+        session['exposure_assist_encoding'] = analyses[0].get('input_encoding')
 
 
 @app.route('/false-color')
 @app.route('/exposure-assist')
 def false_color_page():
-    """Dedicated Swiniec false-color / Exposure Assist scales page."""
-    preset = _load_false_color_preset()
-    strip_path = Path(app.root_path) / 'static' / 'swiniec_false_color' / 'false_color_strip.png'
+    """Exposure Assist / false-color scales from the latest analysis run."""
+    lut_entries = session.get('exposure_assist_scales') or []
+    encoding = session.get('exposure_assist_encoding') or {
+        'description': 'Select an encoding when you analyze a LUT',
+        'transfer': '—',
+        'gamut': '—',
+    }
+    preset = {
+        'signal': 'display_referred_rec709_y_ire_after_lut',
+        'input_assumed': encoding.get('description', 'user-selected encoding'),
+        'measurement_pages': {
+            'SENSOR_SAFETY': {
+                'measure': 'before Look',
+                'purpose': (
+                    'Protect sensor/log signal from clipping; not derived from '
+                    'post-LUT Rec.709 Y of the viewing LUT.'
+                ),
+                'note': (
+                    'Use camera/monitor false color or waveform on the pre-Look path.'
+                ),
+            },
+            'LOOK_EXPOSURE': {
+                'measure': 'after Look',
+                'purpose': 'Look exposure assist for the applied viewing LUT',
+                'maps': 'per_lut_smallhd_zones',
+            },
+        },
+        'highlight_policy': {
+            'WARN': {'color': '#FACC15', 'role': 'yellow'},
+            'HIGH': {'color': '#F97316', 'role': 'orange'},
+            'WHITE_CLIPPING': {
+                'color': '#DC2626',
+                'role': 'red_only_for_clipping',
+            },
+        },
+    }
     return render_template(
         'false_color.html',
         preset=preset,
-        lut_entries=_prepare_false_color_lut_entries(preset),
-        strip_url=(
-            url_for('static', filename='swiniec_false_color/false_color_strip.png')
-            if strip_path.is_file()
-            else None
-        ),
+        lut_entries=lut_entries,
+        has_scales=bool(lut_entries),
+        strip_url=None,
     )
 
 @app.route('/compare')
@@ -373,15 +326,16 @@ def analyze_lut_route():
         flash('No file selected.', 'error')
         return redirect(url_for('index')) # Return to the main page
 
-    curve_name = request.form.get('curve_select', 'slog3') # Get the selected curve
-    
-    # Sprawdzenie aliasów dla zachowania kompatybilności
-    if curve_name in CURVE_ALIASES:
-        curve_name = CURVE_ALIASES[curve_name]
-    
-    # Sprawdzenie, czy krzywa istnieje
-    if curve_name not in CURVE_INFO:
-        flash(f'Invalid curve name: {curve_name}', 'error')
+    analysis_mode = request.form.get('analysis_mode', 'curve_compare')
+    if analysis_mode not in ('curve_compare', 'exposure_assist'):
+        flash(f'Invalid analysis mode: {analysis_mode}', 'error')
+        return redirect(url_for('index'))
+
+    encoding_raw = request.form.get('curve_select', DEFAULT_ENCODING)
+    try:
+        encoding_key, curve_info = resolve_encoding(encoding_raw)
+    except ValueError:
+        flash(f'Invalid encoding: {encoding_raw}', 'error')
         return redirect(url_for('index'))
 
     if file and allowed_file(file.filename):
@@ -391,24 +345,43 @@ def analyze_lut_route():
             file.save(upload_path)
             flash(f'File {filename} was successfully uploaded.', 'success')
 
-            # --- Running Analysis ---
             report_basename = os.path.splitext(filename)[0]
+
+            if analysis_mode == 'exposure_assist':
+                analysis = analyze_exposure_assist(
+                    {
+                        "lut_path": upload_path,
+                        "encoding": encoding_key,
+                    }
+                )
+                report = generate_exposure_assist_report(
+                    {
+                        "analysis": analysis,
+                        "output_dir": app.config['REPORTS_FOLDER'],
+                        "basename": report_basename,
+                    }
+                )
+                _store_exposure_assist_session([analysis])
+                session['exposure_assist_artifacts'] = {
+                    key: os.path.basename(path)
+                    for key, path in report['artifacts'].items()
+                }
+                flash('Exposure Assist completed successfully!', 'success')
+                if request.args.get('format') == 'json':
+                    return jsonify({'status': 'success', 'analysis': analysis})
+                return redirect(url_for('false_color_page'))
+
+            # --- Curve compare ---
             report_pdf_path = os.path.join(app.config['REPORTS_FOLDER'], report_basename + ".pdf")
             report_png_path = os.path.join(app.config['REPORTS_FOLDER'], report_basename + ".png")
 
-            print(f"Starting analysis for: {upload_path}, curve: {curve_name}")
+            print(f"Starting analysis for: {upload_path}, encoding: {encoding_key}")
 
             lut_data = load_cube_file(upload_path)
-            curve_info = CURVE_INFO.get(curve_name)
-            
-            if not curve_info:
-                raise ValueError(f"Invalid curve name: {curve_name}")
-            
-            # Użyj nowej, precyzyjnej funkcji porównującej
             comparison_data = compare_lut_to_curve(
-                lut_data, 
+                lut_data,
                 curve_info["curve_func"],
-                use_tetrahedral=True  # Używaj dokładniejszej interpolacji tetrahedral
+                use_tetrahedral=True,
             )
 
             table_data = []
@@ -505,19 +478,12 @@ def analyze_batch_route():
         flash(f'Invalid analysis mode: {analysis_mode}', 'error')
         return redirect(url_for('batch_page'))
 
-    curve_name = request.form.get('curve_select', 'slog3')
-    if curve_name in CURVE_ALIASES:
-        curve_name = CURVE_ALIASES[curve_name]
-
-    curve_info = None
-    if analysis_mode == 'curve_compare':
-        if curve_name not in CURVE_INFO:
-            flash(f'Invalid curve name: {curve_name}', 'error')
-            return redirect(url_for('batch_page'))
-        curve_info = CURVE_INFO[curve_name]
-    else:
-        # Exposure Assist always treats input as S-Log3 / S-Gamut3.Cine.
-        curve_info = CURVE_INFO.get('slog3_cine') or CURVE_INFO.get('slog3')
+    encoding_raw = request.form.get('curve_select', DEFAULT_ENCODING)
+    try:
+        encoding_key, curve_info = resolve_encoding(encoding_raw)
+    except ValueError:
+        flash(f'Invalid encoding: {encoding_raw}', 'error')
+        return redirect(url_for('batch_page'))
 
     batch_id = f"batch_{int(time.time())}"
     batch_dir = os.path.join(app.config['BATCH_FOLDER'], batch_id)
@@ -526,6 +492,7 @@ def analyze_batch_route():
     files = files[:MAX_BATCH_FILES]
     successful_files = []
     failed_files = []
+    exposure_analyses = []
 
     if analysis_mode == 'exposure_assist':
         generate_smallhd_workflow_diagram(
@@ -545,7 +512,13 @@ def analyze_batch_route():
                 report_basename = os.path.splitext(filename)[0]
 
                 if analysis_mode == 'exposure_assist':
-                    analysis = analyze_exposure_assist({"lut_path": upload_path})
+                    analysis = analyze_exposure_assist(
+                        {
+                            "lut_path": upload_path,
+                            "encoding": encoding_key,
+                        }
+                    )
+                    exposure_analyses.append(analysis)
                     report = generate_exposure_assist_report(
                         {
                             "analysis": analysis,
@@ -584,6 +557,7 @@ def analyze_batch_route():
                             "clipping": analysis["clipping"],
                             "confidence": analysis["confidence"],
                             "limitations": analysis["limitations"],
+                            "encoding": analysis["input_encoding"]["description"],
                         }
                     )
                 else:
@@ -665,8 +639,9 @@ def analyze_batch_route():
         session['zip_filename'] = zip_filename
         session['analysis_mode'] = analysis_mode
         if analysis_mode == 'exposure_assist':
+            _store_exposure_assist_session(exposure_analyses)
             session['curve_name'] = (
-                'S-Log3 / S-Gamut3.Cine → Rec.709 Y (Exposure Assist)'
+                f"{curve_info['description']} → Rec.709 Y (Exposure Assist)"
             )
         else:
             session['curve_name'] = curve_info['description']
